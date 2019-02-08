@@ -1,4 +1,4 @@
-TARGETS= main generate_seed
+TARGETS= main
 
 ifdef D
 	DEBUG=-g
@@ -30,8 +30,7 @@ CXXFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
 
 CFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
 
-LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -lpthread -lboost_system \
--lboost_thread -lm -lbz2 -lz -lrt
+LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -lpthread -lm -lz -lrt
 
 #
 # declaration of dependencies
@@ -40,23 +39,10 @@ LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -lpthread -lboost_system \
 all: $(TARGETS)
 
 # dependencies between programs and .o files
-main:							$(OBJDIR)/main.o $(OBJDIR)/sketch.o \
-									$(OBJDIR)/marsaglia.o $(OBJDIR)/misc.o \
-									$(OBJDIR)/fsutil.o
-
-generate_seed: $(OBJDIR)/generate_seed.o
+main:							$(OBJDIR)/main.o
 
 # dependencies between .o files and .cc (or .c) files
-$(OBJDIR)/sketch.o: 		$(LOC_SRC)/sketch.cc  $(LOC_INCLUDE)/sketch.h \
-												$(LOC_INCLUDE)/marsaglia.hpp \
-												$(LOC_INCLUDE)/seeded_prg.hpp $(LOC_INCLUDE)/misc.hpp
-$(OBJDIR)/misc.o: 			$(LOC_SRC)/misc.cc $(LOC_INCLUDE)/misc.hpp
-$(OBJDIR)/marsaglia.o: 	$(LOC_SRC)/marsaglia.cc $(LOC_INCLUDE)/marsaglia.hpp
-$(OBJDIR)/fsutil.o: 		$(LOC_SRC)/fsutil.cc $(LOC_INCLUDE)/fsutil.h
 $(OBJDIR)/main.o: 			$(LOC_SRC)/main.cc \
-												$(LOC_INCLUDE)/marsaglia.hpp \
-												$(LOC_INCLUDE)/seeded_prg.hpp $(LOC_INCLUDE)/misc.hpp
-$(OBJDIR)/generate_seed.o: $(LOC_SRC)/generate_seed.cc $(LOC_INCLUDE)/seeded_prg.hpp
 
 #
 # generic build rules
