@@ -23,14 +23,17 @@ CC = gcc -std=gnu11
 LD= g++ -std=c++11
 
 LOC_INCLUDE=include
+LOC_LIB=lib
 LOC_SRC=src
 OBJDIR=obj
 
-CXXFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
+CXXFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE) 
+						
 
 CFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
 
-LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -lpthread -lm -lz -lrt
+LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -L$(LOC_LIB) -lm -lvcflib -lhts -lz \
+					 -lbz2 -llzma -lrt -lpthread
 
 #
 # declaration of dependencies
