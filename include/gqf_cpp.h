@@ -36,9 +36,9 @@ class CQF {
 	public:
 		CQF();
 		CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits, enum
-				qf_hashmode hash, uint32_t seed);
+				qf_hashmode hash, uint32_t seed = GQF_SEED);
 		CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits, enum
-				qf_hashmode hash, uint32_t seed, std::string filename);
+				qf_hashmode hash, std::string filename, uint32_t seed = GQF_SEED);
 		CQF(std::string& filename, enum readmode flag);
 		CQF(const CQF<key_obj>& copy_cqf);
 
@@ -111,26 +111,20 @@ class CQF {
 
 class KeyObject {
 	public:
-		KeyObject() : key(0), value(0), count(0), level(0) {};
+		KeyObject() : key(0), value(0) {};
 
-		KeyObject(uint64_t k, uint64_t v, uint64_t c, uint32_t l) : key(k),
-		value(v), count(c), level(l) {};
+		KeyObject(uint64_t k, uint64_t v) : key(k), value(v) {};
 
-		KeyObject(const KeyObject& k) : key(k.key), value(k.value), count(k.count),
-		level(k.level) {};
+		KeyObject(const KeyObject& k) : key(k.key), value(k.value) {};
 
 		bool operator==(KeyObject k) { return key == k.key; }
 
 		std::string to_string() {
-			return "Key: " + std::to_string(key) + " Value: " + std::to_string(value)
-				+ " Count: " + std::to_string(count) + " Level: " +
-				std::to_string(level);
+			return "Key: " + std::to_string(key) + " Value: " + std::to_string(value);
 		}
 
 		uint64_t key;
 		uint64_t value;
-		uint64_t count;
-		uint32_t level;
 };
 
 template <class key_obj>
@@ -138,8 +132,6 @@ struct compare {
 	bool operator()(const key_obj& lhs, const key_obj& rhs) {
 		if (lhs.key != rhs.key)
 			return lhs.key > rhs.key;
-		else
-			return lhs.level > rhs.level;
 	}
 };
 
@@ -154,7 +146,7 @@ CQF<key_obj>::CQF() {
 template <class key_obj>
 CQF<key_obj>::CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits,
 									enum qf_hashmode hash, uint32_t seed) {
-	if (!qf_malloc(&cqf, nslots, key_bits, value_bits, hash, GQF_SEED)) {
+	if (!qf_malloc(&cqf, nslots, key_bits, value_bits, hash, seed)) {
 		ERROR("Can't allocate the CQF.");
 		exit(EXIT_FAILURE);
 	}
@@ -162,8 +154,8 @@ CQF<key_obj>::CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits,
 
 template <class key_obj>
 CQF<key_obj>::CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits,
-									enum qf_hashmode hash, uint32_t seed, std::string filename) {
-	if (!qf_initfile(&cqf, nslots, key_bits, value_bits, hash, GQF_SEED,
+									enum qf_hashmode hash, std::string filename, uint32_t seed) {
+	if (!qf_initfile(&cqf, nslots, key_bits, value_bits, hash, seed,
 									 filename.c_str())) {
 		ERROR("Can't allocate the CQF.");
 		exit(EXIT_FAILURE);
@@ -202,7 +194,7 @@ bool CQF<key_obj>::is_full(void) const {
 
 template <class key_obj>
 int CQF<key_obj>::insert(const key_obj& k, uint8_t flags) {
-	return qf_insert(&cqf, k.key, k.value, k.count, flags);
+	return qf_insert(&cqf, k.key, k.value, 1, flags);
 	// To validate the CQF
 	//set.insert(k.key);
 }
@@ -254,14 +246,14 @@ template <class key_obj>
 key_obj CQF<key_obj>::Iterator::operator*(void) const {
 	uint64_t key = 0, value = 0, count = 0;
 	qfi_get_key(&iter, &key, &value, &count);
-	return key_obj(key, value, count, 0);
+	return key_obj(key, value);
 }
 
 template <class key_obj>
 key_obj CQF<key_obj>::Iterator::get_cur_hash(void) const {
 	uint64_t key = 0, value = 0, count = 0;
 	qfi_get_hash(&iter, &key, &value, &count);
-	return key_obj(key, value, count, 0);
+	return key_obj(key, value);
 }
 
 template<class key_obj>
