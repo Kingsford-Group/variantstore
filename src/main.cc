@@ -15,7 +15,7 @@
 
 #include <iostream>
 #include <string>
-
+#include <vector>
 #include <openssl/rand.h>
 
 #include "gqf_cpp.h"
@@ -38,9 +38,9 @@ main ( int argc, char *argv[] )
 	uint64_t qbits = atoi(argv[1]);
 	uint64_t keybits = 32;
 	uint64_t nslots = (1ULL << qbits);
-	uint64_t nvals = 500*nslots/1000;
+	uint64_t nvals = 250*nslots/1000;
 
-	CQF<KeyObject> graph(nslots, keybits, keybits, QF_HASH_INVERTIBLE);
+	CQF<KeyObject> graph(nslots, keybits, 1, QF_HASH_INVERTIBLE);
 
 	PRINT(graph.total_slots());	
 
@@ -52,14 +52,39 @@ main ( int argc, char *argv[] )
 	}
 
 	srand(time(NULL));
-	for (uint32_t i = 0; i < nvals;) {
+	std::vector<std::vector<uint32_t>> edgelist;
+	for (uint32_t i = 0; i < nvals; i++) {
 		uint32_t key = vals[i];
-		uint32_t nedges = rand() % 4;		// up to 3 edges
+		uint32_t nedges = rand() % 4;		// up to 3 outgoing edges from a node
 		
+		if (nedges > 1)
+			PRINT("Higher degree node: " << key);
+		else if (nedges == 1)
+			PRINT("Single degree node: " << key);
+
 		for (uint32_t j = 0; j < nedges; j++) {
 			uint32_t tonode = vals[rand() % nvals];
-			graph.insert(KeyObject(key, tonode), QF_NO_LOCK);
-			i++;
+			uint64_t is_inplace = 0;
+			uint32_t existing_node = graph.query_key(KeyObject(key, 0, 0),
+																							 &is_inplace, QF_NO_LOCK);
+			if (existing_node == 0) 	// new node
+				graph.insert(KeyObject(key, 1, tonode), QF_NO_LOCK);
+			else {		// existing node
+				if (is_inplace == 1) { // there's only one outgoing edge
+					// create a new vector and add to-nodes
+					std::vector<uint32_t> tonodes;
+					tonodes.emplace_back(existing_node);
+					tonodes.emplace_back(tonode);
+					edgelist.emplace_back(tonodes);
+					uint32_t pointer = edgelist.size(); 
+					// the pointer is always increamented by 1
+					graph.replace_key(KeyObject(key, 1, existing_node), KeyObject(key, 0,
+																																		pointer),
+												QF_NO_LOCK);
+				} else {
+					edgelist[existing_node - 1].emplace_back(tonode);
+				}
+			}
 		}
 	}
 
@@ -67,7 +92,14 @@ main ( int argc, char *argv[] )
 
 	while (!it.done()) {
 		KeyObject edge = *it;
-		PRINT(edge.key << " - " << edge.value);
+		if (edge.value == 1)
+			PRINT(edge.key << " - " << edge.count);
+		else { 
+			std::cout << edge.key << " - ";
+			for (const auto tonode : edgelist[edge.count-1])
+				std::cout << tonode << " ";
+			std::cout << '\n';
+		}
 		++it;
 	}
 

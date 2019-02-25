@@ -111,20 +111,24 @@ class CQF {
 
 class KeyObject {
 	public:
-		KeyObject() : key(0), value(0) {};
+		KeyObject() : key(0), value(0), count(0) {};
 
-		KeyObject(uint64_t k, uint64_t v) : key(k), value(v) {};
+		KeyObject(uint64_t k, uint64_t v, uint64_t c) : key(k),
+		value(v), count(c) {};
 
-		KeyObject(const KeyObject& k) : key(k.key), value(k.value) {};
+		KeyObject(const KeyObject& k) : key(k.key), value(k.value), count(k.count)
+		 {};
 
 		bool operator==(KeyObject k) { return key == k.key; }
 
 		std::string to_string() {
-			return "Key: " + std::to_string(key) + " Value: " + std::to_string(value);
+			return "Key: " + std::to_string(key) + " Value: " + std::to_string(value)
+				+ " Count: " + std::to_string(count);
 		}
 
 		uint64_t key;
 		uint64_t value;
+		uint64_t count;
 };
 
 template <class key_obj>
@@ -194,7 +198,7 @@ bool CQF<key_obj>::is_full(void) const {
 
 template <class key_obj>
 int CQF<key_obj>::insert(const key_obj& k, uint8_t flags) {
-	return qf_insert(&cqf, k.key, k.value, 1, flags);
+	return qf_insert(&cqf, k.key, k.value, k.count, flags);
 	// To validate the CQF
 	//set.insert(k.key);
 }
@@ -218,7 +222,10 @@ int CQF<key_obj>::delete_key(const key_obj& k, uint8_t flag) {
 template <class key_obj>
 int CQF<key_obj>::replace_key(const key_obj& k, const key_obj& newkey, uint8_t
 													 		flag) {
-	return qf_replace(&cqf, k.key, k.value, newkey.value, flag);
+	if (delete_key(k, flag))
+		return insert(newkey, flag);
+	else
+		return -1;
 }
 
 template <class key_obj>
@@ -246,14 +253,14 @@ template <class key_obj>
 key_obj CQF<key_obj>::Iterator::operator*(void) const {
 	uint64_t key = 0, value = 0, count = 0;
 	qfi_get_key(&iter, &key, &value, &count);
-	return key_obj(key, value);
+	return key_obj(key, value, count);
 }
 
 template <class key_obj>
 key_obj CQF<key_obj>::Iterator::get_cur_hash(void) const {
 	uint64_t key = 0, value = 0, count = 0;
 	qfi_get_hash(&iter, &key, &value, &count);
-	return key_obj(key, value);
+	return key_obj(key, value, count);
 }
 
 template<class key_obj>
