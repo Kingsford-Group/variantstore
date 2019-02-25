@@ -16,6 +16,8 @@
 #include <iostream>
 #include <string>
 
+#include "gqf_cpp.h"
+
 #include "vcflib/Variant.h"
 
 /* 
@@ -28,14 +30,14 @@
 main ( int argc, char *argv[] )
 {
 	vcflib::VariantCallFile variantFile;
-	std::string filename = "./data/sample.vcf";
+	std::string filename = argv[1];
 	variantFile.open(filename);
 	vcflib::Variant var(variantFile);
 
 	long int count = 0;
 	while (variantFile.getNextVariant(var)) {
 		count+= 1;
+		std::cout << var << "\n";
 	}
-	assert(count == 9);
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

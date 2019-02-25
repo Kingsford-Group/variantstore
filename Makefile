@@ -42,10 +42,16 @@ LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -L$(LOC_LIB) -lm -lvcflib -lhts -lz \
 all: $(TARGETS)
 
 # dependencies between programs and .o files
-main:							$(OBJDIR)/main.o
+main:										$(OBJDIR)/main.o $(OBJDIR)/gqf.o $(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 
 # dependencies between .o files and .cc (or .c) files
-$(OBJDIR)/main.o: 			$(LOC_SRC)/main.cc \
+$(OBJDIR)/main.o: 			$(LOC_SRC)/main.cc 
+
+$(OBJDIR)/gqf.o: 				$(LOC_SRC)/gqf/gqf.c $(LOC_INCLUDE)/gqf/gqf.h
+$(OBJDIR)/gqf_file.o: 	$(LOC_SRC)/gqf/gqf_file.c $(LOC_INCLUDE)/gqf/gqf_file.h
+$(OBJDIR)/hashutil.o: 	$(LOC_INCLUDE)/gqf/hashutil.h
+
 
 #
 # generic build rules
@@ -58,6 +64,9 @@ $(OBJDIR)/%.o: $(LOC_SRC)/%.cc | $(OBJDIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(OBJDIR)/%.o: $(LOC_SRC)/%.c | $(OBJDIR)
+	$(CXX) $(CFLAGS) $(INCLUDE) -c -o $@ $<
+
+$(OBJDIR)/%.o: $(LOC_SRC)/gqf/%.c | $(OBJDIR)
 	$(CXX) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 $(OBJDIR):
