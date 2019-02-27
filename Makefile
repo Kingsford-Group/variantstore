@@ -18,9 +18,9 @@ ifdef P
 	PROFILE=-pg -no-pie # for bug in gprof.
 endif
 
-CXX = g++ -std=c++11
+CXX = g++ -std=c++17
 CC = gcc -std=gnu11
-LD= g++ -std=c++11
+LD= g++ -std=c++17
 
 LOC_INCLUDE=include
 LOC_LIB=lib
@@ -46,12 +46,12 @@ main:										$(OBJDIR)/main.o $(OBJDIR)/gqf.o $(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 
 # dependencies between .o files and .cc (or .c) files
-$(OBJDIR)/main.o: 			$(LOC_SRC)/main.cc 
+$(OBJDIR)/main.o: 			$(LOC_SRC)/main.cc $(LOC_INCLUDE)/gqf_cpp.h \
+												$(LOC_INCLUDE)/graph.h
 
 $(OBJDIR)/gqf.o: 				$(LOC_SRC)/gqf/gqf.c $(LOC_INCLUDE)/gqf/gqf.h
 $(OBJDIR)/gqf_file.o: 	$(LOC_SRC)/gqf/gqf_file.c $(LOC_INCLUDE)/gqf/gqf_file.h
 $(OBJDIR)/hashutil.o: 	$(LOC_INCLUDE)/gqf/hashutil.h
-
 
 #
 # generic build rules

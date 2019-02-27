@@ -45,14 +45,14 @@ class CQF {
 		int insert(const key_obj& k, uint8_t flags);
 
 		/* Will return the count. */
-		uint64_t query(const key_obj& k, uint8_t flags);
+		uint64_t query(const key_obj& k, uint8_t flags) const;
 		
-		uint64_t query_key(const key_obj& k, uint64_t *val, uint8_t flags);
+		uint64_t query_key(const key_obj& k, uint64_t *val, uint8_t flags) const;
 
 		int delete_key(const key_obj& k, uint8_t flag);
 		int replace_key(const key_obj& k, const key_obj& newkey, uint8_t flag);
 		void destroy();
-		uint64_t inner_prod(const CQF<key_obj>& in_cqf);
+		uint64_t inner_prod(const CQF<key_obj>& in_cqf) const;
 
 		void serialize(std::string filename) {
 			qf_serialize(&cqf, filename.c_str());
@@ -141,10 +141,10 @@ struct compare {
 
 template <class key_obj>
 CQF<key_obj>::CQF() {
-	if (!qf_malloc(&cqf, 1ULL << 6, 14, 0, QF_HASH_INVERTIBLE, GQF_SEED)) {
-		ERROR("Can't allocate the CQF.");
-		exit(EXIT_FAILURE);
-	}
+	//if (!qf_malloc(&cqf, 1ULL << 6, 14, 0, QF_HASH_INVERTIBLE, GQF_SEED)) {
+		//ERROR("Can't allocate the CQF.");
+		//exit(EXIT_FAILURE);
+	//}
 }
 
 template <class key_obj>
@@ -204,13 +204,13 @@ int CQF<key_obj>::insert(const key_obj& k, uint8_t flags) {
 }
 
 template <class key_obj>
-uint64_t CQF<key_obj>::query(const key_obj& k, uint8_t flags) {
+uint64_t CQF<key_obj>::query(const key_obj& k, uint8_t flags) const {
 	return qf_count_key_value(&cqf, k.key, k.value, flags);
 }
 
 template <class key_obj>
 uint64_t CQF<key_obj>::query_key(const key_obj& k, uint64_t *val, uint8_t
-																 flags) {
+																 flags) const {
 	return qf_query(&cqf, k.key, val, flags);
 }
 
@@ -229,7 +229,7 @@ int CQF<key_obj>::replace_key(const key_obj& k, const key_obj& newkey, uint8_t
 }
 
 template <class key_obj>
-uint64_t CQF<key_obj>::inner_prod(const CQF<key_obj>& in_cqf) {
+uint64_t CQF<key_obj>::inner_prod(const CQF<key_obj>& in_cqf) const {
 	return qf_inner_product(&cqf, in_cqf.get_cqf());
 }
 
@@ -287,7 +287,7 @@ template<class key_obj>
 typename CQF<key_obj>::Iterator CQF<key_obj>::end(void) const {
 	QFi qfi;
 	qf_iterator_from_position(&this->cqf, &qfi, 0xffffffffffffffff);
-	return Iterator(qfi, UINT64_MAX);
+	return Iterator(qfi);
 }
 
 #endif

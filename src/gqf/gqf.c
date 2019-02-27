@@ -1913,20 +1913,19 @@ void qf_set_auto_resize(QF* qf, bool enabled)
 int qf_insert(QF *qf, uint64_t key, uint64_t value, uint64_t count, uint8_t
 							flags)
 {
-	/* pp: don't need resizing in popcornfilter. */
 	// We fill up the CQF up to 95% load factor.
 	// This is a very conservative check.
-	/*if (qf->metadata->noccupied_slots >= qf->metadata->nslots * 0.95) {*/
-		/*if (qf->metadata->auto_resize) {*/
-			/*fprintf(stdout, "Resizing the CQF.\n");*/
-			/*if (qf->runtimedata->container_resize(qf, qf->metadata->nslots * 2) < 0)*/
-			/*{*/
-				/*fprintf(stdout, "Resizing the failed.\n");*/
-				/*return QF_NO_SPACE;*/
-			/*}*/
-		/*} else*/
-			/*return QF_NO_SPACE;*/
-	/*}*/
+	if (qf->metadata->noccupied_slots >= qf->metadata->nslots * 0.95) {
+		if (qf->metadata->auto_resize) {
+			fprintf(stdout, "Resizing the CQF.\n");
+			if (qf->runtimedata->container_resize(qf, qf->metadata->nslots * 2) < 0)
+			{
+				fprintf(stdout, "Resizing the failed.\n");
+				return QF_NO_SPACE;
+			}
+		} else
+			return QF_NO_SPACE;
+	}
 	if (qf->metadata->noccupied_slots >= qf->metadata->nslots) {
 		fprintf(stderr, "The CQF is too full. Please resize.\n");
 		return QF_NO_SPACE;
@@ -1954,33 +1953,32 @@ int qf_insert(QF *qf, uint64_t key, uint64_t value, uint64_t count, uint8_t
 		return QF_NO_SPACE;
 	}
 
-	/* pp: don't need resizing in popcornfilter. */
 	// check for fullness based on the distance from the home slot to the slot
 	// in which the key is inserted
-	/*if (ret == QF_NO_SPACE || ret > DISTANCE_FROM_HOME_SLOT_CUTOFF) {*/
-		/*float load_factor = qf->metadata->noccupied_slots /*/
-			/*(float)qf->metadata->nslots;*/
-		/*fprintf(stdout, "Load factor: %lf\n", load_factor);*/
-		/*if (qf->metadata->auto_resize) {*/
-			/*fprintf(stdout, "Resizing the CQF.\n");*/
-			/*if (qf->runtimedata->container_resize(qf, qf->metadata->nslots * 2) > 0)*/
-			/*{*/
-				/*if (ret == QF_NO_SPACE) {*/
-					/*if (count == 1)*/
-						/*ret = insert1(qf, hash, flags);*/
-					/*else*/
-						/*ret = insert(qf, hash, count, flags);*/
-				/*}*/
-				/*fprintf(stderr, "Resize finished.\n");*/
-			/*} else {*/
-				/*fprintf(stderr, "Resize failed\n");*/
-				/*ret = QF_NO_SPACE;*/
-			/*}*/
-		/*} else {*/
-			/*fprintf(stderr, "The CQF is filling up.\n");*/
-			/*ret = QF_NO_SPACE;*/
-		/*}*/
-	/*}*/
+	if (ret == QF_NO_SPACE || ret > DISTANCE_FROM_HOME_SLOT_CUTOFF) {
+		float load_factor = qf->metadata->noccupied_slots /
+			(float)qf->metadata->nslots;
+		fprintf(stdout, "Load factor: %lf\n", load_factor);
+		if (qf->metadata->auto_resize) {
+			fprintf(stdout, "Resizing the CQF.\n");
+			if (qf->runtimedata->container_resize(qf, qf->metadata->nslots * 2) > 0)
+			{
+				if (ret == QF_NO_SPACE) {
+					if (count == 1)
+						ret = insert1(qf, hash, flags);
+					else
+						ret = insert(qf, hash, count, flags);
+				}
+				fprintf(stderr, "Resize finished.\n");
+			} else {
+				fprintf(stderr, "Resize failed\n");
+				ret = QF_NO_SPACE;
+			}
+		} else {
+			fprintf(stderr, "The CQF is filling up.\n");
+			ret = QF_NO_SPACE;
+		}
+	}
 	return ret;
 }
 

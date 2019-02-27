@@ -19,8 +19,11 @@
 #include <openssl/rand.h>
 
 #include "gqf_cpp.h"
+#include "graph.h"
 
 #include "vcflib/Variant.h"
+
+using namespace variantdb;
 
 /* 
  * ===  FUNCTION  =============================================================
@@ -36,71 +39,85 @@ main ( int argc, char *argv[] )
 		exit(1);
 	}
 	uint64_t qbits = atoi(argv[1]);
-	uint64_t keybits = 32;
 	uint64_t nslots = (1ULL << qbits);
-	uint64_t nvals = 250*nslots/1000;
+	uint64_t nvals = 10*nslots/100;
 
-	CQF<KeyObject> graph(nslots, keybits, 1, QF_HASH_INVERTIBLE);
-
-	PRINT(graph.total_slots());	
+	Graph graph(nslots);
 
 	/* Generate random values */
 	uint32_t *vals = (uint32_t*)malloc(nvals*sizeof(vals[0]));
 	RAND_bytes((unsigned char *)vals, sizeof(*vals) * nvals);
 	for (uint32_t i = 0; i < nvals; i++) {
-		vals[i] = (1 * vals[i]) % graph.range();
+		vals[i] = (1 * vals[i]) % UINT32_MAX;
 	}
 
 	srand(time(NULL));
-	std::vector<std::vector<uint32_t>> edgelist;
+	// to check the correctness of our graph implementation.
+	std::unordered_map<uint32_t, std::unordered_set<uint32_t>> adj_list;
 	for (uint32_t i = 0; i < nvals; i++) {
 		uint32_t key = vals[i];
 		uint32_t nedges = rand() % 4;		// up to 3 outgoing edges from a node
 		
-		if (nedges > 1)
-			PRINT("Higher degree node: " << key);
-		else if (nedges == 1)
-			PRINT("Single degree node: " << key);
-
+		//if (nedges > 1)
+			//PRINT("Higher degree node: " << key << " " << nedges);
+		//else if (nedges == 1)
+			//PRINT("Single degree node: " << key);
+		
+		std::unordered_set<uint32_t> vec;
 		for (uint32_t j = 0; j < nedges; j++) {
 			uint32_t tonode = vals[rand() % nvals];
-			uint64_t is_inplace = 0;
-			uint32_t existing_node = graph.query_key(KeyObject(key, 0, 0),
-																							 &is_inplace, QF_NO_LOCK);
-			if (existing_node == 0) 	// new node
-				graph.insert(KeyObject(key, 1, tonode), QF_NO_LOCK);
-			else {		// existing node
-				if (is_inplace == 1) { // there's only one outgoing edge
-					// create a new vector and add to-nodes
-					std::vector<uint32_t> tonodes;
-					tonodes.emplace_back(existing_node);
-					tonodes.emplace_back(tonode);
-					edgelist.emplace_back(tonodes);
-					uint32_t pointer = edgelist.size(); 
-					// the pointer is always increamented by 1
-					graph.replace_key(KeyObject(key, 1, existing_node), KeyObject(key, 0,
-																																		pointer),
-												QF_NO_LOCK);
-				} else {
-					edgelist[existing_node - 1].emplace_back(tonode);
-				}
+			graph.add_edge(key, tonode);
+			vec.insert(tonode);
+		}
+		adj_list[key].merge(vec);
+	}
+
+	PRINT("Num vertices: " << graph.get_num_vertices());
+	PRINT("Num edges: " << graph.get_num_edges());
+
+	for (auto it = adj_list.begin(); it != adj_list.end(); ++it) {
+		Graph::vertex_set neighbors = graph.out_neighbors(it->first);
+
+		if (it->second != neighbors) {
+			std::cout << it->first << " - ";
+			std::cout << '\n';
+			for (auto const n : neighbors) {
+				std::cout << n << " ";
 			}
+
+			std::cout << '\n';
+			for (auto const n : it->second) {
+				std::cout << n << " ";
+			}
+			std::cout << '\n';
+			ERROR("correctness test failed!");
+			return EXIT_FAILURE;
 		}
 	}
 
-	CQF<KeyObject>::Iterator it = graph.begin();	
+	Graph::VertexIterator itr = graph.begin_vertex();
 
-	while (!it.done()) {
-		KeyObject edge = *it;
-		if (edge.value == 1)
-			PRINT(edge.key << " - " << edge.count);
-		else { 
-			std::cout << edge.key << " - ";
-			for (const auto tonode : edgelist[edge.count-1])
-				std::cout << tonode << " ";
+	while (!itr.done()) {
+		Graph::vertex v = *itr;
+		Graph::vertex_set neighbors = graph.out_neighbors(v);
+
+		if (adj_list[v] != neighbors) {
+			std::cout << v << " - ";
 			std::cout << '\n';
+			for (auto const n : neighbors) {
+				std::cout << n << " ";
+			}
+
+			std::cout << '\n';
+			for (auto const n : adj_list[v]) {
+				std::cout << n << " ";
+			}
+			std::cout << '\n';
+			ERROR("correctness test failed!");
+			return EXIT_FAILURE;
 		}
-		++it;
+		//assert(adj_list[v] == neighbors);
+		++itr;
 	}
 
 #if 0	
