@@ -16,6 +16,7 @@
 
 #include <unordered_set>
 #include <vector>
+#include <iostream>
 
 #include "gqf_cpp.h"
 
@@ -38,9 +39,11 @@ namespace variantdb {
 			typedef std::pair<uint32_t, uint32_t> edge;
 			typedef std::unordered_set<vertex> vertex_set;
 			typedef std::unordered_set<edge> edge_set;
+			typedef std::unordered_set<vertex>::iterator vertex_set_iterator;
 
-			Graph();
-			Graph(uint32_t size);
+			Graph();	// create a graph with a default size
+			Graph(uint32_t size);	// create a graph with the given size (#num edges)
+			Graph(std::string infile);	// read graph from the ifstream
 
 			int add_edge(vertex s, vertex d);
 			int remove_edge(vertex s, vertex d);
@@ -54,6 +57,8 @@ namespace variantdb {
 			uint32_t get_num_vertices() const;
 			uint32_t get_num_edges() const;
 
+			int serialize(std::string outfile);
+
 			// Iterate over all nodes in the graph
 			class VertexIterator {
 				public:
@@ -66,8 +71,8 @@ namespace variantdb {
 					CQF<KeyObject>::Iterator adj_list_itr;
 			};
 
-			VertexIterator begin_vertex(void) const;
-			VertexIterator end_vertex(void) const;
+			VertexIterator begin_vertices(void) const;
+			VertexIterator end_vertices(void) const;
 
 			// Iterate over all edges in the graph
 			class EdgeIterator {
@@ -79,14 +84,15 @@ namespace variantdb {
 
 				private:
 					CQF<KeyObject>::Iterator adj_list_itr;
+					vertex_set_iterator vertex_set_itr;
 			};
 
-			EdgeIterator begin_edge(void) const;
-			EdgeIterator end_edge(void) const;
+			EdgeIterator begin_edges(void) const;
+			EdgeIterator end_edges(void) const;
 
 		private:
 			CQF<KeyObject> adj_list;
-			std::vector<std::unordered_set<vertex>> aux_vertex_list;
+			std::vector<vertex_set> aux_vertex_list;
 			uint32_t num_edges{0};
 	};
 
@@ -115,7 +121,7 @@ namespace variantdb {
 		else {		// existing node
 			if (is_inplace == 1) { // there's only one outgoing edge
 				// create a new vector and add outgoing vertices 
-				std::unordered_set<vertex> neighbors;
+				vertex_set neighbors;
 				neighbors.insert(val);
 				neighbors.insert(d);
 				aux_vertex_list.emplace_back(neighbors);
@@ -193,11 +199,11 @@ namespace variantdb {
 		return num_edges;
 	}
 
-	Graph::VertexIterator Graph::begin_vertex(void) const {
+	Graph::VertexIterator Graph::begin_vertices(void) const {
 		return VertexIterator(adj_list.begin());
 	}
 
-	Graph::VertexIterator Graph::end_vertex(void) const {
+	Graph::VertexIterator Graph::end_vertices(void) const {
 		return VertexIterator(adj_list.end());
 	}
 

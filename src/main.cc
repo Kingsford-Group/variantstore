@@ -97,7 +97,7 @@ main ( int argc, char *argv[] )
 	}
 
 	// check all edges from graph iterator in @adj_list
-	Graph::VertexIterator itr = graph.begin_vertex();
+	Graph::VertexIterator itr = graph.begin_vertices();
 
 	while (!itr.done()) {
 		Graph::vertex v = *itr;
