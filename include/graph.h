@@ -28,7 +28,7 @@ namespace variantdb {
 	// Vertices are defined as 32-bit integers.
 	// There can be only one edge between two vertices, i.e., simple graphs.
 	// It uses a variable-length encoding from the QF (counter encoding) data
-	// structure to endcode the neighbors of a vertex. 
+	// structure to encode the neighbors of a vertex. 
 	// If there's only one neighbor then it is stored next to the source vertex
 	// in the QF. If there are more than one neighbors then they are stored in a
 	// vector and a pointer is stored next to the source vertex in the QF.
