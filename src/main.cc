@@ -75,6 +75,7 @@ main ( int argc, char *argv[] )
 	PRINT("Num vertices: " << graph.get_num_vertices());
 	PRINT("Num edges: " << graph.get_num_edges());
 
+	// check all edges from @adj_list in the graph implementation.
 	for (auto it = adj_list.begin(); it != adj_list.end(); ++it) {
 		Graph::vertex_set neighbors = graph.out_neighbors(it->first);
 
@@ -95,6 +96,7 @@ main ( int argc, char *argv[] )
 		}
 	}
 
+	// check all edges from graph iterator in @adj_list
 	Graph::VertexIterator itr = graph.begin_vertex();
 
 	while (!itr.done()) {
