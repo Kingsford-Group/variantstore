@@ -15,7 +15,6 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
 #include <openssl/rand.h>
 
 #include "gqf_cpp.h"
@@ -54,6 +53,7 @@ main ( int argc, char *argv[] )
 	srand(time(NULL));
 	// to check the correctness of our graph implementation.
 	std::unordered_map<uint32_t, std::unordered_set<uint32_t>> adj_list;
+	std::set<std::pair<uint32_t, uint32_t>> edge_list;
 	for (uint32_t i = 0; i < nvals; i++) {
 		uint32_t key = vals[i];
 		uint32_t nedges = rand() % 4;		// up to 3 outgoing edges from a node
@@ -68,6 +68,7 @@ main ( int argc, char *argv[] )
 			uint32_t tonode = vals[rand() % nvals];
 			graph.add_edge(key, tonode);
 			vec.insert(tonode);
+			edge_list.insert(std::make_pair(key, tonode));
 		}
 		adj_list[key].merge(vec);
 	}
@@ -75,7 +76,7 @@ main ( int argc, char *argv[] )
 	PRINT("Num vertices: " << graph.get_num_vertices());
 	PRINT("Num edges: " << graph.get_num_edges());
 
-	// check all edges from @adj_list in the graph implementation.
+	// check graph correctness by iterating over @adj_list
 	for (auto it = adj_list.begin(); it != adj_list.end(); ++it) {
 		Graph::vertex_set neighbors = graph.out_neighbors(it->first);
 
@@ -96,11 +97,10 @@ main ( int argc, char *argv[] )
 		}
 	}
 
-	// check all edges from graph iterator in @adj_list
-	Graph::VertexIterator itr = graph.begin_vertices();
-
-	while (!itr.done()) {
-		Graph::vertex v = *itr;
+	// check graph correctness by iterating over Graph::VertexIterator
+	Graph::VertexIterator vitr = graph.begin_vertices();
+	while (!vitr.done()) {
+		Graph::vertex v = *vitr;
 		Graph::vertex_set neighbors = graph.out_neighbors(v);
 
 		if (adj_list[v] != neighbors) {
@@ -119,7 +119,28 @@ main ( int argc, char *argv[] )
 			return EXIT_FAILURE;
 		}
 		//assert(adj_list[v] == neighbors);
-		++itr;
+		++vitr;
+	}
+
+	// check graph correctness by iterating over @edge_list
+	for (auto it = edge_list.begin(); it != edge_list.end(); ++it) {
+		if (!graph.is_edge(*it)) {
+			PRINT("Graph edge: " << (*it).first << " - " << (*it).second);
+			ERROR("correctness test failed!");
+			return EXIT_FAILURE;
+		}
+	}
+
+	// check graph correctness by iterating over Graph::EdgeIterator
+	Graph::EdgeIterator eitr = graph.begin_edges();
+	while(!eitr.done()) {
+		Graph::edge e = *eitr;
+		if (edge_list.find(e) == edge_list.end()) {
+			PRINT("Graph edge: " << e.first << " - " << e.second);
+			ERROR("correctness test failed!");
+			return EXIT_FAILURE;
+		}
+		++eitr;
 	}
 
 #if 0	

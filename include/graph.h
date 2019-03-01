@@ -39,24 +39,35 @@ namespace variantdb {
 			typedef std::pair<uint32_t, uint32_t> edge;
 			typedef std::unordered_set<vertex> vertex_set;
 			typedef std::unordered_set<edge> edge_set;
-			typedef std::unordered_set<vertex>::iterator vertex_set_iterator;
+			typedef vertex_set::iterator vertex_set_iterator;
 
 			Graph();	// create a graph with a default size
 			Graph(uint32_t size);	// create a graph with the given size (#num edges)
 			Graph(std::string infile);	// read graph from the ifstream
 
-			int add_edge(vertex s, vertex d);
-			int remove_edge(vertex s, vertex d);
+			// add edge between vertices s and d
+			// if edge already exists will not do anything.
+			int add_edge(const vertex s, const vertex d);
+			// remove edge between vertices s and d
+			// if edge doesn't exists will not do anything.
+			int remove_edge(const vertex s, const vertex d);
 
-			vertex_set out_neighbors(vertex s) const;
-			uint32_t out_degree(vertex v) const;
+			// get out neighbors of vertex s
+			vertex_set out_neighbors(const vertex v) const;
+			// get out degree of vertex s
+			uint32_t out_degree(const vertex v) const;
 
-			vertex_set in_neighbors(vertex s) const;
-			uint32_t in_degree(vertex v) const;
+			// these two functions are not implemented currently.
+			vertex_set in_neighbors(const vertex s) const;
+			uint32_t in_degree(const vertex v) const;
+
+			// returns true if edge e exists in the graph. false otherwise.
+			bool is_edge(const edge e) const;
 
 			uint32_t get_num_vertices() const;
 			uint32_t get_num_edges() const;
 
+			// serialize graph to file
 			int serialize(std::string outfile);
 
 			// Iterate over all nodes in the graph
@@ -77,14 +88,19 @@ namespace variantdb {
 			// Iterate over all edges in the graph
 			class EdgeIterator {
 				public:
-					EdgeIterator(CQF<KeyObject>::Iterator it);
+					EdgeIterator(CQF<KeyObject>::Iterator it, const Graph &g);
 					edge operator*(void) const;
 					void operator++(void);
 					bool done(void) const;
 
 				private:
+					void init_vertex_set_and_itr(void);
+
+					const Graph &g;
 					CQF<KeyObject>::Iterator adj_list_itr;
+					vertex_set cur_vertex_set;
 					vertex_set_iterator vertex_set_itr;
+					uint32_t is_inplace;
 			};
 
 			EdgeIterator begin_edges(void) const;
@@ -106,7 +122,7 @@ namespace variantdb {
 		adj_list.set_auto_resize();
 	}
 
-	int Graph::add_edge(vertex s, vertex d) {
+	int Graph::add_edge(const vertex s, const vertex d) {
 		uint64_t is_inplace {0};
 		vertex val = adj_list.query_key(KeyObject(s, 0, 0), &is_inplace,
 																		QF_NO_LOCK);
@@ -127,7 +143,7 @@ namespace variantdb {
 				aux_vertex_list.emplace_back(neighbors);
 				uint32_t pointer = aux_vertex_list.size();	// it is an offset in the vector. 
 				num_edges++;
-				// the pointer is always increamented by 1
+				// the pointer is always incremented by 1
 				return adj_list.replace_key(KeyObject(s, 1, val), KeyObject(s, 0, pointer),
 																		QF_NO_LOCK);
 			} else {
@@ -138,7 +154,7 @@ namespace variantdb {
 		return 0;
 	}
 
-	int Graph::remove_edge(vertex s, vertex d) {
+	int Graph::remove_edge(const vertex s, const vertex d) {
 		uint64_t is_inplace {0};
 		vertex val = adj_list.query_key(KeyObject(s, 0, 0), &is_inplace,
 																		QF_NO_LOCK);
@@ -148,7 +164,6 @@ namespace variantdb {
 			if (is_inplace == 1) {
 				return adj_list.delete_key(KeyObject(s, 1, d), QF_NO_LOCK);
 			} else {
-				//uint32_t idx = 0;
 				for (auto const vertex : aux_vertex_list[val - 1]) {
 					if (vertex == d)
 						aux_vertex_list[val - 1].erase(aux_vertex_list[val - 1].begin());
@@ -158,10 +173,10 @@ namespace variantdb {
 		return 0;
 	}
 
-	Graph::vertex_set Graph::out_neighbors(vertex s) const {
+	Graph::vertex_set Graph::out_neighbors(const vertex v) const {
 		Graph::vertex_set neighbor_set;
 		uint64_t is_inplace {0};
-		vertex val = adj_list.query_key(KeyObject(s, 0, 0), &is_inplace,
+		vertex val = adj_list.query_key(KeyObject(v, 0, 0), &is_inplace,
 																		QF_NO_LOCK);
 		if (val == 0)
 			return neighbor_set;
@@ -175,7 +190,7 @@ namespace variantdb {
 		}
 	}
 
-	uint32_t Graph::out_degree(vertex v) const {
+	uint32_t Graph::out_degree(const vertex v) const {
 		uint64_t is_inplace {0};
 		vertex val = adj_list.query_key(KeyObject(v, 0, 0), &is_inplace,
 																		QF_NO_LOCK);
@@ -189,6 +204,26 @@ namespace variantdb {
 			}
 		}
 		return 0;
+	}
+
+	bool Graph::is_edge(const edge e) const {
+		Graph::vertex_set neighbor_set;
+		uint64_t is_inplace {0};
+		vertex val = adj_list.query_key(KeyObject(e.first, 0, 0), &is_inplace,
+																		QF_NO_LOCK);
+		if (val == 0)
+			return false;
+		else {
+			if (is_inplace == 1) {
+				if (val == e.second)
+					return true;
+			} else {
+				auto itr = aux_vertex_list[val - 1].find(e.second);
+				if (itr != aux_vertex_list[val - 1].end())
+					return true;
+			}
+		}
+		return false;
 	}
 
 	uint32_t Graph::get_num_vertices() const {
@@ -222,6 +257,51 @@ namespace variantdb {
 		return adj_list_itr.done();
 	}
 
+	Graph::EdgeIterator Graph::begin_edges(void) const {
+		return EdgeIterator(adj_list.begin(), *this);
+	}
+
+	Graph::EdgeIterator Graph::end_edges(void) const {
+		return EdgeIterator(adj_list.end(), *this);
+	}
+
+	void Graph::EdgeIterator::init_vertex_set_and_itr(void) {
+		is_inplace = (*adj_list_itr).value;
+		if (is_inplace == 0) {
+			cur_vertex_set = g.out_neighbors((*adj_list_itr).key);
+			vertex_set_itr = cur_vertex_set.begin();
+		}
+	}
+
+	Graph::EdgeIterator::EdgeIterator(CQF<KeyObject>::Iterator it, const Graph
+																		&g) : g(g), adj_list_itr(it) {
+		init_vertex_set_and_itr();
+		};
+
+	Graph::edge Graph::EdgeIterator::operator*(void) const {
+		if (is_inplace == 1)
+			return edge((*adj_list_itr).key, (*adj_list_itr).count);
+		else
+			return edge((*adj_list_itr).key, *vertex_set_itr);
+	}
+
+	void Graph::EdgeIterator::operator++(void) {
+		if (is_inplace == 1) {
+			++adj_list_itr;
+			init_vertex_set_and_itr();
+		} else {
+			++vertex_set_itr;
+			if (vertex_set_itr == cur_vertex_set.end()) {
+				++adj_list_itr;
+				init_vertex_set_and_itr();
+			}
+		}
+	}
+
+	bool Graph::EdgeIterator::done(void) const {
+		return adj_list_itr.done();
+	}
+
 }
 
-#endif	// __GRAPH_H_
+#endif	// __GRAPH_H__
