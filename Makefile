@@ -1,4 +1,4 @@
-TARGETS= main
+TARGETS= boost_graph
 
 ifdef D
 	DEBUG=-g
@@ -45,9 +45,12 @@ all: $(TARGETS)
 main:										$(OBJDIR)/main.o $(OBJDIR)/gqf.o $(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 
+boost_graph: $(OBJDIR)/boost_graph.o
+
 # dependencies between .o files and .cc (or .c) files
 $(OBJDIR)/main.o: 			$(LOC_SRC)/main.cc $(LOC_INCLUDE)/gqf_cpp.h \
 												$(LOC_INCLUDE)/graph.h
+$(OBJDIR)/boot_graph.o: $(LOC_SRC)/boot_graph.cc
 
 $(OBJDIR)/gqf.o: 				$(LOC_SRC)/gqf/gqf.c $(LOC_INCLUDE)/gqf/gqf.h
 $(OBJDIR)/gqf_file.o: 	$(LOC_SRC)/gqf/gqf_file.c $(LOC_INCLUDE)/gqf/gqf_file.h
