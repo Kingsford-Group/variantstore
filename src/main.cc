@@ -17,6 +17,10 @@
 #include <string>
 #include <openssl/rand.h>
 
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/dijkstra_shortest_paths.hpp>
+
 #include "gqf_cpp.h"
 #include "graph.h"
 
@@ -41,7 +45,12 @@ main ( int argc, char *argv[] )
 	uint64_t nslots = (1ULL << qbits);
 	uint64_t nvals = 10*nslots/100;
 
+	// create a typedef for the Graph type
+	typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS>
+		BoostGraph;
+
 	Graph graph(nslots);
+	//BoostGraph bg(nslots);
 
 	/* Generate random values */
 	uint32_t *vals = (uint32_t*)malloc(nvals*sizeof(vals[0]));
@@ -57,7 +66,7 @@ main ( int argc, char *argv[] )
 	for (uint32_t i = 0; i < nvals; i++) {
 		uint32_t key = vals[i];
 		uint32_t nedges = rand() % 4;		// up to 3 outgoing edges from a node
-		
+
 		//if (nedges > 1)
 			//PRINT("Higher degree node: " << key << " " << nedges);
 		//else if (nedges == 1)
@@ -67,6 +76,7 @@ main ( int argc, char *argv[] )
 		for (uint32_t j = 0; j < nedges; j++) {
 			uint32_t tonode = vals[rand() % nvals];
 			graph.add_edge(key, tonode);
+			//boost::add_edge(key, tonode, bg);
 			vec.insert(tonode);
 			edge_list.insert(std::make_pair(key, tonode));
 		}
