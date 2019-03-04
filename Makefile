@@ -1,4 +1,4 @@
-TARGETS= boost_graph
+TARGETS= main boost_graph
 
 ifdef D
 	DEBUG=-g
