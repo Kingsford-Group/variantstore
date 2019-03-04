@@ -1,4 +1,7 @@
 main
+boost_graph
+
+*.o
 
 obj/*
 data/*
