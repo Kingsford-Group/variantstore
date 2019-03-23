@@ -46,7 +46,7 @@
 #define GET_WAIT_FOR_LOCK(flag) (flag & QF_WAIT_FOR_LOCK)
 #define GET_KEY_HASH(flag) (flag & QF_KEY_IS_HASH)
 
-#define DISTANCE_FROM_HOME_SLOT_CUTOFF 1000
+#define DISTANCE_FROM_HOME_SLOT_CUTOFF 500
 #define BILLION 1000000000L
 
 #ifdef DEBUG_MODE
@@ -560,6 +560,20 @@ static inline void set_slot(const QF *qf, uint64_t index, uint64_t value)
 
 #endif
 
+int validate_metadata(const QF *qf) {
+	uint64_t num_set_bits_occ = 0, num_set_bits_runends = 0;
+	for (uint64_t i = 0; i < qf->metadata->nblocks; i++)
+		num_set_bits_occ += bitrank(get_block(qf, i)->occupieds[0], 63);
+
+	for (uint64_t i = 0; i < qf->metadata->nblocks; i++)
+		num_set_bits_runends += bitrank(get_block(qf, i)->runends[0], 63);
+
+	/*printf("metadata count: %ld %ld\n", num_set_bits_occ, num_set_bits_runends);*/
+	if (num_set_bits_occ != num_set_bits_runends)
+		return 0;
+	return 1;
+}
+
 static inline uint64_t run_end(const QF *qf, uint64_t hash_bucket_index);
 
 static inline uint64_t block_offset(const QF *qf, uint64_t blockidx)
@@ -944,7 +958,7 @@ static inline int remove_replace_slots_and_shift_remainders_and_runends_and_offs
 
 	// If this is the last thing in its run, then we may need to set a new runend bit
 	if (is_runend(qf, overwrite_index + old_length - 1)) {
-	  if (total_remainders > 0) { 
+	  if (total_remainders > 0) {
 	    // If we're not deleting this entry entirely, then it will still the last entry in this run
 	    METADATA_WORD(qf, runends, overwrite_index + total_remainders - 1) |= 1ULL << ((overwrite_index + total_remainders - 1) % 64);
 	  } else if (overwrite_index > bucket_index &&
@@ -963,6 +977,10 @@ static inline int remove_replace_slots_and_shift_remainders_and_runends_and_offs
 	int ret_current_distance = current_distance;
 
 	while (current_distance > 0) {
+		/*printf("%ld %ld ", current_bucket, current_slot);*/
+		/*printf("%lx ", current_slot % QF_SLOTS_PER_BLOCK);*/
+		/*qf_dump_block(qf, current_bucket / QF_SLOTS_PER_BLOCK);*/
+
 		if (is_runend(qf, current_slot + current_distance - 1)) {
 			do {
 				current_bucket++;
@@ -1584,6 +1602,7 @@ inline static int _remove(QF *qf, __uint128_t hash, uint64_t count, uint8_t
 	uint64_t hash_bucket_index        = hash >> qf->metadata->bits_per_slot;
 	uint64_t current_remainder, current_count, current_end;
 	uint64_t new_values[67];
+	memset(new_values, 0, sizeof(new_values[0])*67);
 
 	if (GET_NO_LOCK(runtime_lock) != QF_NO_LOCK) {
 		if (!qf_lock(qf, hash_bucket_index, /*small*/ false, runtime_lock))
@@ -1915,7 +1934,7 @@ int qf_insert(QF *qf, uint64_t key, uint64_t value, uint64_t count, uint8_t
 {
 	// We fill up the CQF up to 95% load factor.
 	// This is a very conservative check.
-	if (qf->metadata->noccupied_slots >= qf->metadata->nslots * 0.95) {
+	if (qf->metadata->noccupied_slots >= qf->metadata->nslots * 0.75) {
 		if (qf->metadata->auto_resize) {
 			fprintf(stdout, "Resizing the CQF.\n");
 			if (qf->runtimedata->container_resize(qf, qf->metadata->nslots * 2) < 0)
@@ -2027,6 +2046,16 @@ int qf_delete_key_value(QF *qf, uint64_t key, uint64_t value, uint8_t flags)
 		return 0;
 
 	return qf_remove(qf, key, value, count, flags);
+	/*if (!validate_metadata(qf)) {*/
+		/*printf("validation failed\n");*/
+		/*abort();*/
+	/*}*/
+	/*int ret = qf_remove(qf, key, value, count, flags);*/
+	/*if (!validate_metadata(qf)) {*/
+		/*printf("validation failed\n");*/
+		/*abort();*/
+	/*}*/
+	/*return ret;*/
 }
 	
 int qf_replace(QF *qf, uint64_t key, uint64_t oldvalue, uint64_t newvalue,

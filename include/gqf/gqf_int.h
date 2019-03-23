@@ -37,7 +37,7 @@ extern "C" {
 	typedef struct __attribute__ ((__packed__)) qfblock {
 		/* Code works with uint16_t, uint32_t, etc, but uint8_t seems just as fast as
 		 * anything else */
-		uint8_t offset; 
+		uint32_t offset; 
 		uint64_t occupieds[QF_METADATA_WORDS_PER_BLOCK];
 		uint64_t runends[QF_METADATA_WORDS_PER_BLOCK];
 

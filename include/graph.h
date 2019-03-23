@@ -22,7 +22,8 @@
 
 namespace variantdb {
 
-#define DEFAULT_SIZE (1ULL << 16)
+#define DEFAULT_VERTEX_CONTAINER_SIZE (1ULL << 6)
+#define DEFAULT_EDGE_CONTAINER_SIZE (1ULL << 16)
 #define KEYBITS 32
 
 	// An efficient way to store graph topology for sparse (and skewed) DAGs. 
@@ -40,6 +41,9 @@ namespace variantdb {
 			typedef std::unordered_set<vertex> vertex_set;
 			typedef std::unordered_set<edge> edge_set;
 			typedef vertex_set::iterator vertex_set_iterator;
+			// can be used as a vertex or edge container
+			typedef CQF<KeyObject> container;
+			typedef CQF<KeyObject>::Iterator container_iterator;
 
 			Graph();	// create a graph with a default size
 			Graph(uint32_t size);	// create a graph with the given size (#num edges)
@@ -107,19 +111,55 @@ namespace variantdb {
 			EdgeIterator end_edges(void) const;
 
 		private:
-			CQF<KeyObject> adj_list;
-			std::vector<vertex_set> aux_vertex_list;
+			container get_container(uint64_t size, uint64_t value_bits, bool isSet)
+				const;
+			container_iterator get_container_iterator(const container& c) const;
+			container get_vertex_container(uint64_t size) const;
+			container get_edge_container(uint64_t size) const;
+			vertex_set get_container_set(const container& c) const;
+
+			container adj_list;
+			std::vector<container> aux_vertex_list;
 			uint32_t num_edges{0};
 	};
 
 	Graph::Graph() {
-		adj_list = CQF<KeyObject>(DEFAULT_SIZE, KEYBITS, 1, QF_HASH_INVERTIBLE);
-		adj_list.set_auto_resize();
+		adj_list = get_edge_container(DEFAULT_EDGE_CONTAINER_SIZE);
 	}
 
 	Graph::Graph(uint32_t size) {
-		adj_list = CQF<KeyObject>(size, KEYBITS, 1, QF_HASH_INVERTIBLE);
-		adj_list.set_auto_resize();
+		adj_list = get_edge_container(size);
+	}
+
+	Graph::container Graph::get_container(uint64_t size, uint64_t value_bits,
+																				bool isSet) const {
+		return CQF<KeyObject>(size, KEYBITS, value_bits, QF_HASH_INVERTIBLE, isSet);
+	}
+	
+	Graph::container_iterator Graph::get_container_iterator(const
+																													Graph::container& c)
+		const
+	{
+		return c.begin();
+	}
+
+	Graph::container Graph::get_vertex_container(uint64_t size) const {
+		return get_container(size, 0, true);
+	}
+
+	Graph::container Graph::get_edge_container(uint64_t size) const {
+		return get_container(size, 1, false);
+	}
+
+	Graph::vertex_set Graph::get_container_set(const Graph::container& c) const {
+		container_iterator itr = get_container_iterator(c);
+		Graph::vertex_set v_set;
+		while (!itr.done()) {
+			v_set.insert((*itr).key);
+			++itr;
+		}
+
+		return v_set;
 	}
 
 	int Graph::add_edge(const vertex s, const vertex d) {
@@ -137,9 +177,10 @@ namespace variantdb {
 		else {		// existing node
 			if (is_inplace == 1) { // there's only one outgoing edge
 				// create a new vector and add outgoing vertices 
-				vertex_set neighbors;
-				neighbors.insert(val);
-				neighbors.insert(d);
+				Graph::container neighbors =
+					get_vertex_container(DEFAULT_VERTEX_CONTAINER_SIZE);
+				neighbors.insert(KeyObject(val, 0, 1), QF_NO_LOCK);
+				neighbors.insert(KeyObject(d, 0, 1), QF_NO_LOCK);
 				aux_vertex_list.emplace_back(neighbors);
 				uint32_t pointer = aux_vertex_list.size();	// it is an offset in the vector. 
 				num_edges++;
@@ -147,7 +188,8 @@ namespace variantdb {
 				return adj_list.replace_key(KeyObject(s, 1, val), KeyObject(s, 0, pointer),
 																		QF_NO_LOCK);
 			} else {
-				if (aux_vertex_list[val - 1].insert(d).second)
+				if (aux_vertex_list[val - 1].insert(KeyObject(d, 0, 1), QF_NO_LOCK)
+						>= 0)
 					num_edges++;
 			}
 		}
@@ -164,10 +206,7 @@ namespace variantdb {
 			if (is_inplace == 1) {
 				return adj_list.delete_key(KeyObject(s, 1, d), QF_NO_LOCK);
 			} else {
-				for (auto const vertex : aux_vertex_list[val - 1]) {
-					if (vertex == d)
-						aux_vertex_list[val - 1].erase(aux_vertex_list[val - 1].begin());
-				}
+				aux_vertex_list[val - 1].delete_key(KeyObject(d, 0, 0), QF_NO_LOCK);
 			}
 		}
 		return 0;
@@ -184,7 +223,7 @@ namespace variantdb {
 			if (is_inplace == 1) {
 				neighbor_set.insert(val);
 			} else {
-				neighbor_set = aux_vertex_list[val - 1];
+				neighbor_set = get_container_set(aux_vertex_list[val - 1]);
 			}
 			return neighbor_set;
 		}
@@ -200,7 +239,7 @@ namespace variantdb {
 			if (is_inplace == 1) {
 				return 1;	
 			} else {
-				return aux_vertex_list[val - 1].size();
+				return aux_vertex_list[val - 1].dist_elts();
 			}
 		}
 		return 0;
@@ -218,8 +257,8 @@ namespace variantdb {
 				if (val == e.second)
 					return true;
 			} else {
-				auto itr = aux_vertex_list[val - 1].find(e.second);
-				if (itr != aux_vertex_list[val - 1].end())
+				if (aux_vertex_list[val - 1].query(KeyObject(e.second, 0, 0),
+																					 QF_NO_LOCK) > 0)
 					return true;
 			}
 		}

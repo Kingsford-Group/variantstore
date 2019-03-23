@@ -25,6 +25,7 @@
 #include "util.h"
 
 #define GQF_SEED 2038074761
+#define GQF_ALREADY_PRESENT (-4)
 
 enum readmode {
 	MMAP,
@@ -36,9 +37,10 @@ class CQF {
 	public:
 		CQF();
 		CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits, enum
-				qf_hashmode hash, uint32_t seed = GQF_SEED);
+				qf_hashmode hash, bool isSet = false, uint32_t seed = GQF_SEED);
 		CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits, enum
-				qf_hashmode hash, std::string filename, uint32_t seed = GQF_SEED);
+				qf_hashmode hash, std::string filename, bool isSet = false, uint32_t
+				seed = GQF_SEED);
 		CQF(std::string& filename, enum readmode flag);
 		CQF(const CQF<key_obj>& copy_cqf);
 
@@ -106,6 +108,7 @@ class CQF {
 
 	private:
 		QF cqf;
+		bool isSet{false};
 		//std::unordered_set<uint64_t> set;
 };
 
@@ -149,21 +152,25 @@ CQF<key_obj>::CQF() {
 
 template <class key_obj>
 CQF<key_obj>::CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits,
-									enum qf_hashmode hash, uint32_t seed) {
+									enum qf_hashmode hash, bool isSet, uint32_t seed) :
+	isSet(isSet) {
 	if (!qf_malloc(&cqf, nslots, key_bits, value_bits, hash, seed)) {
 		ERROR("Can't allocate the CQF.");
 		exit(EXIT_FAILURE);
 	}
+	qf_set_auto_resize(&cqf, true);
 }
 
 template <class key_obj>
 CQF<key_obj>::CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits,
-									enum qf_hashmode hash, std::string filename, uint32_t seed) {
+									enum qf_hashmode hash, std::string filename, bool isSet,
+									uint32_t seed) : isSet(isSet) {
 	if (!qf_initfile(&cqf, nslots, key_bits, value_bits, hash, seed,
 									 filename.c_str())) {
 		ERROR("Can't allocate the CQF.");
 		exit(EXIT_FAILURE);
 	}
+	qf_set_auto_resize(&cqf, true);
 }
 
 template <class key_obj>
@@ -198,7 +205,9 @@ bool CQF<key_obj>::is_full(void) const {
 
 template <class key_obj>
 int CQF<key_obj>::insert(const key_obj& k, uint8_t flags) {
-	return qf_insert(&cqf, k.key, k.value, k.count, flags);
+	if (!isSet || (isSet && qf_count_key_value(&cqf, k.key, k.value, flags) == 0))
+		return qf_insert(&cqf, k.key, k.value, k.count, flags);
+	return GQF_ALREADY_PRESENT;
 	// To validate the CQF
 	//set.insert(k.key);
 }
