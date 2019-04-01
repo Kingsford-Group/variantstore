@@ -45,6 +45,8 @@ namespace variantdb {
 			Graph(uint32_t size);	// create a graph with the given size (#num edges)
 			Graph(std::string infile);	// read graph from the ifstream
 
+			~Graph();
+
 			// add edge between vertices s and d
 			// if edge already exists will not do anything.
 			int add_edge(const vertex s, const vertex d);
