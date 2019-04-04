@@ -43,7 +43,7 @@ main ( int argc, char *argv[] )
 	}
 	uint64_t qbits = atoi(argv[1]);
 	uint64_t nslots = (1ULL << qbits);
-	uint64_t nvals = 75*nslots/100;
+	uint64_t nvals = 50*nslots/100;
 
 	// create a typedef for the Graph type
 	typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS>
