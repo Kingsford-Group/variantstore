@@ -242,7 +242,7 @@ bool CQF<key_obj>::is_exact(void) {
 
 template <class key_obj>
 void CQF<key_obj>::destroy() {
-	qf_deletefile(&cqf);
+	qf_free(&cqf);
 }
 
 template <class key_obj>

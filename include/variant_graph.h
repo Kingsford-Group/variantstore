@@ -3,7 +3,7 @@
  *
  *       Filename:  variant_graph.h
  *
- *         Author:  Prashant Pandey (), ppandey@cs.stonybrook.edu
+ *         Author:  Prashant Pandey (), ppandey2@cs.cmu.edu
  *   Organization:  Carnegie Mellon University
  *
  * ============================================================================
@@ -67,6 +67,7 @@ namespace variantdb {
 			// currently this is a naive structure.
 			// TODO: potential scope for space optimization.
 			typedef struct VariantGraphNode {
+				uint64_t node_id;
 				uint64_t offset;
 				uint64_t length;
 				uint64_t index;
@@ -84,8 +85,7 @@ namespace variantdb {
 			std::vector<VariantGraphNode> out_neighbors(uint64_t node_id);
 			std::vector<VariantGraphNode> in_neighbors(uint64_t node_id);
 
-			VariantGraphIterator find(uint64_t node_id, uint64_t sample_id, uint64_t
-																pos);
+			VariantGraphIterator find(uint64_t node_id, uint64_t sample_id);
 			// iterator will be positioned at the start of the path.
 			VariantGraphIterator find(uint64_t sample_id);
 

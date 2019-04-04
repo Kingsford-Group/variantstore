@@ -1023,12 +1023,18 @@ static inline int remove_replace_slots_and_shift_remainders_and_runends_and_offs
 					break;
 				get_block(qf, original_block + 1)->offset = (runend_index % QF_SLOTS_PER_BLOCK) + 1;
 			} else { // if the last run spans across multiple blocks
-				uint64_t i;
-				for (i = original_block + 1; i < runend_index / QF_SLOTS_PER_BLOCK - 1; i++)
-					get_block(qf, i)->offset = QF_SLOTS_PER_BLOCK;
-				if (get_block(qf, runend_index / QF_SLOTS_PER_BLOCK)->offset == (runend_index % QF_SLOTS_PER_BLOCK) + 1)
-					break;
-				get_block(qf, runend_index / QF_SLOTS_PER_BLOCK)->offset = (runend_index % QF_SLOTS_PER_BLOCK) + 1;
+				for (uint64_t i = original_block + 1; i <= runend_index / QF_SLOTS_PER_BLOCK; i++) {
+					uint64_t new_offset = (runend_index / QF_SLOTS_PER_BLOCK - i) * QF_SLOTS_PER_BLOCK + (runend_index % QF_SLOTS_PER_BLOCK) + 1;
+					if (get_block(qf, i)->offset == new_offset)
+						break;
+					get_block(qf, i)->offset = new_offset;
+				}
+				/*uint64_t i;*/
+				/*for (i = original_block + 1; i < runend_index / QF_SLOTS_PER_BLOCK - 1; i++)*/
+				/*get_block(qf, i)->offset = QF_SLOTS_PER_BLOCK;*/
+				/*if (get_block(qf, runend_index / QF_SLOTS_PER_BLOCK)->offset == (runend_index % QF_SLOTS_PER_BLOCK) + 1)*/
+				/*break;*/
+				/*get_block(qf, runend_index / QF_SLOTS_PER_BLOCK)->offset = (runend_index % QF_SLOTS_PER_BLOCK) + 1;*/
 			}
 		}
 		original_block++;

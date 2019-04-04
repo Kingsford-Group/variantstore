@@ -43,7 +43,7 @@ main ( int argc, char *argv[] )
 	}
 	uint64_t qbits = atoi(argv[1]);
 	uint64_t nslots = (1ULL << qbits);
-	uint64_t nvals = 10*nslots/100;
+	uint64_t nvals = 75*nslots/100;
 
 	// create a typedef for the Graph type
 	typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS>
@@ -56,7 +56,7 @@ main ( int argc, char *argv[] )
 	uint32_t *vals = (uint32_t*)malloc(nvals*sizeof(vals[0]));
 	RAND_bytes((unsigned char *)vals, sizeof(*vals) * nvals);
 	for (uint32_t i = 0; i < nvals; i++) {
-		vals[i] = (1 * vals[i]) % UINT32_MAX;
+		vals[i] = (1 * vals[i]) % nvals + 1;
 	}
 
 	srand(time(NULL));

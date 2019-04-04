@@ -124,6 +124,11 @@ namespace variantdb {
 		adj_list.set_auto_resize();
 	}
 
+	Graph::~Graph() {
+		adj_list.destroy();
+		aux_vertex_list.clear();
+	}
+
 	int Graph::add_edge(const vertex s, const vertex d) {
 		uint64_t is_inplace {0};
 		vertex val = adj_list.query_key(KeyObject(s, 0, 0), &is_inplace,
