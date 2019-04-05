@@ -43,7 +43,7 @@ main ( int argc, char *argv[] )
 	}
 	uint64_t qbits = atoi(argv[1]);
 	uint64_t nslots = (1ULL << qbits);
-	uint64_t nvals = 50*nslots/100;
+	uint64_t nvals = 95*nslots/100;
 
 	// create a typedef for the Graph type
 	typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS>
@@ -65,7 +65,7 @@ main ( int argc, char *argv[] )
 	std::set<std::pair<uint32_t, uint32_t>> edge_list;
 	for (uint32_t i = 0; i < nvals; i++) {
 		uint32_t key = vals[i];
-		uint32_t nedges = rand() % 4;		// up to 3 outgoing edges from a node
+		uint32_t nedges = rand() % 4 + 1;		// up to 4 outgoing edges from a node
 
 		//if (nedges > 1)
 			//PRINT("Higher degree node: " << key << " " << nedges);
@@ -106,6 +106,7 @@ main ( int argc, char *argv[] )
 			return EXIT_FAILURE;
 		}
 	}
+	PRINT("Correctness check passed: by iterating over @adj_list!");
 
 	// check graph correctness by iterating over Graph::VertexIterator
 	Graph::VertexIterator vitr = graph.begin_vertices();
@@ -131,6 +132,7 @@ main ( int argc, char *argv[] )
 		//assert(adj_list[v] == neighbors);
 		++vitr;
 	}
+	PRINT("Correctness check passed: by iterating over Graph::VertexIterator!");
 
 	// check graph correctness by iterating over @edge_list
 	for (auto it = edge_list.begin(); it != edge_list.end(); ++it) {
@@ -140,6 +142,7 @@ main ( int argc, char *argv[] )
 			return EXIT_FAILURE;
 		}
 	}
+	PRINT("Correctness check passed: by iterating over @edge_list!");
 
 	// check graph correctness by iterating over Graph::EdgeIterator
 	Graph::EdgeIterator eitr = graph.begin_edges();
@@ -152,6 +155,7 @@ main ( int argc, char *argv[] )
 		}
 		++eitr;
 	}
+	PRINT("Correctness check passed: by iterating over Graph::EdgeIterator!");
 
 #if 0	
 	vcflib::VariantCallFile variantFile;
