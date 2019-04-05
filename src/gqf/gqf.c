@@ -1004,7 +1004,7 @@ static inline int remove_replace_slots_and_shift_remainders_and_runends_and_offs
 	uint64_t original_block = original_bucket / QF_SLOTS_PER_BLOCK;
 	uint64_t end_block = current_slot / QF_SLOTS_PER_BLOCK;
 	if (old_length > total_remainders) {	// we only update offsets if we shift/delete anything
-		while (original_block <= end_block) {
+		while (1) {
 			int32_t last_occupieds_bit = bitscanreverse(get_block(qf, original_block)->occupieds[0]);
 			if (last_occupieds_bit == -1) { // there is nothing in the block.  // check the previous block.
 				uint64_t prev_block = original_block;
