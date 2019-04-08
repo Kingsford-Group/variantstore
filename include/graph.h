@@ -70,6 +70,7 @@ namespace variantdb {
 			uint32_t get_num_edges() const;
 
 			// serialize graph to file
+			// TODO implemention needed
 			int serialize(std::string outfile);
 
 			// Iterate over all nodes in the graph

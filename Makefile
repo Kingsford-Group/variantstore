@@ -1,4 +1,4 @@
-TARGETS= main
+TARGETS= test_graphcontainer test_variantgraph
 
 ifdef D
 	DEBUG=-g
@@ -42,13 +42,20 @@ LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -L$(LOC_LIB) -lm -lvcflib -lhts -lz \
 all: $(TARGETS)
 
 # dependencies between programs and .o files
-main:										$(OBJDIR)/main.o $(OBJDIR)/gqf.o $(OBJDIR)/gqf_file.o \
+test_graphcontainer:		$(OBJDIR)/test_graphcontainer.o $(OBJDIR)/gqf.o \
+												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
+test_variantgraph:			$(OBJDIR)/test_variantgraph.o $(OBJDIR)/gqf.o \
+												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 
 # dependencies between .o files and .cc (or .c) files
-$(OBJDIR)/main.o: 			$(LOC_SRC)/main.cc $(LOC_INCLUDE)/gqf_cpp.h \
-												$(LOC_INCLUDE)/graph.h
-
+$(OBJDIR)/test_graphcontainer.o: 	$(LOC_SRC)/test_graphcontainer.cc \
+																	$(LOC_INCLUDE)/gqf_cpp.h \
+																	$(LOC_INCLUDE)/graph.h
+$(OBJDIR)/test_variantgraph.o: 		$(LOC_SRC)/test_variantgraph.cc \
+																	#$(LOC_INCLUDE)/variant_graph.h \
+																	#$(LOC_INCLUDE)/graph.h
 $(OBJDIR)/gqf.o: 				$(LOC_SRC)/gqf/gqf.c $(LOC_INCLUDE)/gqf/gqf.h
 $(OBJDIR)/gqf_file.o: 	$(LOC_SRC)/gqf/gqf_file.c $(LOC_INCLUDE)/gqf/gqf_file.h
 $(OBJDIR)/hashutil.o: 	$(LOC_INCLUDE)/gqf/hashutil.h

@@ -65,7 +65,7 @@ namespace variantdb {
 
 			// structure of node in variant graph
 			// currently this is a naive structure.
-			// TODO: potential scope for space optimization.
+			// TODO potential scope for space optimization.
 			typedef struct VariantGraphNode {
 				uint64_t node_id;
 				uint64_t offset;
