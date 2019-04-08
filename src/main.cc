@@ -44,6 +44,7 @@ main ( int argc, char *argv[] )
 	uint64_t qbits = atoi(argv[1]);
 	uint64_t nslots = (1ULL << qbits);
 	uint64_t nvals = 95*nslots/100;
+	//nslots *= 16;
 
 	// create a typedef for the Graph type
 	typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS>
@@ -61,8 +62,8 @@ main ( int argc, char *argv[] )
 
 	srand(time(NULL));
 	// to check the correctness of our graph implementation.
-	std::unordered_map<uint32_t, std::unordered_set<uint32_t>> adj_list;
-	std::set<std::pair<uint32_t, uint32_t>> edge_list;
+	//std::unordered_map<uint32_t, std::unordered_set<uint32_t>> adj_list;
+	//std::set<std::pair<uint32_t, uint32_t>> edge_list;
 	for (uint32_t i = 0; i < nvals; i++) {
 		uint32_t key = vals[i];
 		uint32_t nedges = rand() % 4 + 1;		// up to 4 outgoing edges from a node
@@ -77,15 +78,16 @@ main ( int argc, char *argv[] )
 			uint32_t tonode = vals[rand() % nvals];
 			graph.add_edge(key, tonode);
 			//boost::add_edge(key, tonode, bg);
-			vec.insert(tonode);
-			edge_list.insert(std::make_pair(key, tonode));
+			//vec.insert(tonode);
+			//edge_list.insert(std::make_pair(key, tonode));
 		}
-		adj_list[key].merge(vec);
+		//adj_list[key].merge(vec);
 	}
 
 	PRINT("Num vertices: " << graph.get_num_vertices());
 	PRINT("Num edges: " << graph.get_num_edges());
 
+#if 0
 	// check graph correctness by iterating over @adj_list
 	for (auto it = adj_list.begin(); it != adj_list.end(); ++it) {
 		Graph::vertex_set neighbors = graph.out_neighbors(it->first);
@@ -156,6 +158,7 @@ main ( int argc, char *argv[] )
 		++eitr;
 	}
 	PRINT("Correctness check passed: by iterating over Graph::EdgeIterator!");
+#endif
 
 #if 0	
 	vcflib::VariantCallFile variantFile;

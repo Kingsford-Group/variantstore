@@ -1766,6 +1766,13 @@ uint64_t qf_use(QF* qf, void* buffer, uint64_t buffer_len)
 void *qf_destroy(QF *qf)
 {
 	assert(qf->runtimedata != NULL);
+	if (qf->runtimedata->locks != NULL)
+		free((void*)qf->runtimedata->locks);
+	if (qf->runtimedata->wait_times != NULL)
+		free(qf->runtimedata->wait_times);
+	if (qf->runtimedata->f_info.filepath != NULL)
+		free(qf->runtimedata->f_info.filepath);
+
 	free(qf->runtimedata);
 
 	return (void*)qf->metadata;
