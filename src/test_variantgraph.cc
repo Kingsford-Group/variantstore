@@ -20,11 +20,11 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 
-//#include "variant_graph.h"
+#include "variant_graph.h"
 
 #include "vcflib/Variant.h"
 
-//using namespace variantdb;
+using namespace variantdb;
 
 
 #include	<stdlib.h>
@@ -43,21 +43,25 @@ main ( int argc, char *argv[] )
 		exit(1);
 	}
 
-	vcflib::VariantCallFile variantFile;
-	std::string filename = argv[1];
-	variantFile.open(filename);
-	vcflib::Variant var(variantFile);
+	//vcflib::VariantCallFile variantFile;
+	//std::string filename = argv[1];
+	//variantFile.open(filename);
+	//vcflib::Variant var(variantFile);
 
-	int sampleSize = variantFile.sampleNames.size();
-	for (auto sample : variantFile.sampleNames)
-		std::cout << sample << " ";
-	std::cout << "\n";
+	//for (auto sample : variantFile.sampleNames)
+		//std::cout << sample << " ";
+	//std::cout << "\n";
 
-	long int count = 0;
-	while (variantFile.getNextVariant(var)) {
-		count+= 1;
-		std::cout << var << "\n";
-	}
+	//long int count = 0;
+	//while (variantFile.getNextVariant(var)) {
+		//count+= 1;
+		//std::cout << var << "\n";
+	//}
+
+	std::cout << "Creating VG" << '\n';
+	std::string ref_file(argv[1]);
+	VariantGraph vg(ref_file);
+	std::cout << vg.get_num_vertices() << " " << vg.get_seq_length() << '\n';
 
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

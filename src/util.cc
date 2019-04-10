@@ -8,15 +8,15 @@
  */
 
 #include <iostream>
-#include <algorithm>
-#include <cstring>
+#include <sstream>
+#include <fstream>
+
 #include <vector>
 #include <set>
 #include <unordered_set>
 #include <bitset>
 #include <cassert>
 
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,16 +24,6 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <unistd.h>
-
-#include <stdexcept>
-#include <signal.h>
-#include <netinet/in.h>
-#include <sys/errno.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 #include "util.h"
 
@@ -65,4 +55,27 @@ namespace variantdb {
 			"seconds" << std::endl;
 	}
 
+	void read_fasta(const std::string fasta_file, std::string& chr, std::string&
+									ref) {
+		std::ifstream stream(fasta_file);
+		if (!stream.good()) {
+			std::cerr << "Failed to open input fasta file: " << fasta_file << '\n';
+			abort();
+		}
+		bool found_ref = false;;
+		std::string line;
+		while(getline(stream, line)) {
+			if (line.at(0) == '>') {
+				if (found_ref) {
+					std::cerr << "Found multiple references in the fasta file" << "\n";
+					abort();
+				}
+				std::stringstream line_stream(line);
+				getline(line_stream, chr, ' ');
+				found_ref = true;
+			} else {
+				ref.append(line);
+			}
+		}
+	}
 }

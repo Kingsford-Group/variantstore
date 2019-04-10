@@ -66,8 +66,8 @@ namespace variantdb {
 			// returns true if edge e exists in the graph. false otherwise.
 			bool is_edge(const edge e) const;
 
-			uint32_t get_num_vertices() const;
-			uint32_t get_num_edges() const;
+			uint32_t get_num_vertices(void) const;
+			uint32_t get_num_edges(void) const;
 
 			// serialize graph to file
 			// TODO implemention needed
@@ -234,11 +234,11 @@ namespace variantdb {
 		return false;
 	}
 
-	uint32_t Graph::get_num_vertices() const {
+	uint32_t Graph::get_num_vertices(void) const {
 		return adj_list.dist_elts();
 	}
 
-	uint32_t Graph::get_num_edges() const {
+	uint32_t Graph::get_num_edges(void) const {
 		return num_edges;
 	}
 

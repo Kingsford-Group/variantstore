@@ -40,6 +40,11 @@ namespace variantdb {
 	/* Print elapsed time using the start and end timeval */
 	void print_time_elapsed(std::string desc, struct timeval* start, struct
 													timeval* end);
+	// Read the fasta file and sets the value of the chr and ref string.
+	// TODO Assumes there's only one ref in the fasta file. May need to handle
+	// the case with multiple references in one fasta file.
+	void read_fasta(const std::string fasta_file, std::string& chr, std::string&
+									ref);
 
 }
 #endif

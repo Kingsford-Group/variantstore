@@ -17,7 +17,15 @@
 #include <vector>
 #include <map>
 
+#include <sdsl/bit_vectors.hpp>
+#include <sdsl/int_vector.hpp>
+#include <sdsl/util.hpp>
+
+#include "graph.h"
+
 namespace variantdb {
+
+#define SEQ_BUF_DEFAULT_SIZE 3099706404
 
 	// Construction:
 	// Create a variant graph based on a reference genome.
@@ -49,11 +57,13 @@ namespace variantdb {
 
 	class VariantGraph {
 		public:
+			VariantGraph() = delete; 
 			// construct variant graph using a reference genome and zero or more vcf
 			// files.
-			VariantGraph(const std::string ref, const std::vector<std::string> vcfs);
+			VariantGraph(const std::string ref_file, const std::vector<std::string>&
+									 vcfs = std::vector<std::string>());
 			// read variant graph from disk
-			VariantGraph(const std::string prefix);
+			//VariantGraph(const std::string prefix);
 
 			~VariantGraph();
 
@@ -63,6 +73,9 @@ namespace variantdb {
 			// persist variant graph to disk
 			void serialize(const std::string prefix);
 
+			uint64_t get_num_vertices() const;
+			uint64_t get_seq_length() const;
+
 			// structure of vertex in variant graph
 			// currently this is a naive structure.
 			// TODO potential scope for space optimization.
@@ -71,36 +84,41 @@ namespace variantdb {
 				uint64_t offset;
 				uint64_t length;
 				uint64_t index;
-				uint64_t sample_id;
+				std::string sample_id;
 			} VariantGraphVertex;
 
 			// iterator traversing a specific path in the variant graph
 			class VariantGraphPathIterator {
 				public:
-					VariantGraphIterator(VertexIterator vitr);
-					vertex operator*(void) const;
+					VariantGraphPathIterator(Graph::vertex v, const std::string sample_id);
+					VariantGraphVertex operator*(void) const;
 					void operator++(void);
 					bool done(void) const;
 
 				private:
-					VertexIterator vitr;
+					VariantGraphVertex cur;
 			};
 
 			std::vector<VariantGraphVertex> out_neighbors(uint64_t vertex_id);
 			std::vector<VariantGraphVertex> in_neighbors(uint64_t vertex_id);
 
-			VariantGraphIterator find(uint64_t vertex_id, uint64_t sample_id);
+			VariantGraphPathIterator find(uint64_t vertex_id, uint64_t sample_id);
 			// iterator will be positioned at the start of the path.
-			VariantGraphIterator find(uint64_t sample_id);
+			VariantGraphPathIterator find(uint64_t sample_id);
 
-			
+
 		private:
 			void add_mutation(const std::string org, const std::string mut, uint64_t
 												pos);
 			void split_vertex(uint64_t pos);
 			void split_vertex(uint64_t pos1, uint64_t pos2);
-			void add_vertex(const std::string seq, uint64_t index, uint64_t sample_id);
+			// returns the vertex_id of the new vertex
+			uint64_t add_vertex(const std::string& seq, uint64_t index, const
+													std::string& sample_id);
 
+			uint64_t seq_length{0};
+			uint64_t num_vertices{0};
+			std::string chr;
 			std::map<uint64_t, uint64_t> idx_vertex_id;
 
 			// structures to persist when serializing variant graph.
@@ -109,6 +127,52 @@ namespace variantdb {
 			std::map<uint64_t, VariantGraphVertex> vertex_list;
 			sdsl::int_vector<> seq_buffer;
 	};
+
+	VariantGraph::VariantGraph(const std::string ref_file, const
+														 std::vector<std::string>& vcfs) {
+		std::cout << "In VG constructor" << "\n";
+		std::string ref;
+		read_fasta(ref_file, chr, ref);
+		// initialize the seq buffer
+		sdsl::util::assign(seq_buffer, sdsl::int_vector<>(ref.size(), 0, 3));
+
+		// add ref node
+		add_vertex(ref, 0, "ref");
+	}
+
+	VariantGraph::~VariantGraph() {
+	}
+
+	uint64_t VariantGraph::add_vertex(const std::string& seq, uint64_t index,
+																const std::string& sample_id) {
+		// resize the seq_buffer.
+		seq_buffer.resize(seq_buffer.size() + seq.size());
+		uint64_t start_offset = seq_length;
+		// Add seq to seq_buffer
+		for (auto c : seq) {
+			seq_buffer[seq_length] = c;
+			seq_length++;
+		}
+		// create vertex object and add to vertex_list
+		VariantGraphVertex v = {	num_vertices,
+			start_offset,
+			seq_length - start_offset,
+			index,
+			sample_id};
+		vertex_list[v.vertex_id] = v;
+		num_vertices++;
+
+		return v.vertex_id;
+	}
+
+	uint64_t VariantGraph::get_num_vertices(void) const {
+		return num_vertices;
+	}
+
+	uint64_t VariantGraph::get_seq_length(void) const {
+		return seq_length;
+	}
+
 }
 
 #endif //__VARIANT_GRAPH_H__
