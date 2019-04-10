@@ -30,10 +30,10 @@
 #include	<stdlib.h>
 
 /* 
- * ===  FUNCTION  ======================================================================
+ * ===  FUNCTION  =============================================================
  *         Name:  main
  *  Description:  
- * =====================================================================================
+ * ============================================================================
  */
 	int
 main ( int argc, char *argv[] )
@@ -47,6 +47,11 @@ main ( int argc, char *argv[] )
 	std::string filename = argv[1];
 	variantFile.open(filename);
 	vcflib::Variant var(variantFile);
+
+	int sampleSize = variantFile.sampleNames.size();
+	for (auto sample : variantFile.sampleNames)
+		std::cout << sample << " ";
+	std::cout << "\n";
 
 	long int count = 0;
 	while (variantFile.getNextVariant(var)) {

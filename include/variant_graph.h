@@ -43,7 +43,7 @@ namespace variantdb {
 	// data structure.
 	//
 	// Schema:
-	// Node list schema: <Node_ID, Offset, Length, Index, Sample_ID>
+	// Node list schema: <Vertex_ID, Offset, Length, Index, Sample_ID>
 	// Sequence buffer
 	// Graph topology structure
 
@@ -63,29 +63,33 @@ namespace variantdb {
 			// persist variant graph to disk
 			void serialize(const std::string prefix);
 
-			// structure of node in variant graph
+			// structure of vertex in variant graph
 			// currently this is a naive structure.
 			// TODO potential scope for space optimization.
-			typedef struct VariantGraphNode {
-				uint64_t node_id;
+			typedef struct VariantGraphVertex {
+				uint64_t vertex_id;
 				uint64_t offset;
 				uint64_t length;
 				uint64_t index;
 				uint64_t sample_id;
-			} VariantGraphNode;
+			} VariantGraphVertex;
 
 			// iterator traversing a specific path in the variant graph
 			class VariantGraphPathIterator {
 				public:
-					VariantGraphIterator();
+					VariantGraphIterator(VertexIterator vitr);
+					vertex operator*(void) const;
+					void operator++(void);
+					bool done(void) const;
 
 				private:
+					VertexIterator vitr;
 			};
 
-			std::vector<VariantGraphNode> out_neighbors(uint64_t node_id);
-			std::vector<VariantGraphNode> in_neighbors(uint64_t node_id);
+			std::vector<VariantGraphVertex> out_neighbors(uint64_t vertex_id);
+			std::vector<VariantGraphVertex> in_neighbors(uint64_t vertex_id);
 
-			VariantGraphIterator find(uint64_t node_id, uint64_t sample_id);
+			VariantGraphIterator find(uint64_t vertex_id, uint64_t sample_id);
 			// iterator will be positioned at the start of the path.
 			VariantGraphIterator find(uint64_t sample_id);
 
@@ -93,17 +97,17 @@ namespace variantdb {
 		private:
 			void add_mutation(const std::string org, const std::string mut, uint64_t
 												pos);
-			void split_node(uint64_t pos);
-			void split_node(uint64_t pos1, uint64_t pos2);
-			void add_node(const std::string seq, uint64_t index, uint64_t sample_id);
+			void split_vertex(uint64_t pos);
+			void split_vertex(uint64_t pos1, uint64_t pos2);
+			void add_vertex(const std::string seq, uint64_t index, uint64_t sample_id);
 
-			std::map<uint64_t, uint64_t> idx_node_id;
+			std::map<uint64_t, uint64_t> idx_vertex_id;
 
 			// structures to persist when serializing variant graph.
 			std::vector<uint64_t> sample_id_list;
 			Graph topology;
-			std::map<uint64_t, VariantGraphNode> node_list;
-			// string buffer. maybe use sdsl here?? int_vector --> wavelet tree.
+			std::map<uint64_t, VariantGraphVertex> vertex_list;
+			sdsl::int_vector<> seq_buffer;
 	};
 }
 

@@ -56,11 +56,11 @@ namespace variantdb {
 
 			// get out neighbors of vertex s
 			vertex_set out_neighbors(const vertex v) const;
-			// get out degree of vertex s
+			// get out degree of vertex v
 			uint32_t out_degree(const vertex v) const;
 
 			// these two functions are not implemented currently.
-			vertex_set in_neighbors(const vertex s) const;
+			vertex_set in_neighbors(const vertex v) const;
 			uint32_t in_degree(const vertex v) const;
 
 			// returns true if edge e exists in the graph. false otherwise.
