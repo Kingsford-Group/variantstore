@@ -72,6 +72,7 @@ namespace variantdb {
 				}
 				std::stringstream line_stream(line);
 				getline(line_stream, chr, ' ');
+				chr = chr.substr(1);
 				found_ref = true;
 			} else {
 				ref.append(line);

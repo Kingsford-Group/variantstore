@@ -22,8 +22,6 @@
 
 #include "variant_graph.h"
 
-#include "vcflib/Variant.h"
-
 using namespace variantdb;
 
 
@@ -45,18 +43,6 @@ main ( int argc, char *argv[] )
 
 	//vcflib::VariantCallFile variantFile;
 	//std::string filename = argv[1];
-	//variantFile.open(filename);
-	//vcflib::Variant var(variantFile);
-
-	//for (auto sample : variantFile.sampleNames)
-		//std::cout << sample << " ";
-	//std::cout << "\n";
-
-	//long int count = 0;
-	//while (variantFile.getNextVariant(var)) {
-		//count+= 1;
-		//std::cout << var << "\n";
-	//}
 
 	std::cout << "Creating VG" << '\n';
 	std::string ref_file(argv[1]);

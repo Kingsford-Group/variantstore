@@ -21,11 +21,11 @@
 #include <sdsl/int_vector.hpp>
 #include <sdsl/util.hpp>
 
+#include "vcflib/Variant.h"
+
 #include "graph.h"
 
 namespace variantdb {
-
-#define SEQ_BUF_DEFAULT_SIZE 3099706404
 
 	// Construction:
 	// Create a variant graph based on a reference genome.
@@ -57,6 +57,8 @@ namespace variantdb {
 
 	class VariantGraph {
 		public:
+			// can't create a VariantGraph without a reference genome and zero or
+			// more vcf files.
 			VariantGraph() = delete; 
 			// construct variant graph using a reference genome and zero or more vcf
 			// files.
@@ -68,7 +70,7 @@ namespace variantdb {
 			~VariantGraph();
 
 			// add one or more vcf files to the variant graph
-			void add_vcfs(const std::vector<std::string> vcfs);
+			void add_vcfs(const std::vector<std::string>& vcfs);
 
 			// persist variant graph to disk
 			void serialize(const std::string prefix);
@@ -138,9 +140,30 @@ namespace variantdb {
 
 		// add ref node
 		add_vertex(ref, 0, "ref");
+		
+		// Add vcf files
+		add_vcfs(vcfs);
 	}
 
 	VariantGraph::~VariantGraph() {
+	}
+
+	void VariantGraph::add_vcfs(const std::vector<std::string>& vcfs) {
+		for (auto vcf : vcfs) {
+			vcflib::VariantCallFile variantFile;
+			variantFile.open(vcf);
+			vcflib::Variant var(variantFile);
+
+			for (auto sample : variantFile.sampleNames)
+				std::cout << sample << " ";
+			std::cout << "\n";
+
+			long int count = 0;
+			while (variantFile.getNextVariant(var)) {
+				count+= 1;
+				std::cout << var << "\n";
+			}
+		}
 	}
 
 	uint64_t VariantGraph::add_vertex(const std::string& seq, uint64_t index,
@@ -149,7 +172,7 @@ namespace variantdb {
 		seq_buffer.resize(seq_buffer.size() + seq.size());
 		uint64_t start_offset = seq_length;
 		// Add seq to seq_buffer
-		for (auto c : seq) {
+		for (const auto c : seq) {
 			seq_buffer[seq_length] = c;
 			seq_length++;
 		}
@@ -160,6 +183,10 @@ namespace variantdb {
 			index,
 			sample_id};
 		vertex_list[v.vertex_id] = v;
+		// add to idx-vertex map
+		idx_vertex_id[index] = v.vertex_id;
+		
+		// increment vertex count
 		num_vertices++;
 
 		return v.vertex_id;
