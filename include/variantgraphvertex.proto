@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package variantdb;
+
+// structure of vertex in variant graph
+message VariantGraphVertex {
+	double vertex_id = 1;
+	double offset = 2;
+	int32 length = 3;
+
+	message sample_info {
+		double index = 1;
+		string sample_id = 2;
+		// two bits for genotype info.
+		bool gt_1 = 3;
+		bool gt_2 = 4;
+	}
+
+	repeated sample_info s_info = 4;
+}
+
+message VariantGraphVertexList {
+	repeated VariantGraphVertex vertex = 1;
+}

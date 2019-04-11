@@ -23,6 +23,7 @@
 
 #include "vcflib/Variant.h"
 
+#include "variantgraphvertex.pb.h"
 #include "graph.h"
 
 namespace variantdb {
@@ -78,17 +79,6 @@ namespace variantdb {
 			uint64_t get_num_vertices() const;
 			uint64_t get_seq_length() const;
 
-			// structure of vertex in variant graph
-			// currently this is a naive structure.
-			// TODO potential scope for space optimization.
-			typedef struct VariantGraphVertex {
-				uint64_t vertex_id;
-				uint64_t offset;
-				uint64_t length;
-				uint64_t index;
-				std::string sample_id;
-			} VariantGraphVertex;
-
 			// iterator traversing a specific path in the variant graph
 			class VariantGraphPathIterator {
 				public:
@@ -96,7 +86,7 @@ namespace variantdb {
 					VariantGraphVertex operator*(void) const;
 					void operator++(void);
 					bool done(void) const;
-
+		
 				private:
 					VariantGraphVertex cur;
 			};
@@ -124,9 +114,8 @@ namespace variantdb {
 			std::map<uint64_t, uint64_t> idx_vertex_id;
 
 			// structures to persist when serializing variant graph.
-			std::vector<uint64_t> sample_id_list;
 			Graph topology;
-			std::map<uint64_t, VariantGraphVertex> vertex_list;
+			VariantGraphVertexList vertex_list;
 			sdsl::int_vector<> seq_buffer;
 	};
 
@@ -140,7 +129,7 @@ namespace variantdb {
 
 		// add ref node
 		add_vertex(ref, 0, "ref");
-		
+
 		// Add vcf files
 		add_vcfs(vcfs);
 	}
@@ -167,7 +156,7 @@ namespace variantdb {
 	}
 
 	uint64_t VariantGraph::add_vertex(const std::string& seq, uint64_t index,
-																const std::string& sample_id) {
+																		const std::string& sample_id) {
 		// resize the seq_buffer.
 		seq_buffer.resize(seq_buffer.size() + seq.size());
 		uint64_t start_offset = seq_length;
@@ -177,19 +166,20 @@ namespace variantdb {
 			seq_length++;
 		}
 		// create vertex object and add to vertex_list
-		VariantGraphVertex v = {	num_vertices,
-			start_offset,
-			seq_length - start_offset,
-			index,
-			sample_id};
-		vertex_list[v.vertex_id] = v;
-		// add to idx-vertex map
-		idx_vertex_id[index] = v.vertex_id;
-		
+		//VariantGraphVertex v = {	num_vertices,
+			//start_offset,
+			//seq_length - start_offset,
+			//index,
+			//sample_id};
+		//vertex_list[v.vertex_id] = v;
+		//// add to idx-vertex map
+		//idx_vertex_id[index] = v.vertex_id;
+
 		// increment vertex count
 		num_vertices++;
 
-		return v.vertex_id;
+		//return v.vertex_id;
+		return 0;
 	}
 
 	uint64_t VariantGraph::get_num_vertices(void) const {

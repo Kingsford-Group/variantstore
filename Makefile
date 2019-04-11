@@ -27,13 +27,13 @@ LOC_LIB=lib
 LOC_SRC=src
 OBJDIR=obj
 
-CXXFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE) 
-						
+CXXFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
 
 CFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
 
 LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -L$(LOC_LIB) -lm -lvcflib -lhts -lz \
-					 -lbz2 -llzma -lrt -lpthread -lssl -lcrypto -lboost_system -lsdsl
+					 -lbz2 -llzma -lrt -lpthread -lssl -lcrypto -lboost_system -lsdsl \
+						`pkg-config --cflags --libs protobuf` 
 
 #
 # declaration of dependencies
@@ -45,7 +45,8 @@ all: $(TARGETS)
 test_graphcontainer:		$(OBJDIR)/test_graphcontainer.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
-test_variantgraph:			$(OBJDIR)/test_variantgraph.o $(OBJDIR)/gqf.o \
+test_variantgraph:			$(OBJDIR)/test_variantgraph.o \
+												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 
@@ -55,7 +56,10 @@ $(OBJDIR)/test_graphcontainer.o: 	$(LOC_SRC)/test_graphcontainer.cc \
 																	$(LOC_INCLUDE)/graph.h
 $(OBJDIR)/test_variantgraph.o: 		$(LOC_SRC)/test_variantgraph.cc \
 																	$(LOC_INCLUDE)/variant_graph.h \
+																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
 																	$(LOC_INCLUDE)/graph.h
+$(OBJDIR)/variantgraphvertex.pb.o: 	$(LOC_SRC)/variantgraphvertex.pb.cc \
+																		$(LOC_INCLUDE)/variantgraphvertex.pb.h
 $(OBJDIR)/gqf.o: 				$(LOC_SRC)/gqf/gqf.c $(LOC_INCLUDE)/gqf/gqf.h
 $(OBJDIR)/gqf_file.o: 	$(LOC_SRC)/gqf/gqf_file.c $(LOC_INCLUDE)/gqf/gqf_file.h
 $(OBJDIR)/hashutil.o: 	$(LOC_INCLUDE)/gqf/hashutil.h
