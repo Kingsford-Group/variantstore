@@ -41,13 +41,13 @@ main ( int argc, char *argv[] )
 		exit(1);
 	}
 
-	//vcflib::VariantCallFile variantFile;
 	//std::string filename = argv[1];
 
 	std::cout << "Creating VG" << '\n';
 	std::string ref_file(argv[1]);
 	VariantGraph vg(ref_file);
-	std::cout << vg.get_num_vertices() << " " << vg.get_seq_length() << '\n';
+	std::cout << vg.get_chr() << ' ' << vg.get_num_vertices() << " " <<
+		vg.get_seq_length() << '\n';
 
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

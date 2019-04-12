@@ -76,8 +76,9 @@ namespace variantdb {
 			// persist variant graph to disk
 			void serialize(const std::string prefix);
 
-			uint64_t get_num_vertices() const;
-			uint64_t get_seq_length() const;
+			uint64_t get_num_vertices(void) const;
+			uint64_t get_seq_length(void) const;
+			std::string get_chr(void) const;
 
 			// iterator traversing a specific path in the variant graph
 			class VariantGraphPathIterator {
@@ -86,7 +87,7 @@ namespace variantdb {
 					VariantGraphVertex operator*(void) const;
 					void operator++(void);
 					bool done(void) const;
-		
+
 				private:
 					VariantGraphVertex cur;
 			};
@@ -100,13 +101,37 @@ namespace variantdb {
 
 
 		private:
-			void add_mutation(const std::string org, const std::string mut, uint64_t
-												pos);
-			void split_vertex(uint64_t pos);
-			void split_vertex(uint64_t pos1, uint64_t pos2);
+			enum MUTATION_TYPE {
+				INSERTION,
+				DELETION,
+				SUBSTITUTION
+			};
+
+			void update_idx_vertex_id_map(const VariantGraphVertex& v);
+			VariantGraphVertex* create_vertex(uint64_t id, uint64_t offset, uint64_t
+																				length,
+																				const std::vector<VariantGraphVertex::sample_info>&
+																				samples);
+			VariantGraphVertex::sample_info* create_sample_info(uint64_t index,
+																													const std::string
+																													sample_id, bool gt1,
+																													bool gt2); 
+			void add_mutation(const std::string ref, const std::string alt, uint64_t
+												pos, std::string sample_id, bool gt1, bool gt2);
+			// we only split vertices from the ref.
+			// splits the vertex into two. Connects the cur vertex and
+			// the new one. sets the vertex_id of the new vertex.
+			void split_vertex(uint64_t vertex_id, uint64_t pos, uint64_t*
+												new_vertex);
+			// we only split vertices from the ref.
+			// splits the vertex into three vertices. Connects the cur vertex and
+			// the new ones. sets the vertex_id of the new vertices.
+			void split_vertex(uint64_t vertex_id, uint64_t pos1, uint64_t pos2,
+												uint64_t* new_vertex_1,  uint64_t* new_vertex_2);
 			// returns the vertex_id of the new vertex
-			uint64_t add_vertex(const std::string& seq, uint64_t index, const
-													std::string& sample_id);
+			VariantGraphVertex* add_vertex(const std::string& seq, uint64_t index,
+																		 const std::string& sample_id, bool gt1,
+																		 bool gt2);
 
 			uint64_t seq_length{0};
 			uint64_t num_vertices{0};
@@ -124,14 +149,17 @@ namespace variantdb {
 		// Verify that the version of the library that we linked against is
 		// compatible with the version of the headers we compiled against.
 		GOOGLE_PROTOBUF_VERIFY_VERSION;
-		
+
 		std::string ref;
 		read_fasta(ref_file, chr, ref);
 		// initialize the seq buffer
 		sdsl::util::assign(seq_buffer, sdsl::int_vector<>(ref.size(), 0, 3));
 
 		// add ref node
-		add_vertex(ref, 0, "ref");
+		VariantGraphVertex *v = add_vertex(ref, 0, "ref", 0, 0);
+		
+		// update idx->vertex_id map
+		update_idx_vertex_id_map(*v);
 
 		// Add vcf files
 		add_vcfs(vcfs);
@@ -160,8 +188,120 @@ namespace variantdb {
 		}
 	}
 
-	uint64_t VariantGraph::add_vertex(const std::string& seq, uint64_t index,
-																		const std::string& sample_id) {
+	void VariantGraph::update_idx_vertex_id_map(const VariantGraphVertex& v) {
+		for (int i = 0; i < v.s_info_size(); i++) {
+			const VariantGraphVertex::sample_info& s = v.s_info(i);
+			idx_vertex_id[s.index()] = v.vertex_id();
+		}
+	}
+
+	VariantGraphVertex* VariantGraph::create_vertex(uint64_t id, uint64_t
+																									offset, uint64_t length,
+																									const std::vector<VariantGraphVertex::sample_info>&
+																									samples) {
+		// create vertex object and add to vertex_list
+		VariantGraphVertex* v = vertex_list.add_vertex();
+		v->set_vertex_id(id);
+		v->set_offset(offset);
+		v->set_length(length);
+		for (const auto sample : samples) {
+			VariantGraphVertex::sample_info* s = v->add_s_info();
+			s->set_index(sample.index());
+			s->set_sample_id(sample.sample_id());
+			s->set_gt_1(sample.gt_1());
+			s->set_gt_2(sample.gt_2());
+		}
+
+		return v;
+	}
+
+	void VariantGraph::add_mutation(const std::string ref, const std::string
+																	alt, uint64_t pos, std::string sample_id,
+																	bool gt1, bool gt2) {
+		// find the type mutatuin
+		enum MUTATION_TYPE mutation;
+		if (ref.size() == alt.size())
+			mutation = SUBSTITUTION;
+		else if (ref.size() > alt.size()) 
+			mutation = DELETION;
+		else
+			mutation = INSERTION;
+
+		uint64_t ref_vertex_id;
+		auto fit = idx_vertex_id.lower_bound(pos);
+		if (fit != idx_vertex_id.end()) {
+			// get to the vertex which contain @pos
+			while (fit->first > pos - 1 && fit != idx_vertex_id.begin())	
+				--fit;
+			ref_vertex_id = fit->second;
+		} else {
+			auto rit = idx_vertex_id.rbegin();
+			while (rit->first > pos - 1 && rit != idx_vertex_id.rend())
+				++rit;
+			ref_vertex_id = rit->second;
+		}
+
+		VariantGraphVertex v = vertex_list.vertex(ref_vertex_id); 
+
+		// check if need to split
+		if (v.s_info(0).index() < pos - 1 && v.s_info(0).index() + v.length() >
+				pos - 1) { // need splitting
+			// split the ref node
+			// for insertion split the node once. 
+			// for substitution and deletion split twice.
+			uint64_t v1, v2;
+			if (mutation == INSERTION)
+				split_vertex(ref_vertex_id, pos - v.s_info(0).index() - 1, &v1);
+			else
+				split_vertex(ref_vertex_id, pos - v.s_info(0).index() - 1, pos +
+										 alt.size() - v.s_info(0).index() - 1, &v1, &v2);
+		}
+
+		//VariantGraphVertex *v = add_vertex(alt, [>index<], sample_id, gt1, gt2);
+
+
+	}
+
+	void VariantGraph::split_vertex(uint64_t vertex_id, uint64_t pos, uint64_t*
+																	new_vertex) {
+		VariantGraphVertex cur_vertex = vertex_list.vertex(vertex_id);
+
+		// create vertex object and add to vertex_list
+		uint64_t offset = cur_vertex.offset() + pos - 1;
+		uint64_t length = cur_vertex.length() - (pos - cur_vertex.offset()) + 1;
+		VariantGraphVertex::sample_info s;
+		s.set_index(cur_vertex.s_info(0).index() + pos);
+		s.set_sample_id(cur_vertex.s_info(0).sample_id());
+		s.set_gt_1(0);
+		s.set_gt_2(0);
+		std::vector<VariantGraphVertex::sample_info> samples = {s};
+		VariantGraphVertex *v = create_vertex(num_vertices, offset, length, samples);
+
+		*new_vertex = v->vertex_id();
+		update_idx_vertex_id_map(*v);
+
+		// update length of the seq in the cur_vertex
+		cur_vertex.set_length(pos - cur_vertex.offset() - 1);
+
+		// add the edge
+		topology.add_edge(vertex_id, *new_vertex);
+
+		// increment vertex count
+		num_vertices++;
+	}
+
+	void VariantGraph::split_vertex(uint64_t vertex_id, uint64_t pos1, uint64_t
+																	pos2, uint64_t* new_vertex_1,  uint64_t*
+																	new_vertex_2) {
+		uint64_t v1, v2;
+		split_vertex(vertex_id, pos1, &v1);
+		split_vertex(v1, pos2-pos1, &v2);
+	}
+
+	VariantGraphVertex* VariantGraph::add_vertex(const std::string& seq,
+																							 uint64_t index, const
+																							 std::string& sample_id, bool
+																							 gt1, bool gt2) {
 		// resize the seq_buffer.
 		seq_buffer.resize(seq_buffer.size() + seq.size());
 		uint64_t start_offset = seq_length;
@@ -171,21 +311,19 @@ namespace variantdb {
 			seq_length++;
 		}
 		// create vertex object and add to vertex_list
-		VariantGraphVertex* v = vertex_list.add_vertex();
-		v->set_vertex_id(num_vertices);
-		v->set_offset(start_offset);
-		v->set_length(seq_length);
-		VariantGraphVertex::sample_info* s = v->add_s_info();
-		s->set_index(index);
-		s->set_sample_id(sample_id);
-		s->set_gt_1(0);
-		s->set_gt_2(0);
+		VariantGraphVertex::sample_info s;
+		s.set_index(index);
+		s.set_sample_id(sample_id);
+		s.set_gt_1(gt1);
+		s.set_gt_2(gt2);
+		std::vector<VariantGraphVertex::sample_info> samples = {s};
+		VariantGraphVertex *v = create_vertex(num_vertices, start_offset,
+																					seq_length, samples);
 
 		// increment vertex count
 		num_vertices++;
 
-		//return v.vertex_id;
-		return 0;
+		return v;
 	}
 
 	uint64_t VariantGraph::get_num_vertices(void) const {
@@ -194,6 +332,10 @@ namespace variantdb {
 
 	uint64_t VariantGraph::get_seq_length(void) const {
 		return seq_length;
+	}
+
+	std::string VariantGraph::get_chr(void) const {
+		return chr;
 	}
 
 }
