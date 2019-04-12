@@ -121,7 +121,10 @@ namespace variantdb {
 
 	VariantGraph::VariantGraph(const std::string ref_file, const
 														 std::vector<std::string>& vcfs) {
-		std::cout << "In VG constructor" << "\n";
+		// Verify that the version of the library that we linked against is
+		// compatible with the version of the headers we compiled against.
+		GOOGLE_PROTOBUF_VERIFY_VERSION;
+		
 		std::string ref;
 		read_fasta(ref_file, chr, ref);
 		// initialize the seq buffer
@@ -135,6 +138,8 @@ namespace variantdb {
 	}
 
 	VariantGraph::~VariantGraph() {
+		// Optional:  Delete all global objects allocated by libprotobuf.
+		google::protobuf::ShutdownProtobufLibrary();
 	}
 
 	void VariantGraph::add_vcfs(const std::vector<std::string>& vcfs) {
@@ -166,14 +171,15 @@ namespace variantdb {
 			seq_length++;
 		}
 		// create vertex object and add to vertex_list
-		//VariantGraphVertex v = {	num_vertices,
-			//start_offset,
-			//seq_length - start_offset,
-			//index,
-			//sample_id};
-		//vertex_list[v.vertex_id] = v;
-		//// add to idx-vertex map
-		//idx_vertex_id[index] = v.vertex_id;
+		VariantGraphVertex* v = vertex_list.add_vertex();
+		v->set_vertex_id(num_vertices);
+		v->set_offset(start_offset);
+		v->set_length(seq_length);
+		VariantGraphVertex::sample_info* s = v->add_s_info();
+		s->set_index(index);
+		s->set_sample_id(sample_id);
+		s->set_gt_1(0);
+		s->set_gt_2(0);
 
 		// increment vertex count
 		num_vertices++;
