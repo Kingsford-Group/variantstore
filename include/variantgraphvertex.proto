@@ -4,9 +4,9 @@ package variantdb;
 
 // structure of vertex in variant graph
 message VariantGraphVertex {
-	double vertex_id = 1;
-	double offset = 2;
-	int32 length = 3;
+	uint32 vertex_id = 1;
+	uint64 offset = 2;
+	uint32 length = 3;
 
 	message sample_info {
 		double index = 1;

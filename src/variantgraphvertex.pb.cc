@@ -120,19 +120,18 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_include_2fvariantgraphvertex_2eproto[] =
   "\n include/variantgraphvertex.proto\022\tvari"
-  "antdb\032\037google/protobuf/timestamp.proto\"\317"
-  "\001\n\022VariantGraphVertex\022\021\n\tvertex_id\030\001 \001(\001"
-  "\022\016\n\006offset\030\002 \001(\001\022\016\n\006length\030\003 \001(\005\0229\n\006s_in"
-  "fo\030\004 \003(\0132).variantdb.VariantGraphVertex."
-  "sample_info\032K\n\013sample_info\022\r\n\005index\030\001 \001("
-  "\001\022\021\n\tsample_id\030\002 \001(\t\022\014\n\004gt_1\030\003 \001(\010\022\014\n\004gt"
-  "_2\030\004 \001(\010\"G\n\026VariantGraphVertexList\022-\n\006ve"
-  "rtex\030\001 \003(\0132\035.variantdb.VariantGraphVerte"
-  "xb\006proto3"
+  "antdb\"\317\001\n\022VariantGraphVertex\022\021\n\tvertex_i"
+  "d\030\001 \001(\r\022\016\n\006offset\030\002 \001(\004\022\016\n\006length\030\003 \001(\r\022"
+  "9\n\006s_info\030\004 \003(\0132).variantdb.VariantGraph"
+  "Vertex.sample_info\032K\n\013sample_info\022\r\n\005ind"
+  "ex\030\001 \001(\001\022\021\n\tsample_id\030\002 \001(\t\022\014\n\004gt_1\030\003 \001("
+  "\010\022\014\n\004gt_2\030\004 \001(\010\"G\n\026VariantGraphVertexLis"
+  "t\022-\n\006vertex\030\001 \003(\0132\035.variantdb.VariantGra"
+  "phVertexb\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_include_2fvariantgraphvertex_2eproto_once;
 static ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_include_2fvariantgraphvertex_2eproto = {
-  false, descriptor_table_protodef_include_2fvariantgraphvertex_2eproto, "include/variantgraphvertex.proto", 369,
+  false, descriptor_table_protodef_include_2fvariantgraphvertex_2eproto, "include/variantgraphvertex.proto", 336,
   &descriptor_table_include_2fvariantgraphvertex_2eproto_once, AddDescriptors_include_2fvariantgraphvertex_2eproto, schemas,
   file_default_instances, TableStruct_include_2fvariantgraphvertex_2eproto::offsets,
   file_level_metadata_include_2fvariantgraphvertex_2eproto, 3, file_level_enum_descriptors_include_2fvariantgraphvertex_2eproto, file_level_service_descriptors_include_2fvariantgraphvertex_2eproto,
@@ -141,12 +140,11 @@ static ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_inclu
 void AddDescriptors_include_2fvariantgraphvertex_2eproto() {
   static constexpr ::PROTOBUF_NAMESPACE_ID::internal::InitFunc deps[1] =
   {
-    ::AddDescriptors_google_2fprotobuf_2ftimestamp_2eproto,
   };
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_VariantGraphVertex_sample_info_include_2fvariantgraphvertex_2eproto.base);
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_VariantGraphVertex_include_2fvariantgraphvertex_2eproto.base);
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_VariantGraphVertexList_include_2fvariantgraphvertex_2eproto.base);
- ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptors(&descriptor_table_include_2fvariantgraphvertex_2eproto, deps, 1);
+ ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptors(&descriptor_table_include_2fvariantgraphvertex_2eproto, deps, 0);
 }
 
 // Force running AddDescriptors() at dynamic initialization time.
@@ -586,18 +584,18 @@ VariantGraphVertex::VariantGraphVertex(const VariantGraphVertex& from)
       _internal_metadata_(nullptr),
       s_info_(from.s_info_) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
-  ::memcpy(&vertex_id_, &from.vertex_id_,
+  ::memcpy(&offset_, &from.offset_,
     static_cast<size_t>(reinterpret_cast<char*>(&length_) -
-    reinterpret_cast<char*>(&vertex_id_)) + sizeof(length_));
+    reinterpret_cast<char*>(&offset_)) + sizeof(length_));
   // @@protoc_insertion_point(copy_constructor:variantdb.VariantGraphVertex)
 }
 
 void VariantGraphVertex::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(
       &scc_info_VariantGraphVertex_include_2fvariantgraphvertex_2eproto.base);
-  ::memset(&vertex_id_, 0, static_cast<size_t>(
+  ::memset(&offset_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&length_) -
-      reinterpret_cast<char*>(&vertex_id_)) + sizeof(length_));
+      reinterpret_cast<char*>(&offset_)) + sizeof(length_));
 }
 
 VariantGraphVertex::~VariantGraphVertex() {
@@ -624,9 +622,9 @@ void VariantGraphVertex::Clear() {
   (void) cached_has_bits;
 
   s_info_.Clear();
-  ::memset(&vertex_id_, 0, static_cast<size_t>(
+  ::memset(&offset_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&length_) -
-      reinterpret_cast<char*>(&vertex_id_)) + sizeof(length_));
+      reinterpret_cast<char*>(&offset_)) + sizeof(length_));
   _internal_metadata_.Clear();
 }
 
@@ -638,21 +636,21 @@ const char* VariantGraphVertex::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // double vertex_id = 1;
+      // uint32 vertex_id = 1;
       case 1: {
-        if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) != 9) goto handle_unusual;
-        vertex_id_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
-        ptr += sizeof(double);
+        if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) != 8) goto handle_unusual;
+        vertex_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
+        CHK_(ptr);
         break;
       }
-      // double offset = 2;
+      // uint64 offset = 2;
       case 2: {
-        if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) != 17) goto handle_unusual;
-        offset_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
-        ptr += sizeof(double);
+        if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) != 16) goto handle_unusual;
+        offset_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
+        CHK_(ptr);
         break;
       }
-      // int32 length = 3;
+      // uint32 length = 3;
       case 3: {
         if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) != 24) goto handle_unusual;
         length_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint(&ptr);
@@ -701,12 +699,12 @@ bool VariantGraphVertex::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // double vertex_id = 1;
+      // uint32 vertex_id = 1;
       case 1: {
-        if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (9 & 0xFF)) {
+        if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (8 & 0xFF)) {
 
           DO_((::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::ReadPrimitive<
-                   double, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_DOUBLE>(
+                   ::PROTOBUF_NAMESPACE_ID::uint32, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT32>(
                  input, &vertex_id_)));
         } else {
           goto handle_unusual;
@@ -714,12 +712,12 @@ bool VariantGraphVertex::MergePartialFromCodedStream(
         break;
       }
 
-      // double offset = 2;
+      // uint64 offset = 2;
       case 2: {
-        if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (17 & 0xFF)) {
+        if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (16 & 0xFF)) {
 
           DO_((::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::ReadPrimitive<
-                   double, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_DOUBLE>(
+                   ::PROTOBUF_NAMESPACE_ID::uint64, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT64>(
                  input, &offset_)));
         } else {
           goto handle_unusual;
@@ -727,12 +725,12 @@ bool VariantGraphVertex::MergePartialFromCodedStream(
         break;
       }
 
-      // int32 length = 3;
+      // uint32 length = 3;
       case 3: {
         if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (24 & 0xFF)) {
 
           DO_((::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::ReadPrimitive<
-                   ::PROTOBUF_NAMESPACE_ID::int32, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_INT32>(
+                   ::PROTOBUF_NAMESPACE_ID::uint32, ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT32>(
                  input, &length_)));
         } else {
           goto handle_unusual;
@@ -778,19 +776,19 @@ void VariantGraphVertex::SerializeWithCachedSizes(
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // double vertex_id = 1;
+  // uint32 vertex_id = 1;
   if (this->vertex_id() != 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDouble(1, this->vertex_id(), output);
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32(1, this->vertex_id(), output);
   }
 
-  // double offset = 2;
+  // uint64 offset = 2;
   if (this->offset() != 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDouble(2, this->offset(), output);
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64(2, this->offset(), output);
   }
 
-  // int32 length = 3;
+  // uint32 length = 3;
   if (this->length() != 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32(3, this->length(), output);
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32(3, this->length(), output);
   }
 
   // repeated .variantdb.VariantGraphVertex.sample_info s_info = 4;
@@ -815,19 +813,19 @@ void VariantGraphVertex::SerializeWithCachedSizes(
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // double vertex_id = 1;
+  // uint32 vertex_id = 1;
   if (this->vertex_id() != 0) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(1, this->vertex_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(1, this->vertex_id(), target);
   }
 
-  // double offset = 2;
+  // uint64 offset = 2;
   if (this->offset() != 0) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(2, this->offset(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->offset(), target);
   }
 
-  // int32 length = 3;
+  // uint32 length = 3;
   if (this->length() != 0) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->length(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(3, this->length(), target);
   }
 
   // repeated .variantdb.VariantGraphVertex.sample_info s_info = 4;
@@ -870,20 +868,24 @@ size_t VariantGraphVertex::ByteSizeLong() const {
     }
   }
 
-  // double vertex_id = 1;
-  if (this->vertex_id() != 0) {
-    total_size += 1 + 8;
-  }
-
-  // double offset = 2;
+  // uint64 offset = 2;
   if (this->offset() != 0) {
-    total_size += 1 + 8;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->offset());
   }
 
-  // int32 length = 3;
+  // uint32 vertex_id = 1;
+  if (this->vertex_id() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+        this->vertex_id());
+  }
+
+  // uint32 length = 3;
   if (this->length() != 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
         this->length());
   }
 
@@ -915,11 +917,11 @@ void VariantGraphVertex::MergeFrom(const VariantGraphVertex& from) {
   (void) cached_has_bits;
 
   s_info_.MergeFrom(from.s_info_);
-  if (from.vertex_id() != 0) {
-    set_vertex_id(from.vertex_id());
-  }
   if (from.offset() != 0) {
     set_offset(from.offset());
+  }
+  if (from.vertex_id() != 0) {
+    set_vertex_id(from.vertex_id());
   }
   if (from.length() != 0) {
     set_length(from.length());
@@ -952,8 +954,8 @@ void VariantGraphVertex::InternalSwap(VariantGraphVertex* other) {
   using std::swap;
   _internal_metadata_.Swap(&other->_internal_metadata_);
   CastToBase(&s_info_)->InternalSwap(CastToBase(&other->s_info_));
-  swap(vertex_id_, other->vertex_id_);
   swap(offset_, other->offset_);
+  swap(vertex_id_, other->vertex_id_);
   swap(length_, other->length_);
 }
 

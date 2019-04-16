@@ -31,7 +31,6 @@
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
 #include <google/protobuf/unknown_field_set.h>
-#include <google/protobuf/timestamp.pb.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 #define PROTOBUF_INTERNAL_EXPORT_include_2fvariantgraphvertex_2eproto
@@ -324,23 +323,23 @@ class VariantGraphVertex :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::variantdb::VariantGraphVertex_sample_info >&
       s_info() const;
 
-  // double vertex_id = 1;
-  void clear_vertex_id();
-  static const int kVertexIdFieldNumber = 1;
-  double vertex_id() const;
-  void set_vertex_id(double value);
-
-  // double offset = 2;
+  // uint64 offset = 2;
   void clear_offset();
   static const int kOffsetFieldNumber = 2;
-  double offset() const;
-  void set_offset(double value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 offset() const;
+  void set_offset(::PROTOBUF_NAMESPACE_ID::uint64 value);
 
-  // int32 length = 3;
+  // uint32 vertex_id = 1;
+  void clear_vertex_id();
+  static const int kVertexIdFieldNumber = 1;
+  ::PROTOBUF_NAMESPACE_ID::uint32 vertex_id() const;
+  void set_vertex_id(::PROTOBUF_NAMESPACE_ID::uint32 value);
+
+  // uint32 length = 3;
   void clear_length();
   static const int kLengthFieldNumber = 3;
-  ::PROTOBUF_NAMESPACE_ID::int32 length() const;
-  void set_length(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 length() const;
+  void set_length(::PROTOBUF_NAMESPACE_ID::uint32 value);
 
   // @@protoc_insertion_point(class_scope:variantdb.VariantGraphVertex)
  private:
@@ -348,9 +347,9 @@ class VariantGraphVertex :
 
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::variantdb::VariantGraphVertex_sample_info > s_info_;
-  double vertex_id_;
-  double offset_;
-  ::PROTOBUF_NAMESPACE_ID::int32 length_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 offset_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 vertex_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 length_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_include_2fvariantgraphvertex_2eproto;
 };
@@ -581,43 +580,43 @@ inline void VariantGraphVertex_sample_info::set_gt_2(bool value) {
 
 // VariantGraphVertex
 
-// double vertex_id = 1;
+// uint32 vertex_id = 1;
 inline void VariantGraphVertex::clear_vertex_id() {
-  vertex_id_ = 0;
+  vertex_id_ = 0u;
 }
-inline double VariantGraphVertex::vertex_id() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 VariantGraphVertex::vertex_id() const {
   // @@protoc_insertion_point(field_get:variantdb.VariantGraphVertex.vertex_id)
   return vertex_id_;
 }
-inline void VariantGraphVertex::set_vertex_id(double value) {
+inline void VariantGraphVertex::set_vertex_id(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   
   vertex_id_ = value;
   // @@protoc_insertion_point(field_set:variantdb.VariantGraphVertex.vertex_id)
 }
 
-// double offset = 2;
+// uint64 offset = 2;
 inline void VariantGraphVertex::clear_offset() {
-  offset_ = 0;
+  offset_ = PROTOBUF_ULONGLONG(0);
 }
-inline double VariantGraphVertex::offset() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 VariantGraphVertex::offset() const {
   // @@protoc_insertion_point(field_get:variantdb.VariantGraphVertex.offset)
   return offset_;
 }
-inline void VariantGraphVertex::set_offset(double value) {
+inline void VariantGraphVertex::set_offset(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
   offset_ = value;
   // @@protoc_insertion_point(field_set:variantdb.VariantGraphVertex.offset)
 }
 
-// int32 length = 3;
+// uint32 length = 3;
 inline void VariantGraphVertex::clear_length() {
-  length_ = 0;
+  length_ = 0u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 VariantGraphVertex::length() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint32 VariantGraphVertex::length() const {
   // @@protoc_insertion_point(field_get:variantdb.VariantGraphVertex.length)
   return length_;
 }
-inline void VariantGraphVertex::set_length(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void VariantGraphVertex::set_length(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   
   length_ = value;
   // @@protoc_insertion_point(field_set:variantdb.VariantGraphVertex.length)
