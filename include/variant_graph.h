@@ -110,12 +110,13 @@ namespace variantdb {
 			};
 
 			void update_idx_vertex_id_map(const VariantGraphVertex& v);
-			uint64_t get_ref_index(const VariantGraphVertex& v) const;
-			uint64_t find_sample_index(Graph::vertex ref_v_idx, std::string
+			uint64_t get_sample_index(const VariantGraphVertex& v, const std::string
+														 sample_id) const;
+			uint64_t find_sample_index(Graph::vertex ref_v_id, std::string
 																 sample_id) const;
 
-			Graph::vertex get_neighbor_vertex(Graph::vertex id, const std::string
-																				sample_id) const;
+			bool get_neighbor_vertex(Graph::vertex id, const std::string sample_id,
+															 Graph::vertex* v) const;
 			void add_sample_to_vertex(Graph::vertex id, uint64_t sample_idx, const
 																std::string sample_id, bool gt1, bool gt2);
 			VariantGraphVertex* create_vertex(uint64_t id, uint64_t offset, uint64_t
@@ -314,10 +315,11 @@ namespace variantdb {
 		}
 	}
 
-	uint64_t VariantGraph::get_ref_index(const VariantGraphVertex& v) const {
+	uint64_t VariantGraph::get_sample_index(const VariantGraphVertex& v, const
+																			 std::string sample_id) const {
 		for (int i = 0; i < v.s_info_size(); i++) {
 			const VariantGraphVertex::sample_info& s = v.s_info(i);
-			if (s.sample_id() == "ref")
+			if (s.sample_id() == sample_id)
 				return s.index();
 		}
 		std::cerr << "Can't find the ref index in vertex id: " << v.vertex_id() <<
@@ -325,28 +327,55 @@ namespace variantdb {
 		abort();
 	}
 
-	// TODO please implement....
-	uint64_t VariantGraph::find_sample_index(Graph::vertex ref_v_idx,
+	uint64_t VariantGraph::find_sample_index(Graph::vertex ref_v_id,
 																					 const std::string sample_id) const {
-		return 0;
+		Graph::vertex cur_vertex_id = ref_v_id;
+		VariantGraphVertex cur_vertex = vertex_list.vertex(cur_vertex_id);
+		uint64_t cur_index = get_sample_index(cur_vertex, "ref");
+		uint64_t cur_distance = 0;
+		while (cur_index > 1) {
+			Graph::vertex neighbor_vertex_id;
+			if (get_neighbor_vertex(cur_vertex_id, sample_id, &neighbor_vertex_id)) {
+				VariantGraphVertex sample_vertex =
+					vertex_list.vertex(neighbor_vertex_id);
+				uint64_t sample_index = get_sample_index(sample_vertex, sample_id);	
+				return sample_index + cur_distance;
+			}
+			// move to prev vertex.
+			auto temp_itr = idx_vertex_id.lower_bound(cur_index);
+			if (temp_itr->first != cur_index) {
+				std::cout << "Vertex id not found in the map" << '\n';
+				abort();
+			}
+			--temp_itr;
+			cur_vertex_id = temp_itr->second;
+			cur_distance += cur_index - temp_itr->first;
+			cur_index = temp_itr->first; 
+		}
+
+		return cur_distance;
 	}
 
-	Graph::vertex VariantGraph::get_neighbor_vertex(Graph::vertex id,
-																									const std::string sample_id)
+	bool VariantGraph::get_neighbor_vertex(Graph::vertex id, const std::string
+																				 sample_id, Graph::vertex* v)
 		const {
 			for (const auto v_id : topology.out_neighbors(id)) {
 				VariantGraphVertex vertex = vertex_list.vertex(v_id);
 				for (int i = 0; i < vertex.s_info_size(); i++) {
 					const VariantGraphVertex::sample_info& s = vertex.s_info(i);
-					if (s.sample_id() == sample_id)
-						return v_id;
+					if (s.sample_id() == sample_id) {
+						*v = v_id; 
+						return true;
+					}
 				}
 			}
-			std::cerr << "Can't find the vertex with sample id: " <<  sample_id <<
-				" at vertex id: " << id << '\n';
-			abort();
+			if (sample_id == "ref") {
+				std::cerr << "Can't find the vertex with sample id: " <<  sample_id <<
+					" at vertex id: " << id << '\n';
+				abort();
+			}
 
-			return 0;
+			return false;
 	}
 
 	void VariantGraph::add_sample_to_vertex(Graph::vertex id, uint64_t
@@ -396,7 +425,7 @@ namespace variantdb {
 		Graph::vertex ref_vertex_id = ref_idx_itr->second;
 		VariantGraphVertex ref_vertex = vertex_list.vertex(ref_vertex_id);
 		// check if the mapping is consistant with the vertex structure.
-		assert(ref_vertex_idx == get_ref_index(ref_vertex));
+		assert(ref_vertex_idx == get_sample_index(ref_vertex, "ref"));
 
 		if (mutation == SUBSTITUTION) {
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
@@ -413,7 +442,7 @@ namespace variantdb {
 				prev_ref_vertex_id = temp_itr->second;
 
 				// find the next ref vertex
-				next_ref_vertex_id = get_neighbor_vertex(ref_vertex_id, "ref");		
+				get_neighbor_vertex(ref_vertex_id, "ref", &next_ref_vertex_id);		
 			} else if (ref_vertex_idx == pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into two
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
@@ -456,7 +485,7 @@ namespace variantdb {
 				prev_ref_vertex_id = temp_itr->second;
 
 				// find the next ref vertex
-				next_ref_vertex_id = get_neighbor_vertex(ref_vertex_id, "ref");		
+				get_neighbor_vertex(ref_vertex_id, "ref", &next_ref_vertex_id);		
 			} else if (ref_vertex_idx <= pos) {	// vertex needs to be split into two
 				// split the vertex
 				split_vertex(ref_vertex_id, pos - ref_vertex_idx + 1,
@@ -486,7 +515,7 @@ namespace variantdb {
 				prev_ref_vertex_id = temp_itr->second;
 
 				// find the next ref vertex
-				next_ref_vertex_id = get_neighbor_vertex(ref_vertex_id, "ref");		
+				get_neighbor_vertex(ref_vertex_id, "ref", &next_ref_vertex_id);	
 			} else if (ref_vertex_idx == pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into two
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
