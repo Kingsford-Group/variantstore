@@ -85,22 +85,26 @@ namespace variantdb {
 			// iterator traversing a specific path in the variant graph
 			class VariantGraphPathIterator {
 				public:
-					VariantGraphPathIterator(Graph::vertex v, const std::string sample_id);
-					VariantGraphVertex operator*(void) const;
+					VariantGraphPathIterator(const VariantGraph* g, Graph::vertex v,
+																	 const std::string sample_id);
+					const VariantGraphVertex* operator*(void) const;
 					void operator++(void);
 					bool done(void) const;
 
 				private:
+					const VariantGraph* vg;
 					VariantGraphVertex cur;
+					std::string s_id;
+					bool is_done;
 			};
 
-			std::vector<VariantGraphVertex> out_neighbors(uint64_t vertex_id);
-			std::vector<VariantGraphVertex> in_neighbors(uint64_t vertex_id);
+			//std::vector<VariantGraphVertex> out_neighbors(uint64_t vertex_id);
+			//std::vector<VariantGraphVertex> in_neighbors(uint64_t vertex_id);
 
-			VariantGraphPathIterator find(uint64_t vertex_id, uint64_t sample_id);
+			VariantGraph::VariantGraphPathIterator find(uint64_t vertex_id, const
+																									 std::string sample_id);
 			// iterator will be positioned at the start of the path.
-			VariantGraphPathIterator find(uint64_t sample_id);
-
+			VariantGraph::VariantGraphPathIterator find(const std::string sample_id);
 
 		private:
 			enum MUTATION_TYPE {
@@ -111,7 +115,7 @@ namespace variantdb {
 
 			void update_idx_vertex_id_map(const VariantGraphVertex& v);
 			uint64_t get_sample_index(const VariantGraphVertex& v, const std::string
-														 sample_id) const;
+																sample_id) const;
 			uint64_t find_sample_index(Graph::vertex ref_v_id, std::string
 																 sample_id) const;
 
@@ -170,7 +174,7 @@ namespace variantdb {
 		// add ref node
 		// we set the index to 1.
 		VariantGraphVertex *v = add_vertex(ref, 1, "ref", 0, 0);
-		
+
 		// update idx->vertex_id map
 		update_idx_vertex_id_map(*v);
 
@@ -316,7 +320,7 @@ namespace variantdb {
 	}
 
 	uint64_t VariantGraph::get_sample_index(const VariantGraphVertex& v, const
-																			 std::string sample_id) const {
+																					std::string sample_id) const {
 		for (int i = 0; i < v.s_info_size(); i++) {
 			const VariantGraphVertex::sample_info& s = v.s_info(i);
 			if (s.sample_id() == sample_id)
@@ -356,6 +360,7 @@ namespace variantdb {
 		return cur_distance;
 	}
 
+	// if there is not neighbor with @sample_id then set @v to "ref"
 	bool VariantGraph::get_neighbor_vertex(Graph::vertex id, const std::string
 																				 sample_id, Graph::vertex* v)
 		const {
@@ -366,17 +371,19 @@ namespace variantdb {
 					if (s.sample_id() == sample_id) {
 						*v = v_id; 
 						return true;
+					} else if (s.sample_id() == "ref") {
+						*v = v_id;
 					}
 				}
 			}
-			if (sample_id == "ref") {
-				std::cerr << "Can't find the vertex with sample id: " <<  sample_id <<
-					" at vertex id: " << id << '\n';
-				abort();
-			}
+			//if (sample_id == "ref") {
+				//std::cerr << "Can't find the vertex with sample id: " <<  sample_id <<
+					//" at vertex id: " << id << '\n';
+				//abort();
+			//}
 
 			return false;
-	}
+		}
 
 	void VariantGraph::add_sample_to_vertex(Graph::vertex id, uint64_t
 																					sample_idx, const std::string
@@ -543,6 +550,51 @@ namespace variantdb {
 			// make connections
 			topology.add_edge(prev_ref_vertex_id, next_ref_vertex_id);
 		}
+	}
+
+	VariantGraph::VariantGraphPathIterator::VariantGraphPathIterator(const
+																																	 VariantGraph*
+																																	 g,
+																																	 Graph::vertex
+																																	 v, const
+																																	 std::string
+																																	 sample_id)
+	{
+		vg = g; 
+		cur = vg->vertex_list.vertex(v);
+		s_id = sample_id;
+		is_done = false;
+	}
+
+	const VariantGraphVertex*
+		VariantGraph::VariantGraphPathIterator::operator*(void) const {
+		return &cur;
+	}
+
+	void VariantGraph::VariantGraphPathIterator::operator++(void) {
+		Graph::vertex next_vertex = 0; // there shoould be no incoming edge to 0
+		if (!vg->get_neighbor_vertex(cur.vertex_id(), s_id, &next_vertex) &&
+				next_vertex == 0) {
+				is_done = true;
+		}
+		cur = vg->vertex_list.vertex(next_vertex);
+	}
+
+	bool VariantGraph::VariantGraphPathIterator::done(void) const {
+		return is_done;
+	}
+
+	VariantGraph::VariantGraphPathIterator VariantGraph::find(uint64_t
+																														 vertex_id, const
+																														 std::string
+																														 sample_id) {
+		return VariantGraphPathIterator(this, vertex_id, sample_id);	
+	}
+
+	// iterator will be positioned at the start of the path.
+	VariantGraph::VariantGraphPathIterator VariantGraph::find(const std::string
+																														 sample_id) {
+		return VariantGraphPathIterator(this, 0, sample_id);	
 	}
 
 }

@@ -45,7 +45,9 @@ main ( int argc, char *argv[] )
 
 	std::cout << "Creating VG" << '\n';
 	std::string ref_file(argv[1]);
-	VariantGraph vg(ref_file);
+	std::string vcf_file(argv[2]);
+	std::vector<std::string> vcfs = {vcf_file};
+	VariantGraph vg(ref_file, vcfs);
 	std::cout << vg.get_chr() << ' ' << vg.get_num_vertices() << " " <<
 		vg.get_seq_length() << '\n';
 
