@@ -193,19 +193,59 @@ namespace variantdb {
 			variantFile.open(vcf);
 			vcflib::Variant var(variantFile);
 
+			// get all samples
+			std::vector<std::string> samples;
 			for (auto sample : variantFile.sampleNames)
-				std::cout << sample << " ";
-			std::cout << "\n";
+				samples.emplace_back(sample);
 
-			long int count = 0;
+			// substitutions are always only one base at a time.
+			// Insertions/deletions can be multiple bases.
+			long int num_mutations = 0;
 			while (variantFile.getNextVariant(var)) {
-				count+= 1;
-				std::cout << var << "\n";
-			}
-		}
+				num_mutations += 1;
+				for (const auto alt : var.alt) {
+					for (const auto sample : var.samples) {
+						auto gt = sample.second.find("GT");
+						auto gt_vec = *gt;
+						std::string gt_info = gt_vec.second[0];
+						assert(gt_info.size() == 3);
 
-		// substitutions are always only one base at a time.
-		// Insertions/deletions can be multiple bases.
+						// extract gt info
+						const char *str = gt_info.c_str();
+						int first = str[0] - '0';
+						char phase = str[1];
+						int second = str[2] - '0';
+						bool gt1, gt2;
+						bool add = false;
+						if (phase == '|') {
+							if (first > 0 || second > 0) {
+								if (first > 0)
+									gt1 = true;
+								else 
+									gt1 = false;
+								if (second > 0)
+									gt2 = true;
+								else 
+									gt2 = false;
+								
+								add = true;
+							}	
+						} else if (phase == '/') {
+							if (first > 0 && second > 0) {
+								gt1 = true; gt2 = true;
+								add = true;
+							} else if (first == '1' || second == '1') {
+								gt1 = false; gt2 = false;
+								add = true;
+							}
+						}
+						if (add)
+							add_mutation(var.ref, alt, var.position, sample.first, gt1, gt2);
+					}
+				}
+			}
+			std::cout << num_mutations << '\n';
+		}
 	}
 
 	VariantGraphVertex* VariantGraph::add_vertex(const std::string& seq,
@@ -264,10 +304,10 @@ namespace variantdb {
 		uint64_t offset = cur_vertex.offset() + pos - 1;
 		uint64_t length = cur_vertex.length() - pos  + 1;
 		VariantGraphVertex::sample_info s;
-		s.set_index(cur_vertex.s_info(0).index() + pos);
+		s.set_index(pos);
 		s.set_sample_id(cur_vertex.s_info(0).sample_id());
-		s.set_gt_1(0);
-		s.set_gt_2(0);
+		s.set_gt_1(cur_vertex.s_info(0).gt_1());
+		s.set_gt_2(cur_vertex.s_info(0).gt_2());
 		std::vector<VariantGraphVertex::sample_info> samples = {s};
 		VariantGraphVertex *v = create_vertex(num_vertices, offset, length, samples);
 
@@ -293,9 +333,8 @@ namespace variantdb {
 	void VariantGraph::split_vertex(uint64_t vertex_id, uint64_t pos1, uint64_t
 																	pos2, Graph::vertex* new_vertex_1,
 																	Graph::vertex* new_vertex_2) {
-		Graph::vertex v1, v2;
-		split_vertex(vertex_id, pos1, &v1);
-		split_vertex(v1, pos2 - pos1 + 1, &v2);
+		split_vertex(vertex_id, pos1, new_vertex_1);
+		split_vertex(*new_vertex_1, pos2 - pos1 + 1, new_vertex_2);
 	}
 
 	uint64_t VariantGraph::get_num_vertices(void) const {
@@ -461,11 +500,11 @@ namespace variantdb {
 				prev_ref_vertex_id = temp_itr->second;
 
 				// split the vertex
-				split_vertex(ref_vertex_id, ref.size(), &next_ref_vertex_id);
+				split_vertex(ref_vertex_id, ref.size() + 1, &next_ref_vertex_id);
 			} else if (ref_vertex_idx < pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into three
 				// split the vertex
-				Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
-				split_vertex(ref_vertex_id, pos - ref_vertex.offset() + 1, ref.size(),
+				uint64_t split_pos = pos - ref_vertex.offset();
+				split_vertex(ref_vertex_id, split_pos, split_pos + ref.size(),
 										 &prev_ref_vertex_id, &next_ref_vertex_id);
 				std::swap(ref_vertex_id, prev_ref_vertex_id);
 			}
@@ -478,7 +517,6 @@ namespace variantdb {
 			topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
 			topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
 		} else if (mutation == INSERTION) {
-			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
 			// Either we got the vertex where there's already an insertion
 			// or the vertex contains the seq with @pos
 			if (ref_vertex_idx == pos && ref_vertex.length() == 1) { // splitting not needed
@@ -508,7 +546,6 @@ namespace variantdb {
 			topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
 			topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
 		} else { // it's deletion
-			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
 			// Either we got the vertex where there's already a deletion
 			// or the vertex contains the seq with @pos
 			if (ref_vertex_idx == pos && ref_vertex.length() == ref.size()) { // splitting not needed
@@ -537,8 +574,8 @@ namespace variantdb {
 				split_vertex(ref_vertex_id, ref.size(), &next_ref_vertex_id);
 			} else if (ref_vertex_idx < pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into three
 				// split the vertex
-				Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
-				split_vertex(ref_vertex_id, pos - ref_vertex.offset() + 1, ref.size(),
+				uint64_t split_pos = pos - ref_vertex.offset() + 1;
+				split_vertex(ref_vertex_id, split_pos, split_pos + ref.size(),
 										 &prev_ref_vertex_id, &next_ref_vertex_id);
 				std::swap(ref_vertex_id, prev_ref_vertex_id);
 			}
