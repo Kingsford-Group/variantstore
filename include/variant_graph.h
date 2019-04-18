@@ -118,6 +118,8 @@ namespace variantdb {
 				SUBSTITUTION
 			};
 
+			const std::string mutation_string(MUTATION_TYPE m) const;
+
 			void update_idx_vertex_id_map(const VariantGraphVertex& v);
 			uint64_t find_sample_index(Graph::vertex ref_v_id, std::string
 																 sample_id) const;
@@ -295,7 +297,7 @@ namespace variantdb {
 		s.set_gt_2(gt2);
 		std::vector<VariantGraphVertex::sample_info> samples = {s};
 		VariantGraphVertex *v = create_vertex(num_vertices, start_offset,
-																					seq_length, samples);
+																					seq.size(), samples);
 
 		// increment vertex count
 		num_vertices++;
@@ -378,6 +380,15 @@ namespace variantdb {
 		return chr;
 	}
 
+	const std::string VariantGraph::mutation_string(MUTATION_TYPE m) const {
+		if (m == INSERTION)
+			return std::string("INSERTION");
+		else if (m == DELETION)
+			return std::string("DELETION");
+		else
+			return std::string("SUBSTITUTION");
+	}
+
 	void VariantGraph::print_vertex_info(const VariantGraphVertex& v) {
 		std::string samples;
 		for (int i = 0; i < v.s_info_size(); i++) {
@@ -433,12 +444,13 @@ namespace variantdb {
 				abort();
 			}
 			--temp_itr;
-			cur_vertex_id = temp_itr->second;
-			cur_distance += cur_index - temp_itr->first;
+			cur_distance += cur_vertex.length();
 			cur_index = temp_itr->first; 
+			cur_vertex_id = temp_itr->second;
+			cur_vertex = vertex_list.vertex(cur_vertex_id);
 		}
 
-		return cur_distance;
+		return cur_distance + cur_vertex.length() + 1;
 	}
 
 	// if there is not neighbor with @sample_id then set @v to "ref"
@@ -481,8 +493,6 @@ namespace variantdb {
 	void VariantGraph::add_mutation(std::string ref, std::string alt, uint64_t
 																	pos, std::string sample_id,
 																	bool gt1, bool gt2) {
-		DEBUG("Adding mutation: " << ref << " " << alt << " " << pos << " " <<
-					sample_id);		
 		// find the type mutatuin
 		enum MUTATION_TYPE mutation;
 		if (ref.size() == alt.size())
@@ -492,6 +502,8 @@ namespace variantdb {
 		else
 			mutation = INSERTION;
 
+		DEBUG("Adding mutation: " << mutation_string(mutation) << " " << ref <<
+					" " << alt << " " << pos << " " << sample_id);
 		// update pos and alt/ref if it's an insertion/deletion.
 		if (mutation == INSERTION) {
 			pos = pos + ref.size() - 1;

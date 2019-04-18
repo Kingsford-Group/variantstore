@@ -58,6 +58,21 @@ main ( int argc, char *argv[] )
 		vg.print_vertex_info(**itr);
 		++itr;
 	}
+	
+	PRINT("Sample nodes:");
+	vcflib::VariantCallFile variantFile;
+	variantFile.open(vcf_file);
+	vcflib::Variant var(variantFile);
+
+	// get all samples
+	for (auto sample : variantFile.sampleNames) {
+		PRINT("Sample: " << sample);
+		auto itr = vg.find(sample);
+		while (!itr.done()) {
+			vg.print_vertex_info(**itr);
+			++itr;
+		}
+	}
 
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
