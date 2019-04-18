@@ -1,4 +1,4 @@
-TARGETS= test_graphcontainer test_variantgraph
+TARGETS= test_graphcontainer test_variantgraph test_index
 
 ifdef D
 	DEBUG=-g -DDEBUG_MODE
@@ -50,11 +50,21 @@ test_variantgraph:			$(OBJDIR)/test_variantgraph.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 
+test_index:							$(OBJDIR)/test_index.o \
+												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
+												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
+
 # dependencies between .o files and .cc (or .c) files
 $(OBJDIR)/test_graphcontainer.o: 	$(LOC_SRC)/test_graphcontainer.cc \
 																	$(LOC_INCLUDE)/gqf_cpp.h \
 																	$(LOC_INCLUDE)/graph.h
 $(OBJDIR)/test_variantgraph.o: 		$(LOC_SRC)/test_variantgraph.cc \
+																	$(LOC_INCLUDE)/variant_graph.h \
+																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
+																	$(LOC_INCLUDE)/graph.h
+$(OBJDIR)/test_variantgraph.o: 		$(LOC_SRC)/test_index.cc \
+																	$(LOC_INCLUDE)/index.h \
 																	$(LOC_INCLUDE)/variant_graph.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
 																	$(LOC_INCLUDE)/graph.h

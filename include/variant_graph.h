@@ -76,6 +76,7 @@ namespace variantdb {
 			void add_vcfs(const std::vector<std::string>& vcfs);
 
 			// persist variant graph to disk
+			// TODO implemention needed
 			void serialize(const std::string prefix);
 
 			uint64_t get_num_vertices(void) const;
