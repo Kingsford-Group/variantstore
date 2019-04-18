@@ -88,6 +88,26 @@ namespace variantdb {
 				get_sample_from_vertex(Graph::vertex v, const std::string sample_id)
 				const;
 
+			// iterator for a breadth-first traversal in the variant graph
+			class VariantGraphIterator {
+				public:
+					VariantGraphIterator(const VariantGraph* g, Graph::vertex v,
+															 uint64_t radius);
+					const VariantGraphVertex* operator*(void) const;
+					void operator++(void);
+					bool done(void) const;
+
+				private:
+					const VariantGraph* vg;
+					VariantGraphVertex cur;
+					std::queue<Graph::vertex> q;
+					std::string s_id;
+					bool is_done;
+			};
+
+			VariantGraphIterator find(Graph::vertex v = 0, uint64_t radius =
+																UINT64_MAX);
+
 			// iterator traversing a specific path in the variant graph
 			class VariantGraphPathIterator {
 				public:
@@ -108,9 +128,11 @@ namespace variantdb {
 			//std::vector<VariantGraphVertex> in_neighbors(uint64_t vertex_id);
 
 			VariantGraph::VariantGraphPathIterator find(uint64_t vertex_id, const
-																									 std::string sample_id);
+																									 std::string sample_id)
+				const;
 			// iterator will be positioned at the start of the path.
-			VariantGraph::VariantGraphPathIterator find(const std::string sample_id);
+			VariantGraph::VariantGraphPathIterator find(const std::string sample_id)
+				const;
 
 		private:
 			enum MUTATION_TYPE {
@@ -688,13 +710,13 @@ namespace variantdb {
 	VariantGraph::VariantGraphPathIterator VariantGraph::find(uint64_t
 																														 vertex_id, const
 																														 std::string
-																														 sample_id) {
+																														 sample_id) const {
 		return VariantGraphPathIterator(this, vertex_id, sample_id);	
 	}
 
 	// iterator will be positioned at the start of the path.
 	VariantGraph::VariantGraphPathIterator VariantGraph::find(const std::string
-																														 sample_id) {
+																														 sample_id) const {
 		return VariantGraphPathIterator(this, 0, sample_id);	
 	}
 
