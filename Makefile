@@ -1,7 +1,7 @@
 TARGETS= test_graphcontainer test_variantgraph
 
 ifdef D
-	DEBUG=-g
+	DEBUG=-g -DDEBUG_MODE
 	OPT=
 else
 	DEBUG=

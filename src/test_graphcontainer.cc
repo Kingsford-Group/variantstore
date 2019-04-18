@@ -45,8 +45,8 @@ main ( int argc, char *argv[] )
 	//nslots *= 16;
 
 	// create a typedef for the Graph type
-	typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS>
-		BoostGraph;
+	//typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS>
+		//BoostGraph;
 
 	Graph graph(nslots);
 	//BoostGraph bg(nslots);

@@ -43,13 +43,21 @@ main ( int argc, char *argv[] )
 
 	//std::string filename = argv[1];
 
-	std::cout << "Creating VG" << '\n';
+	PRINT("Creating variant graph");
 	std::string ref_file(argv[1]);
 	std::string vcf_file(argv[2]);
 	std::vector<std::string> vcfs = {vcf_file};
 	VariantGraph vg(ref_file, vcfs);
-	std::cout << vg.get_chr() << ' ' << vg.get_num_vertices() << " " <<
-		vg.get_seq_length() << '\n';
+	PRINT("Graph stats:");
+	PRINT(vg.get_chr() << ' ' << vg.get_num_vertices() << " " <<
+				vg.get_seq_length());
+
+	auto itr = vg.find("ref");
+	PRINT("Ref nodes:");
+	while (!itr.done()) {
+		vg.print_vertex_info(**itr);
+		++itr;
+	}
 
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
