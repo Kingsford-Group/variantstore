@@ -17,9 +17,11 @@
 #include <sdsl/bit_vectors.hpp>
 #include <sdsl/int_vector.hpp>
 #include <sdsl/util.hpp>
+#include <vector>
 
-uint64_t REF_GENOME_LEN = 3099706404;
-uint16_t BLOCK_SIZE = 64;
+const uint64_t REF_GENOME_LEN = 3099706404;
+const uint16_t BLOCK_SIZE = 127;
+const uint64_t INIT_NODE_LIST_SZ = 10000;
 
 namespace variantdb {
 	class Index {
@@ -46,30 +48,31 @@ namespace variantdb {
 	};
 
 
-	Index::Index(const VariantGraph vg)
+	Index::Index(const VariantGraph *vg)
 	{
 		// Construct a bit vector of size = genome length
 		sdsl::bit_vector b(REF_GENOME_LEN, 0);
-		// Construct a int vector of NODE_LIST_INIT_SIZE
-		uint64_t node_list_sz = std::distance(vg.find(0), vg.done(0));
-		sdsl::util::assign(node_list, sdsl::int_vector<>(node_list_sz, 0, 64));
-		uint64_t sz = 0;
-
+		// Construct a int vector of node_list_sz
+		sdsl::util::assign(node_list, sdsl::int_vector<>(INIT_NODE_LIST_SZ, 0, 64));
+		uint64_t node_list_sz = 0;
 		// Iterate nodes folloing path in REF
 		// modify bit vector & node list
-		// ?Reference takes the sample id 0?
-		for (VariantGraphIterator node_it = vg.find(0); node_it != vg.done(0); node_it++)
+		VariantGraphPathIterator it = vg->find(0); //  Iterate through reference
+		while(!it.done())
 		{
-			uint64_t node_id = node_it->node_id;
-			uint64_t idx = node_it->index;
+			node_list_sz++;
+			if (node_list_sz > node_list.size()) {node_list.resize(node_list_sz);}
+			uint64_t node_id = (*node_it).vertex_id();
+			uint64_t idx = (*node_it).s_info(node_id).index();
 			b[idx] = 1;
-			node_list[sz] = node_id;
-			sz++;
+			node_list[node_list_sz-1] = node_id;
+			it++;
 		}
 
 		// Compress it & Construct rank support vector from vector
 		sdsl::util::assign(rrrb, sdsl::rrr_vector<BLOCK_SIZE>(b));
-		sdsl::util::assign(rank_rrrb, sdsl::rrr_vector<BLOCK_SIZE>::rank_1_type(&rrrb));
+		sdsl::util::assign(rank_rrrb,
+			sdsl::rrr_vector<BLOCK_SIZE>::rank_1_type(&rrrb));
 		sdsl::util::bit_compress(node_list);
 		return;
 	} // Index(const VariantGraph vg)
@@ -78,7 +81,8 @@ namespace variantdb {
 	{
 		std::ifstream in(filename);
 		rrrb.load(in);
-		sdsl::util::assign(rank_rrrb, sdsl::rrr_vector<BLOCK_SIZE>::rank_1_type(&rrrb));
+		sdsl::util::assign(rank_rrrb,
+			sdsl::rrr_vector<BLOCK_SIZE>::rank_1_type(&rrrb));
     node_list.load(in);
 		return;
 	} // Index(const std::string filename)

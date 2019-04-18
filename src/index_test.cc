@@ -11,49 +11,48 @@
 
 int main()
 {
-    std::cout << "Construct bit_vector ..." << std::endl;
-    const uint64_t node_sz = 306009792;
-    const uint64_t REF_GENOME_LEN = 3099706404;
-    const uint16_t BLOCK_SIZE = 127;
-    sdsl::bit_vector b(REF_GENOME_LEN, 0);
-    sdsl::int_vector<>node_list(node_sz, 0, 64);
 
-    std::cout << "Construct index ..." << std::endl;
+    const uint64_t node_sz = 30600;
+    const uint64_t REF_GENOME_LEN = 3099706;
+    const uint16_t BLOCK_SIZE = 127;
+
     // Create random position
+    std::cout << "Simulate data ..." << std::endl;
+    // Create random positons in order
     std::vector<uint64_t> pos;
     for (uint64_t i = 0; i < REF_GENOME_LEN; i ++)
       pos.push_back(i);
-
     std::srand (unsigned(std::time(0)));
     std::random_shuffle(pos.begin(), pos.end());
-
     std::vector<uint64_t> node_pos;
     for (uint64_t i = 0; i < node_sz; i ++)
       node_pos.push_back(pos[i]);
-
     std::sort(node_pos.begin(), node_pos.end());
-
     // Create random node_list
     std::vector<uint64_t> double_nodes;
     for (uint64_t i = 0; i < node_sz * 2; i ++)
       double_nodes.push_back(i);
-
     std::random_shuffle(double_nodes.begin(), double_nodes.end());
     std::vector<uint64_t> node_ids;
     for (uint64_t i = 0; i < node_sz; i ++)
       node_ids.push_back(double_nodes[i]);
-
     std::sort(node_ids.begin(), node_ids.end());
 
-    std::cout << "Construct index map ..." << std::endl;
-
+    std::cout << "Construct index ..." << std::endl;
+    // Map construction as ground truth
     std::map<uint64_t, uint64_t> idx_map;
+
+    // bit vector construction
+    sdsl::bit_vector b(REF_GENOME_LEN, 0);
+    sdsl::int_vector<>node_list(1000, 0, 64);
+    uint64_t node_list_sz = 0;
 
     for (uint64_t i = 0; i < node_sz; i ++)
     {
+      node_list_sz++;
+      if (node_list_sz > node_list.size()) {node_list.resize(node_list_sz);}
       b[node_pos[i]] = 1;
-      node_list[i] = node_ids[i];
-
+      node_list[node_list_sz-1] = node_ids[i];
       idx_map[node_pos[i]] = node_ids[i];
     }
 
@@ -69,12 +68,10 @@ int main()
     std::cout<< "size of compressed int_vec in MB: " << size_in_mega_bytes(node_list) << std::endl;
 
     std::cout << "Correctness test ... ";
-
     for (uint64_t i = 0; i < REF_GENOME_LEN; i ++)
     {
       uint64_t rank = rank_rrrb(i);
       auto it = idx_map.lower_bound(i);
-
 
       if (rank == 0 || it == idx_map.begin())
       {
@@ -105,5 +102,4 @@ int main()
     serialize(rrrb, out);
     serialize(node_list, out);
     return 0;
-
 }
