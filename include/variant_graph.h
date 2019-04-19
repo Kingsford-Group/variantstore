@@ -229,11 +229,6 @@ namespace variantdb {
 			variantFile.open(vcf);
 			vcflib::Variant var(variantFile);
 
-			// get all samples
-			std::vector<std::string> samples;
-			for (auto sample : variantFile.sampleNames)
-				samples.emplace_back(sample);
-
 			// substitutions are always only one base at a time.
 			// Insertions/deletions can be multiple bases.
 			long int num_mutations = 0;

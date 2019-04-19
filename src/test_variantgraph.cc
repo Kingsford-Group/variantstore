@@ -49,8 +49,8 @@ main ( int argc, char *argv[] )
 	std::vector<std::string> vcfs = {vcf_file};
 	VariantGraph vg(ref_file, vcfs);
 	PRINT("Graph stats:");
-	PRINT(vg.get_chr() << ' ' << vg.get_num_vertices() << " " <<
-				vg.get_seq_length());
+	PRINT("Chromosome: " << vg.get_chr() << " #Vertices: " << vg.get_num_vertices()
+				<< " Seq length: " << vg.get_seq_length());
 
 	auto itr = vg.find("ref");
 	PRINT("Ref nodes:");
@@ -61,7 +61,7 @@ main ( int argc, char *argv[] )
 	}
 
 	PRINT("");
-	PRINT("Sample nodes:");
+	PRINT("Samples:");
 	vcflib::VariantCallFile variantFile;
 	variantFile.open(vcf_file);
 	vcflib::Variant var(variantFile);
