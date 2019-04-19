@@ -28,6 +28,30 @@
 #include "util.h"
 
 namespace variantdb {
+	/*return the integer representation of the base */
+	char map_int(uint8_t base) {
+		switch(base) {
+			case DNA_MAP::A: { return 'A'; }
+			case DNA_MAP::T: { return 'T'; }
+			case DNA_MAP::C: { return 'C'; }
+			case DNA_MAP::G: { return 'G'; }
+			case DNA_MAP::N: { return 'N'; }
+			default:  { return DNA_MAP::N+1; }
+		}
+	}
+
+	/*return the integer representation of the base */
+	uint8_t map_base(char base) {
+		switch(base) {
+			case 'A': { return DNA_MAP::A; }
+			case 'T': { return DNA_MAP::T; }
+			case 'C': { return DNA_MAP::C; }
+			case 'G': { return DNA_MAP::G; }
+			case 'N': { return DNA_MAP::N; }
+			default:  { return DNA_MAP::N+1; }
+		}
+	}
+
 	float cal_time_elapsed(struct timeval* start, struct timeval* end)
 	{
 		struct timeval elapsed;
@@ -39,7 +63,7 @@ namespace variantdb {
 		elapsed.tv_sec = end->tv_sec - start->tv_sec;
 		return (elapsed.tv_sec * 1000000 + elapsed.tv_usec)/1000000.f;
 	}
-	
+
 	void print_time_elapsed(std::string desc, struct timeval* start, struct
 													timeval* end)
 	{

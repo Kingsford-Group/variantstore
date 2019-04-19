@@ -36,6 +36,9 @@
 } while (0)
 
 namespace variantdb {
+	enum DNA_MAP {A, C, T, G, N};  // A=0, C=1, T=2, G=3, N=4
+	char map_int(uint8_t base);
+	uint8_t map_base(char base);
 	float cal_time_elapsed(struct timeval* start, struct timeval* end);
 	/* Print elapsed time using the start and end timeval */
 	void print_time_elapsed(std::string desc, struct timeval* start, struct

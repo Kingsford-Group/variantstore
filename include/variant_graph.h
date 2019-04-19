@@ -81,9 +81,12 @@ namespace variantdb {
 
 			uint64_t get_num_vertices(void) const;
 			uint64_t get_seq_length(void) const;
-			std::string get_chr(void) const;
+			const std::string get_chr(void) const;
+			uint64_t get_ref_length(void) const;
 
-			void print_vertex_info(const VariantGraphVertex& v);
+			void print_vertex_info(const VariantGraphVertex& v) const;
+			const std::string get_sequence(const VariantGraphVertex& v) const;
+
 			const VariantGraphVertex::sample_info&
 				get_sample_from_vertex(Graph::vertex v, const std::string sample_id)
 				const;
@@ -200,6 +203,7 @@ namespace variantdb {
 
 		std::string ref;
 		read_fasta(ref_file, chr, ref);
+		ref_length = ref.size();
 		// initialize the seq buffer
 		sdsl::util::assign(seq_buffer, sdsl::int_vector<>(ref.size(), 0, 3));
 
@@ -309,7 +313,7 @@ namespace variantdb {
 		uint64_t start_offset = seq_length;
 		// Add seq to seq_buffer
 		for (const auto c : seq) {
-			seq_buffer[seq_length] = c;
+			seq_buffer[seq_length] = map_base(c);
 			seq_length++;
 		}
 		// create vertex object and add to vertex_list
@@ -399,8 +403,12 @@ namespace variantdb {
 		return seq_length;
 	}
 
-	std::string VariantGraph::get_chr(void) const {
+	const std::string VariantGraph::get_chr(void) const {
 		return chr;
+	}
+
+	uint64_t VariantGraph::get_ref_length(void) const {
+		return ref_length;
 	}
 
 	const std::string VariantGraph::mutation_string(MUTATION_TYPE m) const {
@@ -412,7 +420,7 @@ namespace variantdb {
 			return std::string("SUBSTITUTION");
 	}
 
-	void VariantGraph::print_vertex_info(const VariantGraphVertex& v) {
+	void VariantGraph::print_vertex_info(const VariantGraphVertex& v) const {
 		std::string samples;
 		for (int i = 0; i < v.s_info_size(); i++) {
 			const VariantGraphVertex::sample_info& s = v.s_info(i);
@@ -421,6 +429,15 @@ namespace variantdb {
 		}
 		PRINT("ID: " << v.vertex_id() << " Offset: " << v.offset() <<
 					" length: " << v.length() << " Samples: " << samples); 
+	}
+	
+	const std::string VariantGraph::get_sequence(const VariantGraphVertex& v)
+		const {
+			std::string seq;
+			for (uint64_t i = v.offset(); i < v.offset() + v.length(); i++) {
+				seq += map_int((uint8_t)seq_buffer[i]);
+			}
+			return seq;
 	}
 
 	// the idx map should only contain information about the ref vertices.
@@ -529,7 +546,7 @@ namespace variantdb {
 					" " << alt << " " << pos << " " << sample_id);
 		// update pos and alt/ref if it's an insertion/deletion.
 		if (mutation == INSERTION) {
-			pos = pos + ref.size() - 1;
+			pos = pos + ref.size();
 			alt = alt.substr(ref.size());
 		} else if (mutation == DELETION) {
 			pos = pos + alt.size();
@@ -656,7 +673,7 @@ namespace variantdb {
 				split_vertex(ref_vertex_id, ref.size(), &next_ref_vertex_id);
 			} else if (ref_vertex_idx < pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into three
 				// split the vertex
-				uint64_t split_pos = pos - ref_vertex.offset() + 1;
+				uint64_t split_pos = pos - ref_vertex.offset() - 1;
 				split_vertex(ref_vertex_id, split_pos, split_pos + ref.size(),
 										 &prev_ref_vertex_id, &next_ref_vertex_id);
 				std::swap(ref_vertex_id, prev_ref_vertex_id);

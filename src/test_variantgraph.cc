@@ -55,10 +55,12 @@ main ( int argc, char *argv[] )
 	auto itr = vg.find("ref");
 	PRINT("Ref nodes:");
 	while (!itr.done()) {
-		vg.print_vertex_info(**itr);
+		//vg.print_vertex_info(**itr);
+		std::cout << vg.get_sequence(**itr);
 		++itr;
 	}
-	
+
+	PRINT("");
 	PRINT("Sample nodes:");
 	vcflib::VariantCallFile variantFile;
 	variantFile.open(vcf_file);
@@ -69,7 +71,8 @@ main ( int argc, char *argv[] )
 		PRINT("Sample: " << sample);
 		auto itr = vg.find(sample);
 		while (!itr.done()) {
-			vg.print_vertex_info(**itr);
+			//vg.print_vertex_info(**itr);
+			std::cout << vg.get_sequence(**itr);
 			++itr;
 		}
 	}
