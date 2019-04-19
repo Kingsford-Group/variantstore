@@ -560,7 +560,7 @@ namespace variantdb {
 			if (ref_vertex_idx == pos && ref_vertex.length() == ref.size()) { // splitting not needed
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
-				if (temp_itr->first != ref_vertex_id) {
+				if (temp_itr->first != ref_vertex_idx) {
 					ERROR("Vertex id not found in the map");
 					abort();
 				}
@@ -572,7 +572,7 @@ namespace variantdb {
 			} else if (ref_vertex_idx == pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into two
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
-				if (temp_itr->first != ref_vertex_id) {
+				if (temp_itr->first != ref_vertex_idx) {
 					ERROR("Vertex id not found in the map");
 					abort();
 				}
@@ -603,7 +603,7 @@ namespace variantdb {
 			if (ref_vertex_idx == pos && ref_vertex.length() == 1) { // splitting not needed
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
-				if (temp_itr->first != ref_vertex_id) {
+				if (temp_itr->first != ref_vertex_idx) {
 					ERROR("Vertex id not found in the map");
 					abort();
 				}
@@ -633,7 +633,7 @@ namespace variantdb {
 			if (ref_vertex_idx == pos && ref_vertex.length() == ref.size()) { // splitting not needed
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
-				if (temp_itr->first != ref_vertex_id) {
+				if (temp_itr->first != ref_vertex_idx) {
 					ERROR("Vertex id not found in the map");
 					abort();
 				}
@@ -645,7 +645,7 @@ namespace variantdb {
 			} else if (ref_vertex_idx == pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into two
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
-				if (temp_itr->first != ref_vertex_id) {
+				if (temp_itr->first != ref_vertex_idx) {
 					ERROR("Vertex id not found in the map");
 					abort();
 				}
