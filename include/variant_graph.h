@@ -153,6 +153,11 @@ namespace variantdb {
 															 Graph::vertex* v) const;
 			void add_sample_to_vertex(Graph::vertex id, uint64_t sample_idx, const
 																std::string sample_id, bool gt1, bool gt2);
+			bool check_if_mutation_exists(Graph::vertex prev, Graph::vertex next,
+																		const std::string alt, Graph::vertex* v)
+				const;
+			bool check_if_mutation_exists(Graph::vertex prev, uint64_t offset,
+																		uint64_t length, Graph::vertex* v) const;
 			VariantGraphVertex* create_vertex(uint64_t id, uint64_t offset, uint64_t
 																				length,
 																				const std::vector<VariantGraphVertex::sample_info>&
@@ -492,23 +497,50 @@ namespace variantdb {
 	bool VariantGraph::get_neighbor_vertex(Graph::vertex id, const std::string
 																				 sample_id, Graph::vertex* v)
 		const {
+			std::vector<Graph::vertex> neighbors;
 			for (const auto v_id : topology.out_neighbors(id)) {
 				VariantGraphVertex vertex = vertex_list.vertex(v_id);
 				for (int i = 0; i < vertex.s_info_size(); i++) {
 					const VariantGraphVertex::sample_info& s = vertex.s_info(i);
-					if (s.sample_id() == sample_id) {
-						*v = v_id; 
-						return true;
-					} else if (s.sample_id() == "ref") {
-						*v = v_id;
+					if (sample_id == "ref" && s.sample_id() == sample_id) { // handle special case for "ref" path.
+						neighbors.emplace_back(v_id);
+					} else {
+						if (s.sample_id() == sample_id) {
+							*v = v_id; 
+							return true;
+						} else if (s.sample_id() == "ref") {	// if sample_id is not found follow "ref" path
+							*v = v_id;
+						}
 					}
 				}
 			}
-			//if (sample_id == "ref") {
-				//std::cerr << "Can't find the vertex with sample id: " <<  sample_id <<
-					//" at vertex id: " << id << '\n';
-				//abort();
-			//}
+			if (sample_id == "ref" && neighbors.size() > 0) {
+				//if (neighbors.size() == 0) {
+					//ERROR("Can't find the vertex with sample id: " <<  sample_id <<
+						//" at vertex id: " << id);
+					//abort();
+				//}
+				if (neighbors.size() > 2) {
+					ERROR("More than two neighbors in ref path at vertex id: " << id);
+					abort();
+				}
+				if (neighbors.size() == 1) {
+					*v = neighbors[0];
+					return true;
+				}
+				if (topology.is_edge(std::make_pair(neighbors[0], neighbors[1]))) {
+					*v = neighbors[0];
+					return true;
+				} else if (topology.is_edge(std::make_pair(neighbors[1],
+																									 neighbors[0]))) {
+					*v = neighbors[1];
+					return true;
+				} else {
+					ERROR("Two neighbors are not connected in ref path at vertex id: "
+								<< id);
+					abort();
+				}
+			}
 
 			return false;
 		}
@@ -523,6 +555,36 @@ namespace variantdb {
 		s->set_sample_id(sample_id);
 		s->set_gt_1(gt1);
 		s->set_gt_2(gt2);
+	}
+
+	bool VariantGraph::check_if_mutation_exists(Graph::vertex prev,
+																							Graph::vertex next, const
+																							std::string alt,
+																							Graph::vertex* v) const {
+		for (const auto v_id : topology.out_neighbors(prev)) {
+			if (topology.is_edge(std::make_pair(v_id, next))) {
+				const VariantGraphVertex neighbor = vertex_list.vertex(v_id);
+				const std::string seq = get_sequence(neighbor);
+				if (seq == alt) {
+					*v = v_id;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	bool VariantGraph::check_if_mutation_exists(Graph::vertex prev,
+																							uint64_t offset, uint64_t length,
+																							Graph::vertex* v) const {
+		for (const auto v_id : topology.out_neighbors(prev)) {
+			const VariantGraphVertex neighbor = vertex_list.vertex(v_id);
+			if (neighbor.offset() == offset && neighbor.length() == length) {
+				*v = v_id;
+				return true;
+			}
+		}
+		return false;
 	}
 
 	void VariantGraph::add_mutation(std::string ref, std::string alt, uint64_t
@@ -602,12 +664,18 @@ namespace variantdb {
 			}
 			// find the index of the sample at this position in the graph.
 			uint64_t sample_idx = find_sample_index(prev_ref_vertex_id, sample_id);
-			VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
-																										 sample_id, gt1, gt2);
+			Graph::vertex exist_vertex = 0;
+			if (check_if_mutation_exists(prev_ref_vertex_id, next_ref_vertex_id, alt,
+																	 &exist_vertex)) {
+				add_sample_to_vertex(exist_vertex, sample_idx, sample_id, gt1, gt2);
+			} else {
+				VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
+																											 sample_id, gt1, gt2);
 
-			// make connections for the new vertex in the graph
-			topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
-			topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
+				// make connections for the new vertex in the graph
+				topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
+				topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
+			}
 		} else if (mutation == INSERTION) {
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
 			// Either we got the vertex where there's already an insertion
@@ -632,12 +700,18 @@ namespace variantdb {
 			}
 			// find the index of the sample at this position in the graph.
 			uint64_t sample_idx = find_sample_index(prev_ref_vertex_id, sample_id);
-			VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
-																										 sample_id, gt1, gt2);
+			Graph::vertex exist_vertex = 0;
+			if (check_if_mutation_exists(prev_ref_vertex_id, next_ref_vertex_id, alt,
+																	 &exist_vertex)) {
+				add_sample_to_vertex(exist_vertex, sample_idx, sample_id, gt1, gt2);
+			} else {
+				VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
+																											 sample_id, gt1, gt2);
 
-			// make connections for the new vertex in the graph
-			topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
-			topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
+				// make connections for the new vertex in the graph
+				topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
+				topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
+			}
 		} else { // it's deletion
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
 			// Either we got the vertex where there's already a deletion
@@ -675,15 +749,10 @@ namespace variantdb {
 			}
 			// find the index of the sample at this position in the graph.
 			uint64_t sample_idx = find_sample_index(prev_ref_vertex_id, sample_id);
-			VariantGraphVertex next_ref_vertex =
-				vertex_list.vertex(next_ref_vertex_id);
-			uint64_t offset = next_ref_vertex.offset();
-			uint64_t length = next_ref_vertex.length();
-			VariantGraphVertex* sample_vertex = add_vertex(offset, length, sample_idx,
-																										 sample_id, gt1, gt2);
-
-			// make connections
-			topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
+			add_sample_to_vertex(next_ref_vertex_id, sample_idx, sample_id, gt1,
+													 gt2);
+			// make connections for the new vertex in the graph
+			topology.add_edge(prev_ref_vertex_id, next_ref_vertex_id);
 		}
 	}
 
