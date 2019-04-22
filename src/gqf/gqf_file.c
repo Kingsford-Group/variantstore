@@ -49,11 +49,11 @@ bool qf_initfile(QF *qf, uint64_t nslots, uint64_t key_bits, uint64_t
 		perror("Couldn't open file.");
 		exit(EXIT_FAILURE);
 	}
-	/*ret = posix_fallocate(qf->runtimedata->f_info.fd, 0, total_num_bytes);*/
-	/*if (ret < 0) {*/
-		/*perror("Couldn't fallocate file:\n");*/
-		/*exit(EXIT_FAILURE);*/
-	/*}*/
+	ret = posix_fallocate(qf->runtimedata->f_info.fd, 0, total_num_bytes);
+	if (ret < 0) {
+		perror("Couldn't fallocate file:\n");
+		exit(EXIT_FAILURE);
+	}
 	qf->metadata = (qfmetadata *)mmap(NULL, total_num_bytes, PROT_READ |
 																		PROT_WRITE, MAP_SHARED,
 																		qf->runtimedata->f_info.fd, 0);
