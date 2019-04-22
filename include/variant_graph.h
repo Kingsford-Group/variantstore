@@ -548,9 +548,8 @@ namespace variantdb {
 	void VariantGraph::add_sample_to_vertex(Graph::vertex id, uint64_t
 																					sample_idx, const std::string
 																					sample_id, bool gt1, bool gt2) {
-		VariantGraphVertex v = vertex_list.vertex(id);
-
-		VariantGraphVertex::sample_info* s = v.add_s_info();
+		VariantGraphVertex::sample_info* s =
+			vertex_list.mutable_vertex(id)->add_s_info();
 		s->set_index(sample_idx);
 		s->set_sample_id(sample_id);
 		s->set_gt_1(gt1);
