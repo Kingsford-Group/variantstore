@@ -52,6 +52,14 @@ main ( int argc, char *argv[] )
 	PRINT("Chromosome: " << vg.get_chr() << " #Vertices: " << vg.get_num_vertices()
 				<< " Seq length: " << vg.get_seq_length());
 
+	PRINT("Variant Graph nodes:");
+	auto bfs = vg.find(0);
+	while (!bfs.done()) {
+		std::cout << (*bfs)->vertex_id() << " ";
+		++bfs;
+	}
+	PRINT("");
+
 	auto itr = vg.find("ref");
 	PRINT("Ref nodes:");
 	while (!itr.done()) {
