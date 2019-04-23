@@ -65,10 +65,11 @@ namespace variantdb {
 			VariantGraph() = delete; 
 			// construct variant graph using a reference genome and zero or more vcf
 			// files.
-			VariantGraph(const std::string ref_file, const std::vector<std::string>&
-									 vcfs = std::vector<std::string>());
+			VariantGraph(const std::string& ref_file, const std::vector<std::string>&
+									 vcfs);
+
 			// read variant graph from disk
-			//VariantGraph(const std::string prefix);
+			VariantGraph(const std::string& prefix);
 
 			~VariantGraph();
 
@@ -76,8 +77,7 @@ namespace variantdb {
 			void add_vcfs(const std::vector<std::string>& vcfs);
 
 			// persist variant graph to disk
-			// TODO implemention needed
-			void serialize(const std::string prefix);
+			void serialize(const std::string& prefix);
 
 			uint64_t get_num_vertices(void) const;
 			uint64_t get_seq_length(void) const;
@@ -192,12 +192,12 @@ namespace variantdb {
 			std::map<uint64_t, uint64_t> idx_vertex_id;
 
 			// structures to persist when serializing variant graph.
-			Graph topology;
 			VariantGraphVertexList vertex_list;
 			sdsl::int_vector<> seq_buffer;
+			Graph topology;
 	};
 
-	VariantGraph::VariantGraph(const std::string ref_file, const
+	VariantGraph::VariantGraph(const std::string& ref_file, const
 														 std::vector<std::string>& vcfs) {
 		// Verify that the version of the library that we linked against is
 		// compatible with the version of the headers we compiled against.
@@ -220,9 +220,42 @@ namespace variantdb {
 		add_vcfs(vcfs);
 	}
 
+	VariantGraph::VariantGraph(const std::string& prefix) {
+		// load vertex list
+		std::string vertex_list_name = prefix + "/vertex_list.proto";
+		fstream input(vertex_list_name, ios::in | ios::binary);
+		if (!vertex_list.ParseFromIstream(&input)) {
+			ERROR("Failed to parse vertex list.");
+			abort();
+		}
+		// load seq buffer
+		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
+		sdsl::load_from_file(seq_buffer, seq_buffer_name);
+		// load topology
+		topology = Graph(prefix);	
+		num_vertices = topology.get_num_vertices() + 1;
+		seq_length = seq_buffer.size();
+	}
+
 	VariantGraph::~VariantGraph() {
 		// Optional:  Delete all global objects allocated by libprotobuf.
 		google::protobuf::ShutdownProtobufLibrary();
+	}
+
+	void VariantGraph::serialize(const std::string& prefix) {
+		// serialize vertex list
+		std::string vertex_list_name = prefix + "/vertex_list.proto";
+		std::fstream output(vertex_list_name, ios::out | ios::trunc | ios::binary);
+		if (!vertex_list.SerializeToOstream(&output)) {
+			ERROR("Failed to write vertex list.");
+			abort();
+		}	
+		// serialize seq buffer
+		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
+		seq_buffer.resize(seq_buffer.size());
+		sdsl::store_to_file(seq_buffer, seq_buffer_name);
+		// serialize topology
+		topology.serialize(prefix);
 	}
 
 	void VariantGraph::add_vcfs(const std::vector<std::string>& vcfs) {

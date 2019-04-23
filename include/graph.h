@@ -131,9 +131,9 @@ namespace variantdb {
 			EdgeIterator end_edges(void) const;
 
 		private:
-			CQF<KeyObject> adj_list;
 			std::vector<vertex_set> aux_vertex_list;
 			uint32_t num_edges{0};
+			CQF<KeyObject> adj_list;
 	};
 
 	Graph::Graph() {
@@ -148,7 +148,7 @@ namespace variantdb {
 
 	Graph::Graph(std::string prefix) {
 		std::string adj_list_name("/adj_list.cqf");
-		std::string vertex_list_name("/vertex_list.sdsl");
+		std::string vertex_list_name("/aux_vertex_list.sdsl");
 		std::string list_lengths_name("/list_lengths.sdsl");
 		// load cqf
 		adj_list = CQF<KeyObject>(prefix + adj_list_name, FREAD);
@@ -178,7 +178,7 @@ namespace variantdb {
 
 	void Graph::serialize(std::string prefix) {
 		std::string adj_list_name("/adj_list.cqf");
-		std::string vertex_list_name("/vertex_list.sdsl");
+		std::string vertex_list_name("/aux_vertex_list.sdsl");
 		std::string list_lengths_name("/list_lengths.sdsl");
 		// serialize the cqf
 		adj_list.serialize(prefix + adj_list_name);

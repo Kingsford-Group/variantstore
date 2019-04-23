@@ -24,30 +24,7 @@
 
 using namespace variantdb;
 
-
-#include	<stdlib.h>
-
-/* 
- * ===  FUNCTION  =============================================================
- *         Name:  main
- *  Description:  
- * ============================================================================
- */
-	int
-main ( int argc, char *argv[] )
-{
-	if (argc < 2) {
-		fprintf(stderr, "Please specify the log of the number of slots in the CQF.\n");
-		exit(1);
-	}
-
-	//std::string filename = argv[1];
-
-	PRINT("Creating variant graph");
-	std::string ref_file(argv[1]);
-	std::string vcf_file(argv[2]);
-	std::vector<std::string> vcfs = {vcf_file};
-	VariantGraph vg(ref_file, vcfs);
+void print_vg_info(VariantGraph& vg, std::string& vcf_file) {
 	PRINT("Graph stats:");
 	PRINT("Chromosome: " << vg.get_chr() << " #Vertices: " << vg.get_num_vertices()
 				<< " Seq length: " << vg.get_seq_length());
@@ -87,7 +64,44 @@ main ( int argc, char *argv[] )
 			++itr;
 		}
 	}
+	PRINT("");
+}
 
+#include	<stdlib.h>
+
+/* 
+ * ===  FUNCTION  =============================================================
+ *         Name:  main
+ *  Description:  
+ * ============================================================================
+ */
+	int
+main ( int argc, char *argv[] )
+{
+	if (argc < 2) {
+		fprintf(stderr, "Please specify the log of the number of slots in the CQF.\n");
+		exit(1);
+	}
+
+	//std::string filename = argv[1];
+
+	PRINT("Creating variant graph");
+	std::string ref_file(argv[1]);
+	std::string vcf_file(argv[2]);
+	std::vector<std::string> vcfs = {vcf_file};
+	VariantGraph vg(ref_file, vcfs);
+
+	print_vg_info(vg, vcf_file);
+
+	PRINT("Serialiing variant graph to disk");
+	vg.serialize("./ser");
+
+	PRINT("Loading variant graph from disk");
+	VariantGraph file_vg("./ser");
+
+	PRINT("Printing variant graph info from file vg");
+	print_vg_info(file_vg, vcf_file);
+	
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
 

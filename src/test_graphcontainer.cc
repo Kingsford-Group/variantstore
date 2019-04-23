@@ -166,10 +166,10 @@ main ( int argc, char *argv[] )
 		return EXIT_FAILURE;
 
 	PRINT("Serializing graph");
-	graph.serialize("./obj");
+	graph.serialize("./ser");
 
 	PRINT("Loading graph from disk");
-	Graph file_graph("./obj");
+	Graph file_graph("./ser");
 
 	PRINT("Testing correctness for file graph");
 	if (test_correctness(file_graph, adj_list, edge_list) == EXIT_FAILURE)
