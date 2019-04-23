@@ -14,14 +14,14 @@
 #define __INDEX_H_
 
 #include "variant_graph.h"
+#include "variantgraphvertex.pb.h"
+
 #include <sdsl/bit_vectors.hpp>
 #include <sdsl/int_vector.hpp>
 #include <sdsl/util.hpp>
 #include <vector>
 
-const uint64_t REF_GENOME_LEN = 3099706404;
 const uint16_t BLOCK_SIZE = 127;
-const uint64_t INIT_NODE_LIST_SZ = 10000;
 
 namespace variantdb {
 	class Index {
@@ -37,7 +37,7 @@ namespace variantdb {
 
 	public:
 		// Construct Index given Variant Graph
-		Index(const VariantGraph vg);
+		Index(const VariantGraph *vg);
 		// Read Index from disk
 		Index(const std::string filename);
 		~Index();
@@ -51,22 +51,23 @@ namespace variantdb {
 	Index::Index(const VariantGraph *vg)
 	{
 		// Construct a bit vector of size = genome length
-		sdsl::bit_vector b(REF_GENOME_LEN, 0);
-		// Construct a int vector of node_list_sz
-		sdsl::util::assign(node_list, sdsl::int_vector<>(INIT_NODE_LIST_SZ, 0, 64));
+		sdsl::bit_vector b(vg->get_ref_length(), 0);
+		// Construct a int vector of) node_list_sz
+		sdsl::util::assign(node_list, sdsl::int_vector<>(0, 0, 64));
 		uint64_t node_list_sz = 0;
 		// Iterate nodes folloing path in REF
 		// modify bit vector & node list
-		VariantGraphPathIterator it = vg->find(0); //  Iterate through reference
+		VariantGraph::VariantGraphPathIterator it = vg->find(0); //  Iterate through reference
 		while(!it.done())
 		{
 			node_list_sz++;
 			if (node_list_sz > node_list.size()) {node_list.resize(node_list_sz);}
-			uint64_t node_id = (*node_it).vertex_id();
-			uint64_t idx = (*node_it).s_info(node_id).index();
+			uint64_t node_id = (*it)->vertex_id();
+			uint64_t idx = (*it)->offset();
+			//uint64_t idx = (*node_it).s_info(0).index();
 			b[idx] = 1;
 			node_list[node_list_sz-1] = node_id;
-			it++;
+			++it;
 		}
 
 		// Compress it & Construct rank support vector from vector
@@ -96,8 +97,8 @@ namespace variantdb {
 	void Index::serialize(const std::string prefix)
 	{
 		std::ofstream out(prefix + ".sdsl");
-		serialize(rrrb, out);
-		serialize(node_list, out);
+		sdsl::serialize(rrrb, out);
+		sdsl::serialize(node_list, out);
 		return;
 	} // serialize(const std::string prefix)
 

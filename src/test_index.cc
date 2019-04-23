@@ -9,6 +9,8 @@
 #include <map>
 #include <iterator>
 
+#include "index.h"
+
 int main()
 {
 
@@ -99,7 +101,7 @@ int main()
 
     std:: cout << "Serialization..." << std::endl;
     std::ofstream out("index.sdsl");
-    serialize(rrrb, out);
-    serialize(node_list, out);
+    sdsl::serialize(rrrb, out);
+    sdsl::serialize(node_list, out);
     return 0;
 }
