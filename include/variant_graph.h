@@ -101,13 +101,8 @@ namespace variantdb {
 					bool done(void) const;
 
 				private:
-					const VariantGraph* vg;
-					VariantGraphVertex cur;
-					std::queue<Graph::vertex> q;
-					uint64_t radius;
-					uint64_t num_hops;
-					bool is_done;
-					std::unordered_set<Graph::vertex> visited;
+					const VariantGraph *vg;
+					Graph::GraphIterator itr;
 			};
 
 			VariantGraphIterator find(Graph::vertex v = 0, uint64_t radius =
@@ -804,46 +799,20 @@ namespace variantdb {
 
 	VariantGraph::VariantGraphIterator::VariantGraphIterator(const VariantGraph*
 																													 g, Graph::vertex v,
-																													 uint64_t r) {
-		vg = g; 
-		cur = vg->vertex_list.vertex(v);
-		visited.insert(v);
-		radius = r;
-		is_done = false;
-		num_hops = 0;
-		// add neighbors of v to the queue.
-		for (const auto v : vg->topology.out_neighbors(v)) {
-			q.push(v);
-		}
-	}
+																													 uint64_t r) :
+		vg(g), itr(&g->topology, v, r) {};
 
 	const VariantGraphVertex*
 		VariantGraph::VariantGraphIterator::operator*(void) const {
-			return &cur;
+			return &vg->vertex_list.vertex(*itr);
 	}
 
 	void VariantGraph::VariantGraphIterator::operator++(void) {
-		Graph::vertex cur_id; 
-		while (!q.empty()) {
-			cur_id = q.front();
-			if (visited.find(cur_id) == visited.end()) {
-				visited.insert(cur_id);
-				break;
-			}
-			else
-				q.pop();
-		}
-		if (q.empty())
-			is_done = true;
-		cur = vg->vertex_list.vertex(cur_id);
-		for (const auto v : vg->topology.out_neighbors(cur.vertex_id())) {
-			q.push(v);
-		}
-		q.pop();
+		++itr;
 	}
 
 	bool VariantGraph::VariantGraphIterator::done(void) const {
-		return is_done;
+		return itr.done();
 	}
 	
 	VariantGraph::VariantGraphIterator VariantGraph::find(Graph::vertex v,
