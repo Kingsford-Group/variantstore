@@ -18,6 +18,10 @@
 #include <vector>
 #include <iostream>
 
+#include <sdsl/bit_vectors.hpp>
+#include <sdsl/int_vector.hpp>
+#include <sdsl/util.hpp>
+
 #include "gqf_cpp.h"
 
 namespace variantdb {
@@ -43,7 +47,7 @@ namespace variantdb {
 
 			Graph();	// create a graph with a default size
 			Graph(uint32_t size);	// create a graph with the given size (#num edges)
-			Graph(std::string infile);	// read graph from the ifstream
+			Graph(std::string prefix);	// read graph from the ifstream
 
 			~Graph();
 
@@ -70,8 +74,7 @@ namespace variantdb {
 			uint32_t get_num_edges(void) const;
 
 			// serialize graph to file
-			// TODO implemention needed
-			int serialize(std::string outfile);
+			void serialize(std::string prefix);
 
 			// Iterate over all nodes in the graph
 			class VertexIterator {
@@ -125,9 +128,65 @@ namespace variantdb {
 		adj_list.set_auto_resize();
 	}
 
+	Graph::Graph(std::string prefix) {
+		std::string adj_list_name("/adj_list.cqf");
+		std::string vertex_list_name("/vertex_list.sdsl");
+		std::string list_lengths_name("/list_lengths.sdsl");
+		// load cqf
+		adj_list = CQF<KeyObject>(prefix + adj_list_name, FREAD);
+
+		// create sdsl vectors
+		sdsl::int_vector<32> vertex_list;
+		sdsl::int_vector<32> list_lengths;
+		sdsl::load_from_file(vertex_list, prefix + vertex_list_name);
+		sdsl::load_from_file(list_lengths, prefix + list_lengths_name);
+
+		uint64_t v_idx = 0;
+		for (auto l_itr = list_lengths.begin(); l_itr != list_lengths.end();
+				 ++l_itr) {
+			uint64_t size = *l_itr;
+			vertex_set v_set;	
+			for (uint64_t pos = v_idx; pos < v_idx + size; ++pos)
+				v_set.insert(vertex_list[pos]);
+			aux_vertex_list.emplace_back(v_set);
+			v_idx += size;
+		}
+	}
+
 	Graph::~Graph() {
 		adj_list.destroy();
 		aux_vertex_list.clear();
+	}
+
+	void Graph::serialize(std::string prefix) {
+		std::string adj_list_name("/adj_list.cqf");
+		std::string vertex_list_name("/vertex_list.sdsl");
+		std::string list_lengths_name("/list_lengths.sdsl");
+		// serialize the cqf
+		adj_list.serialize(prefix + adj_list_name);
+		// determine the size of aux_vertex_list
+		uint64_t total_len = 0;
+		for (const auto list : aux_vertex_list)
+			total_len += list.size();
+
+		// create sdsl vectors
+		sdsl::int_vector<32> vertex_list(total_len);
+		sdsl::int_vector<32> list_lengths(aux_vertex_list.size());
+
+		// populate sdsl vectors
+		uint64_t v_idx = 0, l_idx = 0;
+		for (const auto list : aux_vertex_list) {
+			for (const auto v : list)
+				vertex_list[v_idx++] = v;
+			list_lengths[l_idx++] = list.size();
+		}
+		// compress and serialize
+		//sdsl::util::bit_compress(vertex_list);
+		//sdsl::util::bit_compress(list_lengths);
+		vertex_list.resize(vertex_list.size());
+		list_lengths.resize(list_lengths.size());
+		sdsl::store_to_file(vertex_list, prefix + vertex_list_name);
+		sdsl::store_to_file(list_lengths, prefix + list_lengths_name);
 	}
 
 	int Graph::add_edge(const vertex s, const vertex d) {

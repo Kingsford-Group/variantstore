@@ -39,8 +39,8 @@ class CQF {
 				qf_hashmode hash, uint32_t seed = GQF_SEED);
 		CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits, enum
 				qf_hashmode hash, std::string filename, uint32_t seed = GQF_SEED);
-		CQF(std::string& filename, enum readmode flag);
-		CQF(const CQF<key_obj>& copy_cqf);
+		CQF(const std::string& filename, enum readmode flag);
+		CQF(const CQF<key_obj>& copy_cqf) = delete;
 
 		int insert(const key_obj& k, uint8_t flags);
 
@@ -54,7 +54,7 @@ class CQF {
 		void destroy();
 		uint64_t inner_prod(const CQF<key_obj>& in_cqf) const;
 
-		void serialize(std::string filename) {
+		void serialize(const std::string& filename) {
 			qf_serialize(&cqf, filename.c_str());
 		}
 
@@ -167,7 +167,7 @@ CQF<key_obj>::CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits,
 }
 
 template <class key_obj>
-CQF<key_obj>::CQF(std::string& filename, enum readmode flag) {
+CQF<key_obj>::CQF(const std::string& filename, enum readmode flag) {
 	uint64_t size = 0;
 	if (flag == MMAP)
 	 size = qf_usefile(&cqf, filename.c_str(), QF_USEFILE_READ_ONLY);
@@ -180,10 +180,10 @@ CQF<key_obj>::CQF(std::string& filename, enum readmode flag) {
 	}
 }
 
-template <class key_obj> CQF<key_obj>::CQF(const CQF<key_obj>& copy_cqf) {
-	memcpy(reinterpret_cast<void*>(&cqf),
-				 reinterpret_cast<void*>(const_cast<QF*>(&copy_cqf.cqf)), sizeof(QF));
-}
+//template <class key_obj> CQF<key_obj>::CQF(const CQF<key_obj>& copy_cqf) {
+	//memcpy(reinterpret_cast<void*>(&cqf),
+				 //reinterpret_cast<void*>(const_cast<QF*>(&copy_cqf.cqf)), sizeof(QF));
+//}
 
 template <class key_obj>
 bool CQF<key_obj>::is_full(void) const {
