@@ -1,0 +1,21 @@
+Install:
+Samtools
+bcftools
+tabix
+
+Input: a.vcf ref.fa
+
+1. Compressed vcf file using bgzip
+bgzip a.vcf > a.vcf.gz
+
+2. Indexing the compressed file
+tabix -p vcf a.vcf.gz
+
+3. Indexing reference file
+samtools faidx ref.fa
+
+4. Run bcftools consensus
+bcftools consensus -s HG00103 -f ref.fa a.vcf.gz > HG00103.fa
+Note:
+-s: specify sample_id
+
