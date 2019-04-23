@@ -63,7 +63,7 @@ namespace variantdb {
 			// get out degree of vertex v
 			uint32_t out_degree(const vertex v) const;
 
-			// these two functions are not implemented currently.
+			// TODO these two functions are not implemented currently.
 			vertex_set in_neighbors(const vertex v) const;
 			uint32_t in_degree(const vertex v) const;
 
@@ -75,6 +75,25 @@ namespace variantdb {
 
 			// serialize graph to file
 			void serialize(std::string prefix);
+
+			class GraphIterator {
+				public:
+					GraphIterator(const Graph* graph, vertex v, uint64_t radius);
+					vertex operator*(void) const;
+					void operator++(void);
+					bool done(void) const;
+
+				private:
+					const Graph* g;
+					vertex cur;
+					std::queue<Graph::vertex> q;
+					uint64_t r;
+					uint64_t num_hops;
+					bool is_done;
+					std::unordered_set<Graph::vertex> visited;
+			};
+
+			GraphIterator find(vertex v = 0, uint64_t radius = UINT64_MAX); 
 
 			// Iterate over all nodes in the graph
 			class VertexIterator {
@@ -343,7 +362,7 @@ namespace variantdb {
 	Graph::EdgeIterator::EdgeIterator(CQF<KeyObject>::Iterator it, const Graph
 																		&g) : g(g), adj_list_itr(it) {
 		init_vertex_set_and_itr();
-		};
+	};
 
 	Graph::edge Graph::EdgeIterator::operator*(void) const {
 		if (is_inplace == 1)
@@ -369,6 +388,53 @@ namespace variantdb {
 		return adj_list_itr.done();
 	}
 
+	Graph::GraphIterator::GraphIterator(const Graph* graph, vertex v, uint64_t
+																			radius) {
+		g = graph; 
+		cur = v;
+		visited.insert(v);
+		r = radius;
+		num_hops = 0;
+		is_done = false;
+		// add neighbors of v to the queue.
+		for (const auto v : g->out_neighbors(v)) {
+			q.push(v);
+		}	
+	}
+
+	Graph::vertex Graph::GraphIterator::operator*(void) const {
+		return cur;
+	}
+
+	void Graph::GraphIterator::operator++(void) {
+		Graph::vertex cur_vertex = 0; 
+		while (!q.empty()) {
+			cur_vertex = q.front();
+			if (visited.find(cur_vertex) == visited.end()) {
+				visited.insert(cur_vertex);
+				break;
+			}
+			else
+				q.pop();
+		}
+		if (q.empty()) {
+			is_done = true;
+			return;
+		}
+		cur = cur_vertex;
+		q.pop();
+		for (const auto v : g->out_neighbors(cur)) {
+			q.push(v);
+		}
+	}
+
+	bool Graph::GraphIterator::done(void) const {
+		return is_done;
+	}
+	
+	Graph::GraphIterator Graph::find(vertex v, uint64_t radius) {
+		return GraphIterator(this, v, radius);
+	}
 }
 
 #endif	// __GRAPH_H__
