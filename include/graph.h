@@ -86,9 +86,8 @@ namespace variantdb {
 				private:
 					const Graph* g;
 					vertex cur;
-					std::queue<Graph::vertex> q;
+					std::queue<std::pair<Graph::vertex, uint64_t>> q;
 					uint64_t r;
-					uint64_t num_hops;
 					bool is_done;
 					std::unordered_set<Graph::vertex> visited;
 			};
@@ -394,12 +393,13 @@ namespace variantdb {
 		cur = v;
 		visited.insert(v);
 		r = radius;
-		num_hops = 0;
 		is_done = false;
 		// add neighbors of v to the queue.
-		for (const auto v : g->out_neighbors(v)) {
-			q.push(v);
-		}	
+		if (radius > 0) {
+			for (const auto v : g->out_neighbors(v)) {
+				q.push(std::make_pair(v, 1));
+			}
+		}
 	}
 
 	Graph::vertex Graph::GraphIterator::operator*(void) const {
@@ -407,9 +407,11 @@ namespace variantdb {
 	}
 
 	void Graph::GraphIterator::operator++(void) {
-		Graph::vertex cur_vertex = 0; 
+		Graph::vertex cur_vertex = 0;
+		uint64_t hop = 0;
 		while (!q.empty()) {
-			cur_vertex = q.front();
+			cur_vertex = q.front().first;
+			hop = q.front().second;
 			if (visited.find(cur_vertex) == visited.end()) {
 				visited.insert(cur_vertex);
 				break;
@@ -423,8 +425,10 @@ namespace variantdb {
 		}
 		cur = cur_vertex;
 		q.pop();
-		for (const auto v : g->out_neighbors(cur)) {
-			q.push(v);
+		if (hop < r) {
+			for (const auto v : g->out_neighbors(cur)) {
+				q.push(std::make_pair(v, hop + 1));
+			}
 		}
 	}
 

@@ -53,12 +53,15 @@ main ( int argc, char *argv[] )
 				<< " Seq length: " << vg.get_seq_length());
 
 	PRINT("Variant Graph nodes:");
-	auto bfs = vg.find(0);
-	while (!bfs.done()) {
-		std::cout << (*bfs)->vertex_id() << " ";
-		++bfs;
+	for (int i = 0; i < 8; i++) {
+		auto bfs = vg.find(0, i);
+		std::cout << "radius: " << i << " -- ";
+		while (!bfs.done()) {
+			std::cout << (*bfs)->vertex_id() << " ";
+			++bfs;
+		}
+		PRINT("");
 	}
-	PRINT("");
 
 	auto itr = vg.find("ref");
 	PRINT("Ref nodes:");
