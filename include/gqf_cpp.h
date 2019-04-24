@@ -40,7 +40,9 @@ class CQF {
 		CQF(uint64_t nslots, uint64_t key_bits, uint64_t value_bits, enum
 				qf_hashmode hash, std::string filename, uint32_t seed = GQF_SEED);
 		CQF(const std::string& filename, enum readmode flag);
-		CQF(const CQF<key_obj>& copy_cqf) = delete;
+		CQF(const CQF<key_obj>& copy_cqf);
+
+		CQF<key_obj>& operator=(const CQF<key_obj> copy_cqf);
 
 		int insert(const key_obj& k, uint8_t flags);
 
@@ -180,10 +182,17 @@ CQF<key_obj>::CQF(const std::string& filename, enum readmode flag) {
 	}
 }
 
-//template <class key_obj> CQF<key_obj>::CQF(const CQF<key_obj>& copy_cqf) {
-	//memcpy(reinterpret_cast<void*>(&cqf),
-				 //reinterpret_cast<void*>(const_cast<QF*>(&copy_cqf.cqf)), sizeof(QF));
-//}
+template <class key_obj> CQF<key_obj>::CQF(const CQF<key_obj>& copy_cqf) {
+	memcpy(reinterpret_cast<void*>(&cqf),
+				 reinterpret_cast<void*>(const_cast<QF*>(&copy_cqf.cqf)), sizeof(QF));
+}
+
+template <class key_obj> 
+CQF<key_obj>& CQF<key_obj>::operator=(const CQF<key_obj> copy_cqf) {
+	memcpy(reinterpret_cast<void*>(&cqf),
+				 reinterpret_cast<void*>(const_cast<QF*>(&copy_cqf.cqf)), sizeof(QF));
+	return *this;
+}
 
 template <class key_obj>
 bool CQF<key_obj>::is_full(void) const {

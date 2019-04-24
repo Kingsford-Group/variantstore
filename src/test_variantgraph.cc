@@ -61,8 +61,8 @@ void print_vg_info(VariantGraph& vg, std::string& vcf_file,
 			std::cout << vg.get_sequence(**itr);
 			++itr;
 		}
+		PRINT("");
 	}
-	PRINT("");
 }
 
 #include	<stdlib.h>

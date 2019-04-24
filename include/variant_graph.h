@@ -220,7 +220,7 @@ namespace variantdb {
 		add_vcfs(vcfs);
 	}
 
-	VariantGraph::VariantGraph(const std::string& prefix) {
+	VariantGraph::VariantGraph(const std::string& prefix) : topology(prefix) {
 		// load vertex list
 		std::string vertex_list_name = prefix + "/vertex_list.proto";
 		fstream input(vertex_list_name, ios::in | ios::binary);
@@ -232,7 +232,7 @@ namespace variantdb {
 		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
 		sdsl::load_from_file(seq_buffer, seq_buffer_name);
 		// load topology
-		topology = Graph(prefix);	
+		//topology = Graph(prefix);	
 		num_vertices = topology.get_num_vertices() + 1;
 		seq_length = seq_buffer.size();
 	}
@@ -274,35 +274,44 @@ namespace variantdb {
 						auto gt = sample.second.find("GT");
 						auto gt_vec = *gt;
 						std::string gt_info = gt_vec.second[0];
-						assert(gt_info.size() == 3);
+						//assert(gt_info.size() == 3);
 
-						// extract gt info
-						const char *str = gt_info.c_str();
-						int first = str[0] - '0';
-						char phase = str[1];
-						int second = str[2] - '0';
 						bool gt1, gt2;
 						bool add = false;
-						if (phase == '|') {
-							if (first > 0 || second > 0) {
-								if (first > 0)
-									gt1 = true;
-								else 
-									gt1 = false;
-								if (second > 0)
-									gt2 = true;
-								else 
-									gt2 = false;
+						if (gt_info.size() == 3) {
+							// extract gt info
+							const char *str = gt_info.c_str();
+							int first = str[0] - '0';
+							char phase = str[1];
+							int second = str[2] - '0';
+							if (phase == '|') {
+								if (first > 0 || second > 0) {
+									if (first > 0)
+										gt1 = true;
+									else 
+										gt1 = false;
+									if (second > 0)
+										gt2 = true;
+									else 
+										gt2 = false;
 
+									add = true;
+								}	
+							} else if (phase == '/') {
+								if (first > 0 && second > 0) {
+									gt1 = true; gt2 = true;
+									add = true;
+								} else if (first == '1' || second == '1') {
+									gt1 = false; gt2 = false;
+									add = true;
+								}
+							}
+						} else if (gt_info.size() == 1) {
+							int present = stoi(gt_info);
+							if (present) {
 								add = true;
-							}	
-						} else if (phase == '/') {
-							if (first > 0 && second > 0) {
-								gt1 = true; gt2 = true;
-								add = true;
-							} else if (first == '1' || second == '1') {
-								gt1 = false; gt2 = false;
-								add = true;
+								gt1 = true;
+								gt2 = false;
 							}
 						}
 						if (add)
