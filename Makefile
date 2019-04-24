@@ -63,7 +63,7 @@ $(OBJDIR)/test_variantgraph.o: 		$(LOC_SRC)/test_variantgraph.cc \
 																	$(LOC_INCLUDE)/variant_graph.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
 																	$(LOC_INCLUDE)/graph.h
-$(OBJDIR)/test_variantgraph.o: 		$(LOC_SRC)/test_index.cc \
+$(OBJDIR)/test_index.o: 					$(LOC_SRC)/test_index.cc \
 																	$(LOC_INCLUDE)/index.h \
 																	$(LOC_INCLUDE)/variant_graph.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \

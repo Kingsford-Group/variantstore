@@ -65,10 +65,11 @@ namespace variantdb {
 			VariantGraph() = delete; 
 			// construct variant graph using a reference genome and zero or more vcf
 			// files.
-			VariantGraph(const std::string ref_file, const std::vector<std::string>&
-									 vcfs = std::vector<std::string>());
+			VariantGraph(const std::string& ref_file, const std::vector<std::string>&
+									 vcfs);
+
 			// read variant graph from disk
-			//VariantGraph(const std::string prefix);
+			VariantGraph(const std::string& prefix);
 
 			~VariantGraph();
 
@@ -76,8 +77,7 @@ namespace variantdb {
 			void add_vcfs(const std::vector<std::string>& vcfs);
 
 			// persist variant graph to disk
-			// TODO implemention needed
-			void serialize(const std::string prefix);
+			void serialize(const std::string& prefix);
 
 			uint64_t get_num_vertices(void) const;
 			uint64_t get_seq_length(void) const;
@@ -101,13 +101,8 @@ namespace variantdb {
 					bool done(void) const;
 
 				private:
-					const VariantGraph* vg;
-					VariantGraphVertex cur;
-					std::queue<Graph::vertex> q;
-					uint64_t radius;
-					uint64_t num_hops;
-					bool is_done;
-					std::unordered_set<Graph::vertex> visited;
+					const VariantGraph *vg;
+					Graph::GraphIterator itr;
 			};
 
 			VariantGraphIterator find(Graph::vertex v = 0, uint64_t radius =
@@ -197,12 +192,12 @@ namespace variantdb {
 			std::map<uint64_t, uint64_t> idx_vertex_id;
 
 			// structures to persist when serializing variant graph.
-			Graph topology;
 			VariantGraphVertexList vertex_list;
 			sdsl::int_vector<> seq_buffer;
+			Graph topology;
 	};
 
-	VariantGraph::VariantGraph(const std::string ref_file, const
+	VariantGraph::VariantGraph(const std::string& ref_file, const
 														 std::vector<std::string>& vcfs) {
 		// Verify that the version of the library that we linked against is
 		// compatible with the version of the headers we compiled against.
@@ -225,9 +220,42 @@ namespace variantdb {
 		add_vcfs(vcfs);
 	}
 
+	VariantGraph::VariantGraph(const std::string& prefix) {
+		// load vertex list
+		std::string vertex_list_name = prefix + "/vertex_list.proto";
+		fstream input(vertex_list_name, ios::in | ios::binary);
+		if (!vertex_list.ParseFromIstream(&input)) {
+			ERROR("Failed to parse vertex list.");
+			abort();
+		}
+		// load seq buffer
+		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
+		sdsl::load_from_file(seq_buffer, seq_buffer_name);
+		// load topology
+		topology = Graph(prefix);	
+		num_vertices = topology.get_num_vertices() + 1;
+		seq_length = seq_buffer.size();
+	}
+
 	VariantGraph::~VariantGraph() {
 		// Optional:  Delete all global objects allocated by libprotobuf.
 		google::protobuf::ShutdownProtobufLibrary();
+	}
+
+	void VariantGraph::serialize(const std::string& prefix) {
+		// serialize vertex list
+		std::string vertex_list_name = prefix + "/vertex_list.proto";
+		std::fstream output(vertex_list_name, ios::out | ios::trunc | ios::binary);
+		if (!vertex_list.SerializeToOstream(&output)) {
+			ERROR("Failed to write vertex list.");
+			abort();
+		}	
+		// serialize seq buffer
+		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
+		seq_buffer.resize(seq_buffer.size());
+		sdsl::store_to_file(seq_buffer, seq_buffer_name);
+		// serialize topology
+		topology.serialize(prefix);
 	}
 
 	void VariantGraph::add_vcfs(const std::vector<std::string>& vcfs) {
@@ -804,46 +832,20 @@ namespace variantdb {
 
 	VariantGraph::VariantGraphIterator::VariantGraphIterator(const VariantGraph*
 																													 g, Graph::vertex v,
-																													 uint64_t r) {
-		vg = g; 
-		cur = vg->vertex_list.vertex(v);
-		visited.insert(v);
-		radius = r;
-		is_done = false;
-		num_hops = 0;
-		// add neighbors of v to the queue.
-		for (const auto v : vg->topology.out_neighbors(v)) {
-			q.push(v);
-		}
-	}
+																													 uint64_t r) :
+		vg(g), itr(&g->topology, v, r) {};
 
 	const VariantGraphVertex*
 		VariantGraph::VariantGraphIterator::operator*(void) const {
-			return &cur;
+			return &vg->vertex_list.vertex(*itr);
 	}
 
 	void VariantGraph::VariantGraphIterator::operator++(void) {
-		Graph::vertex cur_id; 
-		while (!q.empty()) {
-			cur_id = q.front();
-			if (visited.find(cur_id) == visited.end()) {
-				visited.insert(cur_id);
-				break;
-			}
-			else
-				q.pop();
-		}
-		if (q.empty())
-			is_done = true;
-		cur = vg->vertex_list.vertex(cur_id);
-		for (const auto v : vg->topology.out_neighbors(cur.vertex_id())) {
-			q.push(v);
-		}
-		q.pop();
+		++itr;
 	}
 
 	bool VariantGraph::VariantGraphIterator::done(void) const {
-		return is_done;
+		return itr.done();
 	}
 	
 	VariantGraph::VariantGraphIterator VariantGraph::find(Graph::vertex v,
