@@ -24,7 +24,8 @@
 
 using namespace variantdb;
 
-void print_vg_info(VariantGraph& vg, std::string& vcf_file) {
+void print_vg_info(VariantGraph& vg, std::string& vcf_file,
+									 std::vector<std::string> sampleNames) {
 	PRINT("Graph stats:");
 	PRINT("Chromosome: " << vg.get_chr() << " #Vertices: " << vg.get_num_vertices()
 				<< " Seq length: " << vg.get_seq_length());
@@ -50,12 +51,9 @@ void print_vg_info(VariantGraph& vg, std::string& vcf_file) {
 
 	PRINT("");
 	PRINT("Samples:");
-	vcflib::VariantCallFile variantFile;
-	variantFile.open(vcf_file);
-	vcflib::Variant var(variantFile);
-
+	
 	// get all samples
-	for (auto sample : variantFile.sampleNames) {
+	for (auto sample : sampleNames) {
 		PRINT("Sample: " << sample);
 		auto itr = vg.find(sample);
 		while (!itr.done()) {
@@ -91,7 +89,11 @@ main ( int argc, char *argv[] )
 	std::vector<std::string> vcfs = {vcf_file};
 	VariantGraph vg(ref_file, vcfs);
 
-	print_vg_info(vg, vcf_file);
+	vcflib::VariantCallFile variantFile;
+	variantFile.open(vcf_file);
+	vcflib::Variant var(variantFile);
+
+	print_vg_info(vg, vcf_file, variantFile.sampleNames);
 
 	PRINT("Serialiing variant graph to disk");
 	vg.serialize("./ser");
@@ -100,7 +102,7 @@ main ( int argc, char *argv[] )
 	VariantGraph file_vg("./ser");
 
 	PRINT("Printing variant graph info from file vg");
-	print_vg_info(file_vg, vcf_file);
+	print_vg_info(file_vg, vcf_file, variantFile.sampleNames);
 	
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

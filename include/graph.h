@@ -84,11 +84,11 @@ namespace variantdb {
 					bool done(void) const;
 
 				private:
-					const Graph* g;
 					vertex cur;
-					std::queue<std::pair<Graph::vertex, uint64_t>> q;
 					uint64_t r;
 					bool is_done;
+					const Graph* g;
+					std::queue<std::pair<Graph::vertex, uint64_t>> q;
 					std::unordered_set<Graph::vertex> visited;
 			};
 

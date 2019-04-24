@@ -33,7 +33,7 @@ CFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
 
 LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -L$(LOC_LIB) -lm -lvcflib -lhts -lz \
 					 -lbz2 -llzma -lrt -lpthread -lssl -lcrypto -lboost_system -lsdsl \
-						`pkg-config --cflags --libs protobuf` 
+						-ltcmalloc `pkg-config --cflags --libs protobuf` 
 
 #
 # declaration of dependencies
