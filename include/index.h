@@ -15,10 +15,7 @@
 
 #include "variant_graph.h"
 #include "variantgraphvertex.pb.h"
-<<<<<<< HEAD
 #include "graph.h"
-=======
->>>>>>> 0ccdfae050b5431a254aa354537f2fc36fef746e
 #include <sdsl/bit_vectors.hpp>
 #include <sdsl/int_vector.hpp>
 #include <sdsl/util.hpp>
@@ -55,11 +52,7 @@ namespace variantdb {
 		// Construct a bit vector of size = genome length
 		sdsl::bit_vector b(vg->get_ref_length(), 0);
 		// Construct a int vector of node_list_sz
-<<<<<<< HEAD
 		uint64_t init_sz = 1;
-=======
-		uint64_t init_sz = 1000;
->>>>>>> 0ccdfae050b5431a254aa354537f2fc36fef746e
 		sdsl::util::assign(node_list, sdsl::int_vector<>(init_sz, 0, 64));
 		uint64_t node_list_sz = 0;
 		// Iterate nodes folloing path in REF
@@ -70,17 +63,12 @@ namespace variantdb {
 			node_list_sz++;
 			if (node_list_sz > node_list.size()) {node_list.resize(node_list_sz);}
 			uint64_t node_id = (*it)->vertex_id();
-<<<<<<< HEAD
 			Graph::vertex v = node_id;
 			uint64_t idx = vg->get_sample_from_vertex(v, "ref").index();
 
 			DEBUG("At index " << idx
 								<< " has node " << node_id);
 
-=======
-			//uint64_t idx = vg->get_sample_from_vertex(**it, "ref").index();
-			uint64_t idx = (*it)->s_info(0).index();
->>>>>>> 0ccdfae050b5431a254aa354537f2fc36fef746e
 			b[idx] = 1;
 			node_list[node_list_sz-1] = node_id;
 			++it;
@@ -106,11 +94,8 @@ namespace variantdb {
 
 	uint64_t Index::find(uint64_t pos) const
 	{
-<<<<<<< HEAD
 		if ( pos >= rank_rrrb.size())
 			return node_list[node_list.size()-1];
-=======
->>>>>>> 0ccdfae050b5431a254aa354537f2fc36fef746e
 
 		uint64_t node_idx = rank_rrrb(pos);
 		if ( node_idx == 0 )
