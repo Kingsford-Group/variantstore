@@ -14,14 +14,14 @@
 #define __INDEX_H_
 
 #include "variant_graph.h"
+#include "variantgraphvertex.pb.h"
+#include "graph.h"
 #include <sdsl/bit_vectors.hpp>
 #include <sdsl/int_vector.hpp>
 #include <sdsl/util.hpp>
 #include <vector>
 
-const uint64_t REF_GENOME_LEN = 3099706404;
 const uint16_t BLOCK_SIZE = 127;
-const uint64_t INIT_NODE_LIST_SZ = 10000;
 
 namespace variantdb {
 	class Index {
@@ -29,46 +29,52 @@ namespace variantdb {
 		// An Index supports query node(in reference) at a given position
 		// Adding nodes in reference change the index content
 
+	public:
+		// Construct Index given Variant Graph
+		Index(const VariantGraph *vg);
+		// Read Index from disk
+		Index(const std::string prefix);
+		~Index();
+		// Query node_id given position
+		uint64_t find(uint64_t pos) const;
+		void serialize(const std::string prefix);
+
 	private:
 		//bit_vector bound_vec;
 		sdsl::rrr_vector<BLOCK_SIZE> rrrb;
 		sdsl::rrr_vector<BLOCK_SIZE>::rank_1_type rank_rrrb;
 		sdsl::int_vector<> node_list;
-
-	public:
-		// Construct Index given Variant Graph
-		Index(const VariantGraph vg);
-		// Read Index from disk
-		Index(const std::string filename);
-		~Index();
-		// Query node_id given position
-		uint64_t find(uint64_t pos);
-
-		void serialize(const std::string prefix);
 	};
 
 
 	Index::Index(const VariantGraph *vg)
 	{
 		// Construct a bit vector of size = genome length
-		sdsl::bit_vector b(REF_GENOME_LEN, 0);
+		sdsl::bit_vector b(vg->get_ref_length(), 0);
 		// Construct a int vector of node_list_sz
-		sdsl::util::assign(node_list, sdsl::int_vector<>(INIT_NODE_LIST_SZ, 0, 64));
+		uint64_t init_sz = 1;
+		sdsl::util::assign(node_list, sdsl::int_vector<>(init_sz, 0, 64));
 		uint64_t node_list_sz = 0;
 		// Iterate nodes folloing path in REF
 		// modify bit vector & node list
-		VariantGraphPathIterator it = vg->find(0); //  Iterate through reference
+		VariantGraph::VariantGraphPathIterator it = vg->find("ref"); //  Iterate through reference
 		while(!it.done())
 		{
 			node_list_sz++;
 			if (node_list_sz > node_list.size()) {node_list.resize(node_list_sz);}
-			uint64_t node_id = (*node_it).vertex_id();
-			uint64_t idx = (*node_it).s_info(node_id).index();
+			uint64_t node_id = (*it)->vertex_id();
+			Graph::vertex v = node_id;
+			uint64_t idx = vg->get_sample_from_vertex(v, "ref").index();
+
+			DEBUG("At index " << idx
+								<< " has node " << node_id);
+
 			b[idx] = 1;
 			node_list[node_list_sz-1] = node_id;
-			it++;
+			++it;
 		}
 
+		std::cout << std::endl;
 		// Compress it & Construct rank support vector from vector
 		sdsl::util::assign(rrrb, sdsl::rrr_vector<BLOCK_SIZE>(b));
 		sdsl::util::assign(rank_rrrb,
@@ -77,27 +83,31 @@ namespace variantdb {
 		return;
 	} // Index(const VariantGraph vg)
 
-	Index::Index(const std::string filename)
+	Index::Index(const std::string prefix)
 	{
-		std::ifstream in(filename);
-		rrrb.load(in);
+		sdsl::load_from_file(rrrb, prefix + "/index.sdsl");
+		sdsl::load_from_file(node_list, prefix + "/ref_node_id.sdsl");
 		sdsl::util::assign(rank_rrrb,
 			sdsl::rrr_vector<BLOCK_SIZE>::rank_1_type(&rrrb));
-    node_list.load(in);
 		return;
 	} // Index(const std::string filename)
 
-	uint64_t Index::find(uint64_t pos)
+	uint64_t Index::find(uint64_t pos) const
 	{
+		if ( pos >= rank_rrrb.size())
+			return node_list[node_list.size()-1];
+
 		uint64_t node_idx = rank_rrrb(pos);
-		return node_list[node_idx];
+		if ( node_idx == 0 )
+			return node_list[0];
+
+		return node_list[node_idx-1];
 	} // find(uint64_t pos)
 
 	void Index::serialize(const std::string prefix)
 	{
-		std::ofstream out(prefix + ".sdsl");
-		serialize(rrrb, out);
-		serialize(node_list, out);
+		sdsl::store_to_file(rrrb, prefix + "/index.sdsl");
+		sdsl::store_to_file(node_list, prefix + "/ref_node_id.sdsl");
 		return;
 	} // serialize(const std::string prefix)
 
