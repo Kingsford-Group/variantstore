@@ -44,11 +44,11 @@ namespace variantdb {
     for (int i = 0; i < v->s_info_size(); i++) {
 			const VariantGraphVertex::sample_info& s = v->s_info(i);
     //  DEBUG("Node " << v->vertex_id() << " contains sample " << s.sample_id());
-			if (s.sample_id() != "ref") {
-        return false;
+			if (s.sample_id() == "ref") {
+        return true;
       }
 		}
-    return true;
+    return false;
   }
 
   bool createDotGraph(VariantGraph *vg, std::string prefix, Graph::vertex v = 0,
