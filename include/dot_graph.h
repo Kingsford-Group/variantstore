@@ -40,11 +40,24 @@
 using namespace variantdb;
 
 namespace variantdb {
-  bool createDotGraph(VariantGraph *vg, Graph::vertex v = 0,
-          uint64_t radius = UINT64_MAX, std::string prefix="graph")
+  bool is_ref_node(const VariantGraphVertex* v) {
+    for (int i = 0; i < v->s_info_size(); i++) {
+			const VariantGraphVertex::sample_info& s = v->s_info(i);
+    //  DEBUG("Node " << v->vertex_id() << " contains sample " << s.sample_id());
+			if (s.sample_id() == "ref") {
+        return true;
+      }
+		}
+    return false;
+  }
+
+  bool createDotGraph(VariantGraph *vg, std::string prefix, Graph::vertex v = 0,
+                      uint64_t radius = UINT64_MAX)
   {
     std::ofstream dotfile;
-    dotfile.open (prefix + ".dot");
+    dotfile.open (prefix + "/node_graph.dot");
+    std::string ref = "";
+    std::string sample = "";
 
     if (!dotfile.is_open())
     {
@@ -54,29 +67,37 @@ namespace variantdb {
 
     VariantGraph::VariantGraphIterator it = vg->find(v, radius);
     dotfile << "digraph {\n";
-
-    /*
     ref += "\tsubgraph cluster_0 {\n";
     ref += "\t\tlable=\"reference\";\n";
-    */
 
     while(!it.done())
     {
       uint64_t node_id = (*it)->vertex_id();
-			//uint64_t sample_id = (*it)->s_info(0).sample_id();
 
-      //Todo: Get outgoing nodes
-      for (const auto v : vg->topology.out_neighbors((*it)->vertex_id()))
-      {
-        const VariantGraphVertex out_node = vg->vertex_list.vertex(node_id);
-        uint64_t out_node_id = out_node.vertex_id();
-        dotfile << "\t" + std::to_string(node_id) + "->"
-                << std::to_string(node_id) + ";\n";
+      // Find neibors of node
+      VariantGraph::VariantGraphIterator node = vg->find(node_id, 1);
+      ++node;
+
+      while (!node.done()) {
+        uint64_t neibor_id = (*node)->vertex_id();
+        if (is_ref_node(*node) && is_ref_node(*it)) {
+          DEBUG("Node " << node_id << " is on the reference path");
+          ref += "\t\t" + std::to_string(node_id) + " -> " ;
+          ref += std::to_string(neibor_id) + "\n";
+        }
+        else {
+          sample += "\t" + std::to_string(node_id) + " -> " ;
+          sample += std::to_string(neibor_id) + "\n";
+        }
+        ++node;
       }
 
       ++it;
     }
 
+    ref += "\t}\n";
+    dotfile << ref;
+    dotfile << sample;
     dotfile << "}";
     dotfile.close();
     return true;

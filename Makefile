@@ -1,4 +1,4 @@
-TARGETS= test_graphcontainer test_variantgraph test_index
+TARGETS= test_graphcontainer test_variantgraph test_index test_dotgraph
 
 ifdef D
 	DEBUG=-g -DDEBUG_MODE
@@ -49,8 +49,11 @@ test_variantgraph:			$(OBJDIR)/test_variantgraph.o \
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
-
 test_index:							$(OBJDIR)/test_index.o \
+												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
+												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
+test_dotgraph:					$(OBJDIR)/test_dotgraph.o \
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
@@ -65,6 +68,12 @@ $(OBJDIR)/test_variantgraph.o: 		$(LOC_SRC)/test_variantgraph.cc \
 																	$(LOC_INCLUDE)/graph.h
 $(OBJDIR)/test_index.o: 					$(LOC_SRC)/test_index.cc \
 																	$(LOC_INCLUDE)/index.h \
+																	$(LOC_INCLUDE)/variant_graph.h \
+																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
+																	$(LOC_INCLUDE)/graph.h
+$(OBJDIR)/test_dotgraph.o: 					$(LOC_SRC)/test_index.cc \
+																	$(LOC_INCLUDE)/index.h \
+																	$(LOC_INCLUDE)/dot_graph.h \
 																	$(LOC_INCLUDE)/variant_graph.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
 																	$(LOC_INCLUDE)/graph.h
