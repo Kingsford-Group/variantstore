@@ -1004,46 +1004,21 @@ static inline int remove_replace_slots_and_shift_remainders_and_runends_and_offs
 	uint64_t original_block = original_bucket / QF_SLOTS_PER_BLOCK;
 	if (old_length > total_remainders) {	// we only update offsets if we shift/delete anything
 		while (1) {
-			/*int32_t last_occupieds_bit = bitscanreverse(get_block(qf, original_block)->occupieds[0]);*/
-			/*// there is nothing in the block */
-			/*// the offset of the next block will depend on the original_block offset*/
-			/*if (last_occupieds_bit == -1) {*/
-				/*uint64_t new_offset = 0;*/
-				/*if (get_block(qf, original_block)->offset == BITMASK(8*sizeof(qf->blocks[0].offset)))*/
-					/*new_offset = BITMASK(8*sizeof(qf->blocks[0].offset));*/
-				/*else if (get_block(qf, original_block)->offset > QF_SLOTS_PER_BLOCK)*/
-					/*new_offset = get_block(qf, original_block)->offset - QF_SLOTS_PER_BLOCK;*/
-				/*if (get_block(qf, original_block + 1)->offset == new_offset)*/
-					/*break;*/
-				/*get_block(qf, original_block + 1)->offset = new_offset;*/
-			/*} else {*/
-				uint64_t last_occupieds_hash_index = QF_SLOTS_PER_BLOCK * original_block + 63;
-				uint64_t runend_index = run_end(qf, last_occupieds_hash_index);
-				// runend spans across the block
-				// update the offset of the next block
-				if (runend_index / QF_SLOTS_PER_BLOCK == original_block) { // if the run ends in the same block
-					if (get_block(qf, original_block + 1)->offset == 0)
-						break;
-					get_block(qf, original_block + 1)->offset = 0;
-					original_block++;
-				} else if (runend_index / QF_SLOTS_PER_BLOCK == original_block + 1) { // if the last run spans across one block
-					if (get_block(qf, original_block + 1)->offset == (runend_index % QF_SLOTS_PER_BLOCK) + 1)
-						break;
-					get_block(qf, original_block + 1)->offset = (runend_index % QF_SLOTS_PER_BLOCK) + 1;
-					original_block++;
-				} else { // if the last run spans across multiple blocks
-					for (uint64_t i = original_block + 1; i <= runend_index / QF_SLOTS_PER_BLOCK; i++) {
-						uint64_t new_offset = (runend_index / QF_SLOTS_PER_BLOCK - i) * QF_SLOTS_PER_BLOCK + (runend_index % QF_SLOTS_PER_BLOCK) + 1;
-						if (new_offset > BITMASK(8*sizeof(qf->blocks[0].offset)))
-							new_offset = BITMASK(8*sizeof(qf->blocks[0].offset));
-						if (get_block(qf, i)->offset == new_offset)
-							break;
-						get_block(qf, i)->offset = new_offset;
-					}
-					original_block = runend_index / QF_SLOTS_PER_BLOCK;
-				}
+			uint64_t last_occupieds_hash_index = QF_SLOTS_PER_BLOCK * original_block + (QF_SLOTS_PER_BLOCK - 1);
+			uint64_t runend_index = run_end(qf, last_occupieds_hash_index);
+			// runend spans across the block
+			// update the offset of the next block
+			if (runend_index / QF_SLOTS_PER_BLOCK == original_block) { // if the run ends in the same block
+				if (get_block(qf, original_block + 1)->offset == 0)
+					break;
+				get_block(qf, original_block + 1)->offset = 0;
+			} else { // if the last run spans across the block
+				if (get_block(qf, original_block + 1)->offset == (runend_index - last_occupieds_hash_index))
+					break;
+				get_block(qf, original_block + 1)->offset = (runend_index - last_occupieds_hash_index);
 			}
-		/*}*/
+			original_block++;
+		}
 	}
 	int num_slots_freed = old_length - total_remainders;
 	modify_metadata(qf, &qf->metadata->noccupied_slots, -num_slots_freed);
