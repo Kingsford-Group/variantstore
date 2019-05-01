@@ -1,4 +1,4 @@
-TARGETS= test_graphcontainer test_variantgraph test_index test_dotgraph
+TARGETS= test_graphcontainer test_variantgraph test_index
 
 ifdef D
 	DEBUG=-g -DDEBUG_MODE

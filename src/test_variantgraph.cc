@@ -20,6 +20,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 
+#include "dot_graph.h"
 #include "variant_graph.h"
 
 using namespace variantdb;
@@ -104,6 +105,8 @@ main ( int argc, char *argv[] )
 	PRINT("Printing variant graph info from file vg");
 	print_vg_info(file_vg, vcf_file, variantFile.sampleNames);
 	
+	createDotGraph(&file_vg, "./ser");
+
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
 

@@ -21,7 +21,6 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 
-#include "gqf_cpp.h"
 #include "graph.h"
 
 using namespace variantdb;
