@@ -106,7 +106,7 @@ namespace variantdb {
       while (!node.done()) {
         uint64_t neibor_id = (*node)->vertex_id();
         if (is_ref_node(*node) && is_ref_node(*it)) {
-          DEBUG("Node " << node_id << " is on the reference path");
+          //DEBUG("Node " << node_id << " is on the reference path");
           ref += "\t\t" + std::to_string(node_id) + " -> " ;
           ref += std::to_string(neibor_id) + "\n";
         }

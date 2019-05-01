@@ -32,15 +32,15 @@ void print_vg_info(VariantGraph& vg, std::string& vcf_file,
 				<< " Seq length: " << vg.get_seq_length());
 
 	PRINT("Variant Graph nodes:");
-	for (int i = 0; i < 8; i++) {
-		auto bfs = vg.find(0, i);
-		std::cout << "radius: " << i << " -- ";
-		while (!bfs.done()) {
-			std::cout << (*bfs)->vertex_id() << " ";
-			++bfs;
-		}
-		PRINT("");
+	//for (int i = 0; i < 8; i++) {
+	auto bfs = vg.find(0);
+	//std::cout << "radius: " << i << " -- ";
+	while (!bfs.done()) {
+		std::cout << (*bfs)->vertex_id() << " ";
+		++bfs;
 	}
+	PRINT("");
+	//}
 
 	auto itr = vg.find("ref");
 	PRINT("Ref nodes:");
@@ -52,7 +52,7 @@ void print_vg_info(VariantGraph& vg, std::string& vcf_file,
 
 	PRINT("");
 	PRINT("Samples:");
-	
+
 	// get all samples
 	for (auto sample : sampleNames) {
 		PRINT("Sample: " << sample);

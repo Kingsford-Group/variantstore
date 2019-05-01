@@ -562,7 +562,7 @@ namespace variantdb {
 				VariantGraphVertex vertex = vertex_list.vertex(v_id);
 				for (int i = 0; i < vertex.s_info_size(); i++) {
 					const VariantGraphVertex::sample_info& s = vertex.s_info(i);
-					if (s.sample_id() == sample_id) {
+					if (s.sample_id() != "ref" && s.sample_id() == sample_id) {
 						*v = v_id; 
 						return true;
 					} else if (s.sample_id() == "ref") {	// if sample_id is not found follow "ref" path
@@ -572,15 +572,6 @@ namespace variantdb {
 				}
 			}
 			if (neighbors.size() > 0) {
-				//if (neighbors.size() == 0) {
-				//ERROR("Can't find the vertex with sample id: " <<  sample_id <<
-				//" at vertex id: " << id);
-				//abort();
-				//}
-				//if (neighbors.size() > 2) {
-				//ERROR("More than two neighbors in ref path at vertex id: " << id);
-				//abort();
-				//}
 				if (neighbors.size() == 1) {
 					*v = neighbors[0];
 					return true;
