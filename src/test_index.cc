@@ -75,36 +75,33 @@ void print_vg_info(VariantGraph& vg, std::string& vcf_file) {
 int
 main ( int argc, char *argv[] )
 {
-if (argc < 2) {
-  fprintf(stderr, "Please specify the reference fasta file and vcf file.\n");
-  exit(1);
-}
+	if (argc < 2) {
+		fprintf(stderr, "Please specify the reference fasta file and vcf file.\n");
+		exit(1);
+	}
 
-//std::string filename = argv[1];
+	//std::string filename = argv[1];
 
-PRINT("Creating variant graph");
-std::string ref_file(argv[1]);
-std::string vcf_file(argv[2]);
-std::vector<std::string> vcfs = {vcf_file};
-VariantGraph vg(ref_file, vcfs);
+	PRINT("Creating variant graph");
+	std::string ref_file(argv[1]);
+	std::string vcf_file(argv[2]);
+	std::vector<std::string> vcfs = {vcf_file};
+	VariantGraph vg(ref_file, vcfs);
 
-print_vg_info(vg, vcf_file);
+	print_vg_info(vg, vcf_file);
 
-PRINT("Creating Index");
-Index idx(&vg);
-print_index_info(idx, 50);
+	PRINT("Creating Index");
+	Index idx(&vg);
+	print_index_info(idx, 50);
 
-PRINT("Storing Index");
-idx.serialize("test");
+	PRINT("Storing Index");
+	idx.serialize("test");
 
-PRINT("Reading Index");
-Index idx2("test");
-print_index_info(idx2, 50);
+	PRINT("Reading Index");
+	Index idx2("test");
+	print_index_info(idx2, 50);
 
-
-
-
-return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
 
 /*
