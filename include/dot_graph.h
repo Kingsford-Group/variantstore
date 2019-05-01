@@ -51,11 +51,23 @@ namespace variantdb {
     return false;
   }
 
+	std::string get_samples(const VariantGraphVertex* v) {
+		std::string samples;
+		samples += "[ label=\"" + std::to_string(v->vertex_id()) + "\n(";
+    for (int i = 0; i < v->s_info_size(); i++) {
+			const VariantGraphVertex::sample_info& s = v->s_info(i);
+			samples += " " + s.sample_id();
+		}
+		samples += ")\"]";
+    return samples;
+  }
+
   bool createDotGraph(VariantGraph *vg, std::string prefix, Graph::vertex v = 0,
                       uint64_t radius = UINT64_MAX)
   {
     std::ofstream dotfile;
-    dotfile.open (prefix + "/node_graph.dot");
+    dotfile.open (prefix + "/variant_graph.dot");
+		std::string labels = "";
     std::string ref = "";
     std::string sample = "";
 
@@ -65,10 +77,19 @@ namespace variantdb {
       return false;
     }
 
+
     VariantGraph::VariantGraphIterator it = vg->find(v, radius);
+    while(!it.done()) {
+			labels += std::to_string((*it)->vertex_id()) + get_samples(*it) + "\n";
+      ++it;
+		}
+
     dotfile << "digraph {\n";
+		dotfile << labels;
+
+    it = vg->find(v, radius);
     ref += "\tsubgraph cluster_0 {\n";
-    ref += "\t\tlable=\"reference\";\n";
+    ref += "\t\tlabel=\"reference\";\n";
 
     while(!it.done())
     {
