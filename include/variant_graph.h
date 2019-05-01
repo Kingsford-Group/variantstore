@@ -562,44 +562,41 @@ namespace variantdb {
 				VariantGraphVertex vertex = vertex_list.vertex(v_id);
 				for (int i = 0; i < vertex.s_info_size(); i++) {
 					const VariantGraphVertex::sample_info& s = vertex.s_info(i);
-					if (sample_id == "ref" && s.sample_id() == sample_id) { // handle special case for "ref" path.
+					if (s.sample_id() == sample_id) {
+						*v = v_id; 
+						return true;
+					} else if (s.sample_id() == "ref") {	// if sample_id is not found follow "ref" path
+						*v = v_id;
 						neighbors.emplace_back(v_id);
-					} else {
-						if (s.sample_id() == sample_id) {
-							*v = v_id; 
-							return true;
-						} else if (s.sample_id() == "ref") {	// if sample_id is not found follow "ref" path
-							*v = v_id;
-						}
 					}
 				}
 			}
-			if (sample_id == "ref" && neighbors.size() > 0) {
+			if (neighbors.size() > 0) {
 				//if (neighbors.size() == 0) {
 				//ERROR("Can't find the vertex with sample id: " <<  sample_id <<
 				//" at vertex id: " << id);
 				//abort();
 				//}
-				if (neighbors.size() > 2) {
-					ERROR("More than two neighbors in ref path at vertex id: " << id);
-					abort();
-				}
+				//if (neighbors.size() > 2) {
+				//ERROR("More than two neighbors in ref path at vertex id: " << id);
+				//abort();
+				//}
 				if (neighbors.size() == 1) {
 					*v = neighbors[0];
 					return true;
 				}
-				if (topology.is_edge(std::make_pair(neighbors[0], neighbors[1]))) {
-					*v = neighbors[0];
-					return true;
-				} else if (topology.is_edge(std::make_pair(neighbors[1],
-																									 neighbors[0]))) {
-					*v = neighbors[1];
-					return true;
-				} else {
-					ERROR("Two neighbors are not connected in ref path at vertex id: "
-								<< id);
-					abort();
+				for (uint64_t i = 0; i < neighbors.size(); i++) {
+					for (uint64_t j = 0; j < neighbors.size(); j++) {
+						if (i != j && topology.is_edge(std::make_pair(neighbors[i],
+																													neighbors[j]))) {
+							*v = neighbors[i];
+							return true;
+						}
+					}
 				}
+				ERROR("Two neighbors are not connected in ref path at vertex id: "
+							<< id);
+				abort();
 			}
 
 			return false;
