@@ -53,10 +53,14 @@ namespace variantdb {
 
 	std::string get_samples(const VariantGraphVertex* v) {
 		std::string samples;
-		samples += "[ label=\"" + std::to_string(v->vertex_id()) + "\n(";
-    for (int i = 0; i < v->s_info_size(); i++) {
+		samples += "[ label=\"" + std::to_string(v->vertex_id()) + " l:" +
+			std::to_string(static_cast<int>(v->length())) + "\n(";
+    for (int i = 0; i < v->s_info_size(); ++i) {
 			const VariantGraphVertex::sample_info& s = v->s_info(i);
-			samples += " " + s.sample_id();
+			samples += s.sample_id() + " i:" +
+				std::to_string(static_cast<int>(s.index()));
+			if (i < v->s_info_size() - 1)
+				samples += "\n";
 		}
 		samples += ")\"]";
     return samples;
