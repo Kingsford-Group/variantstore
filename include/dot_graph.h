@@ -70,7 +70,7 @@ namespace variantdb {
                       uint64_t radius = UINT64_MAX)
   {
     std::ofstream dotfile;
-    dotfile.open (prefix + "/variant_graph.dot");
+    dotfile.open (prefix + "/graph.dot");
 		std::string labels = "";
     std::string ref = "";
     std::string sample = "";

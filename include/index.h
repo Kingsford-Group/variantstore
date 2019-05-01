@@ -64,7 +64,12 @@ namespace variantdb {
 			if (node_list_sz > node_list.size()) {node_list.resize(node_list_sz);}
 			uint64_t node_id = (*it)->vertex_id();
 			Graph::vertex v = node_id;
-			uint64_t idx = vg->get_sample_from_vertex(v, "ref").index();
+			VariantGraphVertex::sample_info sample;
+			if (!vg->get_sample_from_vertex_if_exists(v, "ref", sample)) {
+				ERROR("Ref sample not found in the vertex: " << v);
+				abort();
+			}
+			uint64_t idx = 	sample.index();
 
 			DEBUG("At index " << idx
 								<< " has node " << node_id);

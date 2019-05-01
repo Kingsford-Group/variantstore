@@ -21,11 +21,13 @@ endif
 CXX = g++ -std=c++17
 CC = gcc -std=gnu11
 LD= g++ -std=c++17
+dot= dot -Grankdir=LR -Tpng 
 
 LOC_INCLUDE=include
 LOC_LIB=lib
 LOC_SRC=src
 OBJDIR=obj
+SER=ser
 
 CXXFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
 
@@ -40,6 +42,8 @@ LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -L$(LOC_LIB) -lm -lvcflib -lhts -lz \
 #
 
 all: $(TARGETS)
+
+graph:	$(SER)/graph.png
 
 # dependencies between programs and .o files
 test_graphcontainer:		$(OBJDIR)/test_graphcontainer.o $(OBJDIR)/gqf.o \
@@ -75,6 +79,11 @@ $(OBJDIR)/gqf.o: 				$(LOC_SRC)/gqf/gqf.c $(LOC_INCLUDE)/gqf/gqf.h
 $(OBJDIR)/gqf_file.o: 	$(LOC_SRC)/gqf/gqf_file.c $(LOC_INCLUDE)/gqf/gqf_file.h
 $(OBJDIR)/hashutil.o: 	$(LOC_INCLUDE)/gqf/hashutil.h
 
+
+# create dot graph
+$(SER)/graph.png:
+	$(dot) $(SER)/graph.dot -o $@
+
 #
 # generic build rules
 #
@@ -95,5 +104,5 @@ $(OBJDIR):
 	@mkdir -p $(OBJDIR)
 
 clean:
-	rm -rf $(OBJDIR) core $(TARGETS)
+	rm -rf $(OBJDIR) $(SER)/graph.png core $(TARGETS)
 
