@@ -1913,7 +1913,7 @@ int qf_insert(QF *qf, uint64_t key, uint64_t value, uint64_t count, uint8_t
 			fprintf(stdout, "Resizing the CQF.\n");
 			if (qf->runtimedata->container_resize(qf, qf->metadata->nslots * 2) < 0)
 			{
-				fprintf(stdout, "Resizing the failed.\n");
+				fprintf(stdout, "Resizing failed.\n");
 				return QF_NO_SPACE;
 			}
 		} else

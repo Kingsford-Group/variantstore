@@ -308,7 +308,10 @@ namespace variantdb {
 								}
 							}
 						} else if (gt_info.size() == 1) {
-							int present = stoi(gt_info);
+							int present = 0;
+							try {
+								present = stoi(gt_info);
+							} catch (const std::invalid_argument& ia) {}
 							if (present) {
 								add = true;
 								gt1 = true;
@@ -572,22 +575,26 @@ namespace variantdb {
 				}
 			}
 			if (neighbors.size() > 0) {
+				if (neighbors.size() > 2) {
+					ERROR("More than two neighbors on ref path at vertex id: " << id);
+					abort();
+				}
 				if (neighbors.size() == 1) {
 					*v = neighbors[0];
 					return true;
+				} else {
+					*v = std::min(neighbors[0], neighbors[1]);
+					return true;
 				}
-				for (uint64_t i = 0; i < neighbors.size(); i++) {
-					for (uint64_t j = 0; j < neighbors.size(); j++) {
-						if (i != j && topology.is_edge(std::make_pair(neighbors[i],
-																													neighbors[j]))) {
-							*v = neighbors[i];
-							return true;
-						}
-					}
-				}
-				ERROR("Two neighbors are not connected in ref path at vertex id: "
-							<< id);
-				abort();
+				//for (uint64_t i = 0; i < neighbors.size(); i++) {
+					//for (uint64_t j = 0; j < neighbors.size(); j++) {
+						//if (i != j && topology.is_edge(std::make_pair(neighbors[i],
+																													//neighbors[j]))) {
+							//*v = neighbors[i];
+							//return true;
+						//}
+					//}
+				//}
 			}
 
 			return false;

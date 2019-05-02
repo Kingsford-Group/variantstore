@@ -94,11 +94,12 @@ main ( int argc, char *argv[] )
 	variantFile.open(vcf_file);
 	vcflib::Variant var(variantFile);
 
-	print_vg_info(vg, vcf_file, variantFile.sampleNames);
+	//print_vg_info(vg, vcf_file, variantFile.sampleNames);
 
 	PRINT("Serialiing variant graph to disk");
 	vg.serialize("./ser");
 
+#if 0
 	PRINT("Loading variant graph from disk");
 	VariantGraph file_vg("./ser");
 
@@ -106,7 +107,7 @@ main ( int argc, char *argv[] )
 	print_vg_info(file_vg, vcf_file, variantFile.sampleNames);
 	
 	createDotGraph(&file_vg, "./ser");
-
+#endif
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
 
