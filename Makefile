@@ -1,4 +1,4 @@
-TARGETS= test_graphcontainer test_variantgraph test_index
+TARGETS=variantdb test_graphcontainer test_variantgraph test_index
 
 ifdef D
 	DEBUG=-g -DDEBUG_MODE
@@ -41,7 +41,8 @@ LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -L$(LOC_LIB) -lm -lvcflib -lhts -lz \
 # declaration of dependencies
 #
 
-all: $(TARGETS)
+all: variantdb
+tests:	test_graphcontainer test_variantgraph test_index
 
 graph:	$(SER)/graph.png
 
@@ -57,7 +58,10 @@ test_index:							$(OBJDIR)/test_index.o \
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
-
+variantdb:							$(OBJDIR)/variantdb.o \
+												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
+												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 # dependencies between .o files and .cc (or .c) files
 $(OBJDIR)/test_graphcontainer.o: 	$(LOC_SRC)/test_graphcontainer.cc \
 																	$(LOC_INCLUDE)/gqf_cpp.h \
@@ -72,6 +76,11 @@ $(OBJDIR)/test_index.o: 					$(LOC_SRC)/test_index.cc \
 																	$(LOC_INCLUDE)/variant_graph.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
 																	$(LOC_INCLUDE)/graph.h
+$(OBJDIR)/variantdb.o: 						$(LOC_SRC)/variantdb.cc \
+																	$(LOC_INCLUDE)/variant_graph.h \
+																	$(LOC_INCLUDE)/index.h \
+																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
+																	$(LOC_INCLUDE)/graph.h 
 
 $(OBJDIR)/variantgraphvertex.pb.o: 	$(LOC_SRC)/variantgraphvertex.pb.cc \
 																		$(LOC_INCLUDE)/variantgraphvertex.pb.h

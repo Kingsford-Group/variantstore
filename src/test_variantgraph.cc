@@ -12,14 +12,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <iostream>
-#include <string>
-#include <openssl/rand.h>
-
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/dijkstra_shortest_paths.hpp>
-
 #include "dot_graph.h"
 #include "variant_graph.h"
 
@@ -94,12 +86,11 @@ main ( int argc, char *argv[] )
 	variantFile.open(vcf_file);
 	vcflib::Variant var(variantFile);
 
-	//print_vg_info(vg, vcf_file, variantFile.sampleNames);
+	print_vg_info(vg, vcf_file, variantFile.sampleNames);
 
 	PRINT("Serialiing variant graph to disk");
 	vg.serialize("./ser");
 
-#if 0
 	PRINT("Loading variant graph from disk");
 	VariantGraph file_vg("./ser");
 
@@ -107,7 +98,7 @@ main ( int argc, char *argv[] )
 	print_vg_info(file_vg, vcf_file, variantFile.sampleNames);
 	
 	createDotGraph(&file_vg, "./ser");
-#endif
+
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
 
