@@ -83,6 +83,11 @@ $(OBJDIR)/hashutil.o: 	$(LOC_INCLUDE)/gqf/hashutil.h
 # create dot graph
 $(SER)/graph.png: $(SER)/graph.dot
 
+# generate proto files
+proto:
+	protoc --cpp_out=./ ./include/variantgraphvertex.proto && \
+		mv include/variantgraphvertex.pb.cc src
+
 #
 # generic build rules
 #
