@@ -81,8 +81,7 @@ $(OBJDIR)/hashutil.o: 	$(LOC_INCLUDE)/gqf/hashutil.h
 
 
 # create dot graph
-$(SER)/graph.png:
-	$(dot) $(SER)/graph.dot -o $@
+$(SER)/graph.png: $(SER)/graph.dot
 
 #
 # generic build rules
@@ -100,8 +99,14 @@ $(OBJDIR)/%.o: $(LOC_SRC)/%.c | $(OBJDIR)
 $(OBJDIR)/%.o: $(LOC_SRC)/gqf/%.c | $(OBJDIR)
 	$(CXX) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
+$(SER)/%.png: $(SER)/%.dot | $(SER)
+	$(dot) -o $@ $<
+
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
+
+$(SER):
+	@mkdir -p $(SER)
 
 clean:
 	rm -rf $(OBJDIR) $(SER)/graph.png core $(TARGETS)
