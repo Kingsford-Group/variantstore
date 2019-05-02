@@ -45,7 +45,7 @@ main ( int argc, char *argv[] )
 	vg.serialize("./ser");
 
 	PRINT("Serialing index to disk");
-	idx.serialize("test");
+	idx.serialize("./ser");
 
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
