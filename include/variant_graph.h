@@ -208,7 +208,7 @@ namespace variantdb {
 		read_fasta(ref_file, chr, ref);
 		ref_length = ref.size();
 		// initialize the seq buffer
-		sdsl::util::assign(seq_buffer, sdsl::int_vector<>(ref.size(), 0, 3));
+		sdsl::util::assign(seq_buffer, sdsl::int_vector<>(0, 0, 3));
 
 		// add ref node
 		// we set the index to 1.
@@ -254,6 +254,7 @@ namespace variantdb {
 		// serialize seq buffer
 		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
 		seq_buffer.resize(seq_buffer.size());
+		sdsl::util::bit_compress(seq_buffer);
 		sdsl::store_to_file(seq_buffer, seq_buffer_name);
 		// serialize topology
 		topology.serialize(prefix);
