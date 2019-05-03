@@ -24,11 +24,17 @@
 #include <sdsl/util.hpp>
 
 #include "vcflib/Variant.h"
+#include "lru/lru.hpp"
 
 #include "variantgraphvertex.pb.h"
 #include "graph.h"
 
 namespace variantdb {
+
+#define CACHE_SIZE 256
+
+// to map a sample --> vertex ids.
+using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 	// Construction:
 	// Create a variant graph based on a reference genome.
@@ -191,6 +197,7 @@ namespace variantdb {
 			std::string chr;
 			uint64_t ref_length;
 			std::map<uint64_t, uint64_t> idx_vertex_id;
+			Cache cache;
 
 			// structures to persist when serializing variant graph.
 			VariantGraphVertexList vertex_list;
@@ -199,7 +206,8 @@ namespace variantdb {
 	};
 
 	VariantGraph::VariantGraph(const std::string& ref_file, const
-														 std::vector<std::string>& vcfs) {
+														 std::vector<std::string>& vcfs) :
+		cache(CACHE_SIZE) {
 		// Verify that the version of the library that we linked against is
 		// compatible with the version of the headers we compiled against.
 		GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -517,27 +525,31 @@ namespace variantdb {
 		if (get_sample_from_vertex_if_exists(cur_vertex_id, sample_id, sample))
 			return sample.index() + cur_vertex.length();
 
-		// else traverse back in the graph to find a vertex with @sample_id
-		get_sample_from_vertex_if_exists(ref_v_id, "ref", sample);
-		uint64_t cur_index = sample.index();
-		auto temp_itr = idx_vertex_id.lower_bound(cur_index);
-		--temp_itr;
-		while (cur_index > 1) {
-			// move to prev vertex.
-			cur_index = temp_itr->first; 
-			cur_vertex_id = temp_itr->second;
-			cur_vertex = vertex_list.vertex(cur_vertex_id);
-
-			if (get_sample_from_vertex_if_exists(cur_vertex_id, sample_id, sample))
-				break;
-
-			Graph::vertex neighbor_vertex_id;
-			if (get_neighbor_vertex(cur_vertex_id, sample_id, &neighbor_vertex_id)) {
-				cur_vertex_id = neighbor_vertex_id;
-				cur_vertex = vertex_list.vertex(neighbor_vertex_id);
-				break;
-			}
+		// check in the cache
+		if (cache.contains(sample_id))
+			cur_vertex_id = cache.lookup(sample_id);
+		else {	// else traverse back in the graph to find a vertex with @sample_id
+			get_sample_from_vertex_if_exists(ref_v_id, "ref", sample);
+			uint64_t cur_index = sample.index();
+			auto temp_itr = idx_vertex_id.lower_bound(cur_index);
 			--temp_itr;
+			while (cur_index > 1) {
+				// move to prev vertex.
+				cur_index = temp_itr->first; 
+				cur_vertex_id = temp_itr->second;
+				cur_vertex = vertex_list.vertex(cur_vertex_id);
+
+				if (get_sample_from_vertex_if_exists(cur_vertex_id, sample_id, sample))
+					break;
+
+				Graph::vertex neighbor_vertex_id;
+				if (get_neighbor_vertex(cur_vertex_id, sample_id, &neighbor_vertex_id)) {
+					cur_vertex_id = neighbor_vertex_id;
+					cur_vertex = vertex_list.vertex(neighbor_vertex_id);
+					break;
+				}
+				--temp_itr;
+			}
 		}
 
 		// init cur distance
@@ -723,10 +735,14 @@ namespace variantdb {
 			if (check_if_mutation_exists(prev_ref_vertex_id, next_ref_vertex_id, alt,
 																	 &exist_vertex)) {
 				add_sample_to_vertex(exist_vertex, sample_idx, sample_id, gt1, gt2);
+				// update cache
+				cache.emplace(sample_id, exist_vertex);
 			} else {
 				VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
 																											 sample_id, gt1, gt2);
 
+				// update cache
+				cache.emplace(sample_id, sample_vertex->vertex_id());
 				// make connections for the new vertex in the graph
 				topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
 				topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
@@ -759,10 +775,14 @@ namespace variantdb {
 			if (check_if_mutation_exists(prev_ref_vertex_id, next_ref_vertex_id, alt,
 																	 &exist_vertex)) {
 				add_sample_to_vertex(exist_vertex, sample_idx, sample_id, gt1, gt2);
+				// update cache
+				cache.emplace(sample_id, exist_vertex);
 			} else {
 				VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
 																											 sample_id, gt1, gt2);
 
+				// update cache
+				cache.emplace(sample_id, sample_vertex->vertex_id());
 				// make connections for the new vertex in the graph
 				topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
 				topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
@@ -806,6 +826,8 @@ namespace variantdb {
 			uint64_t sample_idx = find_sample_index(prev_ref_vertex_id, sample_id);
 			add_sample_to_vertex(next_ref_vertex_id, sample_idx, sample_id, gt1,
 													 gt2);
+			// update cache
+			cache.emplace(sample_id, next_ref_vertex_id);
 			// make connections for the new vertex in the graph
 			topology.add_edge(prev_ref_vertex_id, next_ref_vertex_id);
 		}
