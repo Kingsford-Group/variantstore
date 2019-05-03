@@ -38,6 +38,9 @@ main ( int argc, char *argv[] )
 	std::vector<std::string> vcfs = {vcf_file};
 	VariantGraph vg(ref_file, vcfs);
 
+	PRINT("Graph stats:");
+	PRINT("Chromosome: " << vg.get_chr() << " #Vertices: " << vg.get_num_vertices()
+				<< " Seq length: " << vg.get_seq_length());
 	PRINT("Creating Index");
 	Index idx(&vg);
 

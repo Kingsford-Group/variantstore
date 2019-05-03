@@ -89,6 +89,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 			uint64_t get_seq_length(void) const;
 			const std::string get_chr(void) const;
 			uint64_t get_ref_length(void) const;
+			double get_cache_hit_rate(void) const;
 
 			void print_vertex_info(const VariantGraphVertex& v) const;
 			const std::string get_sequence(const VariantGraphVertex& v) const;
@@ -211,6 +212,10 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 		// Verify that the version of the library that we linked against is
 		// compatible with the version of the headers we compiled against.
 		GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+#ifdef DEBUG_MODE
+		cache.monitor();
+#endif
 
 		std::string ref;
 		read_fasta(ref_file, chr, ref);
@@ -461,6 +466,13 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 	uint64_t VariantGraph::get_ref_length(void) const {
 		return ref_length;
+	}
+			
+	double VariantGraph::get_cache_hit_rate(void) const {
+#ifdef DEBUG_MODE
+		return cache.stats().hit_rate();
+#endif
+		return 0;
 	}
 
 	const std::string VariantGraph::mutation_string(MUTATION_TYPE m) const {
@@ -736,13 +748,13 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 																	 &exist_vertex)) {
 				add_sample_to_vertex(exist_vertex, sample_idx, sample_id, gt1, gt2);
 				// update cache
-				cache.emplace(sample_id, exist_vertex);
+				cache.insert(sample_id, exist_vertex);
 			} else {
 				VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
 																											 sample_id, gt1, gt2);
 
 				// update cache
-				cache.emplace(sample_id, sample_vertex->vertex_id());
+				cache.insert(sample_id, sample_vertex->vertex_id());
 				// make connections for the new vertex in the graph
 				topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
 				topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
@@ -776,13 +788,13 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 																	 &exist_vertex)) {
 				add_sample_to_vertex(exist_vertex, sample_idx, sample_id, gt1, gt2);
 				// update cache
-				cache.emplace(sample_id, exist_vertex);
+				cache.insert(sample_id, exist_vertex);
 			} else {
 				VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
 																											 sample_id, gt1, gt2);
 
 				// update cache
-				cache.emplace(sample_id, sample_vertex->vertex_id());
+				cache.insert(sample_id, sample_vertex->vertex_id());
 				// make connections for the new vertex in the graph
 				topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
 				topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
@@ -827,7 +839,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 			add_sample_to_vertex(next_ref_vertex_id, sample_idx, sample_id, gt1,
 													 gt2);
 			// update cache
-			cache.emplace(sample_id, next_ref_vertex_id);
+			cache.insert(sample_id, next_ref_vertex_id);
 			// make connections for the new vertex in the graph
 			topology.add_edge(prev_ref_vertex_id, next_ref_vertex_id);
 		}
