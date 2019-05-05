@@ -53,7 +53,8 @@ namespace variantdb {
 		sdsl::bit_vector b(vg->get_ref_length(), 0);
 		// Construct a int vector of node_list_sz
 		uint64_t init_sz = 1;
-		sdsl::util::assign(node_list, sdsl::int_vector<>(init_sz, 0, 64));
+		sdsl::util::assign(node_list, sdsl::int_vector<>(init_sz, 0,
+																										 sizeof(Graph::vertex)));
 		uint64_t node_list_sz = 0;
 		// Iterate nodes folloing path in REF
 		// modify bit vector & node list

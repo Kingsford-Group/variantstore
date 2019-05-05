@@ -45,10 +45,10 @@ main ( int argc, char *argv[] )
 	Index idx(&vg);
 
 	PRINT("Serialing variant graph to disk");
-	vg.serialize("./ser");
+	vg.serialize(argv[3]);
 
 	PRINT("Serialing index to disk");
-	idx.serialize("./ser");
+	idx.serialize(argv[3]);
 
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
