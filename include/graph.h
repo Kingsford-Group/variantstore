@@ -250,9 +250,13 @@ namespace variantdb {
 				return adj_list.delete_key(KeyObject(s, 1, d), QF_NO_LOCK);
 			} else {
 				for (auto const vertex : aux_vertex_list[val - 1]) {
-					if (vertex == d)
+					if (vertex == d) {
 						aux_vertex_list[val - 1].erase(aux_vertex_list[val - 1].begin());
+						break;
+					}
 				}
+				//if (aux_vertex_list[val - 1].size() == 0)
+					//return adj_list.delete_key(KeyObject(s, 0, 0), QF_NO_LOCK);
 			}
 		}
 		return 0;

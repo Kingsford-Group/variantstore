@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <regex>
 
 #include <assert.h>
 
@@ -285,55 +286,58 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 			while (variantFile.getNextVariant(var)) {
 				num_mutations += 1;
 				for (const auto alt : var.alt) {
-					for (const auto sample : var.samples) {
-						auto gt = sample.second.find("GT");
-						auto gt_vec = *gt;
-						std::string gt_info = gt_vec.second[0];
-						//assert(gt_info.size() == 3);
+					if (std::regex_match(alt, std::regex("^[ACTG]+$"))) {
+						for (const auto sample : var.samples) {
+							auto gt = sample.second.find("GT");
+							auto gt_vec = *gt;
+							std::string gt_info = gt_vec.second[0];
+							//assert(gt_info.size() == 3);
 
-						bool gt1, gt2;
-						bool add = false;
-						if (gt_info.size() == 3) {
-							// extract gt info
-							const char *str = gt_info.c_str();
-							int first = str[0] - '0';
-							char phase = str[1];
-							int second = str[2] - '0';
-							if (phase == '|') {
-								if (first > 0 || second > 0) {
-									if (first > 0)
-										gt1 = true;
-									else 
-										gt1 = false;
-									if (second > 0)
-										gt2 = true;
-									else 
-										gt2 = false;
+							bool gt1, gt2;
+							bool add = false;
+							if (gt_info.size() == 3) {
+								// extract gt info
+								const char *str = gt_info.c_str();
+								int first = str[0] - '0';
+								char phase = str[1];
+								int second = str[2] - '0';
+								if (phase == '|') {
+									if (first > 0 || second > 0) {
+										if (first > 0)
+											gt1 = true;
+										else 
+											gt1 = false;
+										if (second > 0)
+											gt2 = true;
+										else 
+											gt2 = false;
 
+										add = true;
+									}	
+								} else if (phase == '/') {
+									if (first > 0 && second > 0) {
+										gt1 = true; gt2 = true;
+										add = true;
+									} else if (first == '1' || second == '1') {
+										gt1 = false; gt2 = false;
+										add = true;
+									}
+								}
+							} else if (gt_info.size() == 1) {
+								int present = 0;
+								try {
+									present = stoi(gt_info);
+								} catch (const std::invalid_argument& ia) {}
+								if (present) {
 									add = true;
-								}	
-							} else if (phase == '/') {
-								if (first > 0 && second > 0) {
-									gt1 = true; gt2 = true;
-									add = true;
-								} else if (first == '1' || second == '1') {
-									gt1 = false; gt2 = false;
-									add = true;
+									gt1 = true;
+									gt2 = false;
 								}
 							}
-						} else if (gt_info.size() == 1) {
-							int present = 0;
-							try {
-								present = stoi(gt_info);
-							} catch (const std::invalid_argument& ia) {}
-							if (present) {
-								add = true;
-								gt1 = true;
-								gt2 = false;
-							}
+							if (add)
+								add_mutation(var.ref, alt, var.position, sample.first, gt1,
+														 gt2);
 						}
-						if (add)
-							add_mutation(var.ref, alt, var.position, sample.first, gt1, gt2);
 					}
 				}
 			}
@@ -411,7 +415,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 	void VariantGraph::split_vertex(uint64_t vertex_id, uint64_t pos,
 																	Graph::vertex* new_vertex) {
-		DEBUG("Spliting vertex: " << vertex_id << " " << pos);
+		//DEBUG("Splitting vertex: " << vertex_id << " " << pos);
 		const VariantGraphVertex cur_vertex = vertex_list.vertex(vertex_id);
 
 		// create vertex object and add to vertex_list
@@ -678,8 +682,8 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 		else
 			mutation = INSERTION;
 
-		DEBUG("Adding mutation: " << mutation_string(mutation) << " " << ref <<
-					" " << alt << " " << pos << " " << sample_id);
+		//DEBUG("Adding mutation: " << mutation_string(mutation) << " " << ref <<
+					//" " << alt << " " << pos << " " << sample_id);
 		// update pos and alt/ref if it's an insertion/deletion.
 		if (mutation == INSERTION) {
 			pos = pos + ref.size();
