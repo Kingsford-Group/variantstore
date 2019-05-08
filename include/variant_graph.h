@@ -339,6 +339,8 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 								add_mutation(var.ref, alt, var.position, sample.first, gt1,
 														 gt2);
 						}
+					} else {
+						ERROR("Unsupported variant allele: " << alt);
 					}
 				}
 			}
@@ -678,7 +680,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 	void VariantGraph::add_mutation(std::string ref, std::string alt, uint64_t
 																	pos, std::string sample_id,
 																	bool gt1, bool gt2) {
-		// find the type mutatuin
+		// find the type mutation
 		enum MUTATION_TYPE mutation;
 		if (ref.size() == alt.size())
 			mutation = SUBSTITUTION;
