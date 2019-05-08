@@ -40,7 +40,7 @@ namespace variantdb {
 	class Graph {
 		public:
 			typedef uint32_t vertex;
-			typedef std::pair<uint32_t, uint32_t> edge;
+			typedef std::pair<vertex, vertex> edge;
 			typedef std::unordered_set<vertex> vertex_set;
 			typedef std::unordered_set<edge> edge_set;
 			typedef vertex_set::iterator vertex_set_iterator;
