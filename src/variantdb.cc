@@ -40,6 +40,7 @@ main ( int argc, char *argv[] )
 
 	PRINT("Graph stats:");
 	PRINT("Chromosome: " << vg.get_chr() << " #Vertices: " << vg.get_num_vertices()
+				<< " #Edges: " << vg.get_num_edges()
 				<< " Seq length: " << vg.get_seq_length());
 	PRINT("Creating Index");
 	Index idx(&vg);

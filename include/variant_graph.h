@@ -87,6 +87,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 			void serialize(const std::string& prefix);
 
 			uint64_t get_num_vertices(void) const;
+			uint64_t get_num_edges(void) const;
 			uint64_t get_seq_length(void) const;
 			const std::string get_chr(void) const;
 			uint64_t get_ref_length(void) const;
@@ -457,7 +458,11 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 	}
 
 	uint64_t VariantGraph::get_num_vertices(void) const {
-		return num_vertices;
+		return topology.get_num_vertices();
+	}
+
+	uint64_t VariantGraph::get_num_edges(void) const {
+		return topology.get_num_edges();
 	}
 
 	uint64_t VariantGraph::get_seq_length(void) const {
