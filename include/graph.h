@@ -26,7 +26,7 @@
 
 namespace variantdb {
 
-#define DEFAULT_SIZE (1ULL << 24)
+#define DEFAULT_SIZE (1ULL << 18)
 #define KEYBITS 40
 
 	// An efficient way to store graph topology for sparse (and skewed) DAGs. 
