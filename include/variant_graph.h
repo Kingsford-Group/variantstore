@@ -281,11 +281,21 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 			variantFile.open(vcf);
 			vcflib::Variant var(variantFile);
 
+			PRINT("Adding mutations from: " << vcf << " #Samples:" <<
+						variantFile.sampleNames.size());
 			// substitutions are always only one base at a time.
 			// Insertions/deletions can be multiple bases.
 			long int num_mutations = 0;
+			//uint32_t num_samples_in_mutation = 0;
 			while (variantFile.getNextVariant(var)) {
 				num_mutations += 1;
+				if (num_mutations % 10000 == 0) {
+					PRINT("Mutations added: " << num_mutations << " #Vertices: " <<
+								get_num_vertices() << " #Edges: " << get_num_edges());
+					//PRINT("Average num samples in mutations: " <<
+								//num_samples_in_mutation / (double)1000);
+					//num_samples_in_mutation = 0;
+				}
 				for (const auto alt : var.alt) {
 					if (std::regex_match(alt, std::regex("^[ACTG]+$"))) {
 						for (const auto sample : var.samples) {
@@ -335,12 +345,14 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 									gt2 = false;
 								}
 							}
-							if (add)
+							if (add) {
 								add_mutation(var.ref, alt, var.position, sample.first, gt1,
 														 gt2);
+								//num_samples_in_mutation++;
+							}
 						}
 					} else {
-						ERROR("Unsupported variant allele: " << alt);
+						//ERROR("Unsupported variant allele: " << alt);
 					}
 				}
 			}
