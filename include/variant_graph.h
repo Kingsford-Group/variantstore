@@ -286,15 +286,15 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 			// substitutions are always only one base at a time.
 			// Insertions/deletions can be multiple bases.
 			long int num_mutations = 0;
-			//uint32_t num_samples_in_mutation = 0;
+			uint32_t num_samples_in_mutation = 0;
 			while (variantFile.getNextVariant(var)) {
 				num_mutations += 1;
-				if (num_mutations % 10000 == 0) {
+				if (num_mutations % 1000 == 0) {
 					PRINT("Mutations added: " << num_mutations << " #Vertices: " <<
 								get_num_vertices() << " #Edges: " << get_num_edges());
-					//PRINT("Average num samples in mutations: " <<
-								//num_samples_in_mutation / (double)1000);
-					//num_samples_in_mutation = 0;
+					PRINT("Average num samples in mutations: " <<
+								num_samples_in_mutation / (double)1000);
+					num_samples_in_mutation = 0;
 				}
 				for (const auto alt : var.alt) {
 					if (std::regex_match(alt, std::regex("^[ACTG]+$"))) {
@@ -348,7 +348,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 							if (add) {
 								add_mutation(var.ref, alt, var.position, sample.first, gt1,
 														 gt2);
-								//num_samples_in_mutation++;
+								num_samples_in_mutation++;
 							}
 						}
 					} else {
