@@ -13,13 +13,12 @@
 #ifndef __INDEX_H__
 #define __INDEX_H_
 
-#include "variant_graph.h"
-#include "variantgraphvertex.pb.h"
-#include "graph.h"
 #include <sdsl/bit_vectors.hpp>
 #include <sdsl/int_vector.hpp>
 #include <sdsl/util.hpp>
 #include <vector>
+
+#include "variant_graph.h"
 
 const uint16_t BLOCK_SIZE = 127;
 

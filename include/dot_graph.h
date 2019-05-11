@@ -14,8 +14,6 @@
 #define __DOT_GRAPH_H__
 
 #include "variant_graph.h"
-#include "variantgraphvertex.pb.h"
-#include "graph.h"
 #include "util.h"
 
 #include <string>

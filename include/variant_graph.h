@@ -27,7 +27,8 @@
 #include "vcflib/Variant.h"
 #include "lru/lru.hpp"
 
-#include "variantgraphvertex.pb.h"
+//#include "variantgraphvertex.pb.h"
+#include "variant_graph_vertex.h"
 #include "graph.h"
 
 namespace variantdb {
@@ -153,7 +154,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 			const std::string mutation_string(MUTATION_TYPE m) const;
 
-			void update_idx_vertex_id_map(const VariantGraphVertex& v);
+			void update_idx_vertex_id_map(const VariantGraphVertex* v);
 			uint64_t find_sample_index(Graph::vertex ref_v_id, std::string
 																 sample_id) const;
 			bool get_neighbor_vertex(Graph::vertex id, const std::string sample_id,
@@ -165,10 +166,10 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 				const;
 			bool check_if_mutation_exists(Graph::vertex prev, uint64_t offset,
 																		uint64_t length, Graph::vertex* v) const;
-			VariantGraphVertex* create_vertex(uint64_t id, uint64_t offset, uint64_t
-																				length,
-																				const std::vector<VariantGraphVertex::sample_info>&
-																				samples);
+			const VariantGraphVertex* create_vertex(uint64_t id, uint64_t offset,
+																							uint64_t length, const
+																							VariantGraphVertex::sample_info&
+																							sample);
 			VariantGraphVertex::sample_info* create_sample_info(uint64_t index,
 																													const std::string
 																													sample_id, bool gt1,
@@ -187,13 +188,13 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 												Graph::vertex* new_vertex_1,  Graph::vertex*
 												new_vertex_2);
 			// returns the vertex_id of the new vertex
-			VariantGraphVertex* add_vertex(uint64_t offset, uint64_t length,
-																		 uint64_t index, const std::string&
-																		 sample_id, bool gt1, bool gt2);
+			const VariantGraphVertex* add_vertex(uint64_t offset, uint64_t length,
+																					 uint64_t index, const std::string&
+																					 sample_id, bool gt1, bool gt2);
 			// returns the vertex_id of the new vertex
-			VariantGraphVertex* add_vertex(const std::string& seq, uint64_t index,
-																		 const std::string& sample_id, bool gt1,
-																		 bool gt2);
+			const VariantGraphVertex* add_vertex(const std::string& seq, uint64_t
+																					 index, const std::string&
+																					 sample_id, bool gt1, bool gt2);
 
 			uint64_t seq_length{0};
 			uint64_t num_vertices{0};
@@ -213,7 +214,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 		cache(CACHE_SIZE), topology(1<<20) {
 		// Verify that the version of the library that we linked against is
 		// compatible with the version of the headers we compiled against.
-		GOOGLE_PROTOBUF_VERIFY_VERSION;
+		//GOOGLE_PROTOBUF_VERIFY_VERSION;
 
 #ifdef DEBUG_MODE
 		cache.monitor();
@@ -227,10 +228,10 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 		// add ref node
 		// we set the index to 1.
-		VariantGraphVertex *v = add_vertex(ref, 1, "ref", 0, 0);
+		const VariantGraphVertex *v = add_vertex(ref, 1, "ref", 0, 0);
 
 		// update idx->vertex_id map
-		update_idx_vertex_id_map(*v);
+		update_idx_vertex_id_map(v);
 
 		// Add vcf files
 		add_vcfs(vcfs);
@@ -238,12 +239,12 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 	VariantGraph::VariantGraph(const std::string& prefix) : topology(prefix) {
 		// load vertex list
-		std::string vertex_list_name = prefix + "/vertex_list.proto";
-		fstream input(vertex_list_name, ios::in | ios::binary);
-		if (!vertex_list.ParseFromIstream(&input)) {
-			ERROR("Failed to parse vertex list.");
-			abort();
-		}
+		//std::string vertex_list_name = prefix + "/vertex_list.proto";
+		//fstream input(vertex_list_name, ios::in | ios::binary);
+		//if (!vertex_list.ParseFromIstream(&input)) {
+			//ERROR("Failed to parse vertex list.");
+			//abort();
+		//}
 		// load seq buffer
 		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
 		sdsl::load_from_file(seq_buffer, seq_buffer_name);
@@ -255,17 +256,17 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 	VariantGraph::~VariantGraph() {
 		// Optional:  Delete all global objects allocated by libprotobuf.
-		google::protobuf::ShutdownProtobufLibrary();
+		//google::protobuf::ShutdownProtobufLibrary();
 	}
 
 	void VariantGraph::serialize(const std::string& prefix) {
 		// serialize vertex list
-		std::string vertex_list_name = prefix + "/vertex_list.proto";
-		std::fstream output(vertex_list_name, ios::out | ios::trunc | ios::binary);
-		if (!vertex_list.SerializeToOstream(&output)) {
-			ERROR("Failed to write vertex list.");
-			abort();
-		}	
+		//std::string vertex_list_name = prefix + "/vertex_list.proto";
+		//std::fstream output(vertex_list_name, ios::out | ios::trunc | ios::binary);
+		//if (!vertex_list.SerializeToOstream(&output)) {
+			//ERROR("Failed to write vertex list.");
+			//abort();
+		//}	
 		// serialize seq buffer
 		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
 		seq_buffer.resize(seq_buffer.size());
@@ -360,19 +361,20 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 		}
 	}
 
-	VariantGraphVertex* VariantGraph::add_vertex(uint64_t offset, uint64_t length,
-																							 uint64_t index, const
-																							 std::string& sample_id, bool
-																							 gt1, bool gt2) {
+	const VariantGraphVertex* VariantGraph::add_vertex(uint64_t offset, uint64_t
+																										 length, uint64_t index,
+																										 const std::string&
+																										 sample_id, bool gt1, bool
+																										 gt2) {
 		// create vertex object and add to vertex_list
-		VariantGraphVertex::sample_info s;
-		s.set_index(index);
-		s.set_sample_id(sample_id);
-		s.set_gt_1(gt1);
-		s.set_gt_2(gt2);
-		std::vector<VariantGraphVertex::sample_info> samples = {s};
-		VariantGraphVertex *v = create_vertex(num_vertices, offset, length,
-																					samples);
+		VariantGraphVertex::sample_info s(index, sample_id, gt1, gt2);
+		//s.set_index(index);
+		//s.set_sample_id(sample_id);
+		//s.set_gt_1(gt1);
+		//s.set_gt_2(gt2);
+		//std::vector<VariantGraphVertex::sample_info> samples = {s};
+		const VariantGraphVertex *v = create_vertex(num_vertices, offset, length,
+																								s);
 
 		// increment vertex count
 		num_vertices++;
@@ -380,10 +382,10 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 		return v;
 	}
 
-	VariantGraphVertex* VariantGraph::add_vertex(const std::string& seq,
-																							 uint64_t index, const
-																							 std::string& sample_id, bool
-																							 gt1, bool gt2) {
+	const VariantGraphVertex* VariantGraph::add_vertex(const std::string& seq,
+																										 uint64_t index, const
+																										 std::string& sample_id,
+																										 bool gt1, bool gt2) {
 		// resize the seq_buffer.
 		seq_buffer.resize(seq_buffer.size() + seq.size());
 		uint64_t start_offset = seq_length;
@@ -393,14 +395,14 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 			seq_length++;
 		}
 		// create vertex object and add to vertex_list
-		VariantGraphVertex::sample_info s;
-		s.set_index(index);
-		s.set_sample_id(sample_id);
-		s.set_gt_1(gt1);
-		s.set_gt_2(gt2);
-		std::vector<VariantGraphVertex::sample_info> samples = {s};
-		VariantGraphVertex *v = create_vertex(num_vertices, start_offset,
-																					seq.size(), samples);
+		VariantGraphVertex::sample_info s(index, sample_id, gt1, gt2);
+		//s.set_index(index);
+		//s.set_sample_id(sample_id);
+		//s.set_gt_1(gt1);
+		//s.set_gt_2(gt2);
+		//std::vector<VariantGraphVertex::sample_info> samples = {s};
+		const VariantGraphVertex *v = create_vertex(num_vertices, start_offset,
+																					seq.size(), s);
 
 		// increment vertex count
 		num_vertices++;
@@ -408,25 +410,25 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 		return v;
 	}
 
-	VariantGraphVertex* VariantGraph::create_vertex(uint64_t id, uint64_t
+	const VariantGraphVertex* VariantGraph::create_vertex(uint64_t id, uint64_t
 																									offset, uint64_t length,
-																									const std::vector<VariantGraphVertex::sample_info>&
-																									samples) {
+																									const VariantGraphVertex::sample_info&
+																									sample) {
 		// create vertex object and add to vertex_list
-		VariantGraphVertex v;
-		v.set_vertex_id(id);
-		v.set_offset(offset);
-		v.set_length(length);
-		for (const auto sample : samples) {
-			VariantGraphVertex::sample_info* s = v.add_s_info();
-			*s = sample;
-			//s->set_index(sample.index());
-			//s->set_sample_id(sample.sample_id());
-			//s->set_gt_1(sample.gt_1());
-			//s->set_gt_2(sample.gt_2());
-		}
-		VariantGraphVertex* vertex = vertex_list.add_vertex();
-		*vertex = v;
+		VariantGraphVertex v(id, offset, length, sample);
+		//v.set_vertex_id(id);
+		//v.set_offset(offset);
+		//v.set_length(length);
+		//for (const auto sample : samples) {
+			//VariantGraphVertex::sample_info* s = v.add_s_info();
+			//*s = sample;
+			////s->set_index(sample.index());
+			////s->set_sample_id(sample.sample_id());
+			////s->set_gt_1(sample.gt_1());
+			////s->set_gt_2(sample.gt_2());
+		//}
+		const VariantGraphVertex* vertex = vertex_list.add_vertex(v);
+		//*vertex = v;
 
 		return vertex;
 	}
@@ -434,21 +436,31 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 	void VariantGraph::split_vertex(uint64_t vertex_id, uint64_t pos,
 																	Graph::vertex* new_vertex) {
 		//DEBUG("Splitting vertex: " << vertex_id << " " << pos);
-		const VariantGraphVertex cur_vertex = vertex_list.vertex(vertex_id);
+		const VariantGraphVertex& cur_vertex = vertex_list.vertex(vertex_id);
 
 		// create vertex object and add to vertex_list
 		uint64_t offset = cur_vertex.offset() + pos - 1;
 		uint64_t length = cur_vertex.length() - pos  + 1;
-		VariantGraphVertex::sample_info s;
-		s.set_index(cur_vertex.s_info(0).index() + pos - 1);
-		s.set_sample_id(cur_vertex.s_info(0).sample_id());
-		s.set_gt_1(cur_vertex.s_info(0).gt_1());
-		s.set_gt_2(cur_vertex.s_info(0).gt_2());
-		std::vector<VariantGraphVertex::sample_info> samples = {s};
-		VariantGraphVertex *v = create_vertex(num_vertices, offset, length, samples);
+		VariantGraphVertex::sample_info sample; 
+		if (!get_sample_from_vertex_if_exists(cur_vertex.vertex_id(), "ref",
+																					sample)) {
+			ERROR("Can't find ref sample");
+			abort();
+		}
+
+		VariantGraphVertex::sample_info s(sample.index() + pos - 1,
+																			sample.sample_id(),
+																			sample.gt_1(),
+																			sample.gt_2());
+		//s.set_index(cur_vertex.s_info(0).index() + pos - 1);
+		//s.set_sample_id(cur_vertex.s_info(0).sample_id());
+		//s.set_gt_1(cur_vertex.s_info(0).gt_1());
+		//s.set_gt_2(cur_vertex.s_info(0).gt_2());
+		//std::vector<VariantGraphVertex::sample_info> samples = {s};
+		const VariantGraphVertex *v = create_vertex(num_vertices, offset, length, s);
 
 		*new_vertex = v->vertex_id();
-		update_idx_vertex_id_map(*v);
+		update_idx_vertex_id_map(v);
 
 		// update length of the seq in the cur_vertex
 		vertex_list.mutable_vertex(vertex_id)->set_length(cur_vertex.length() -
@@ -512,7 +524,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 	void VariantGraph::print_vertex_info(const VariantGraphVertex& v) const {
 		std::string samples;
-		for (int i = 0; i < v.s_info_size(); i++) {
+		for (uint32_t i = 0; i < v.s_info_size(); i++) {
 			const VariantGraphVertex::sample_info& s = v.s_info(i);
 			samples.append("Sample id: " + s.sample_id());
 			samples.append(" Index: " +  std::to_string((int)s.index()) + " ");
@@ -531,11 +543,11 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 		}
 
 	// the idx map should only contain information about the ref vertices.
-	void VariantGraph::update_idx_vertex_id_map(const VariantGraphVertex& v) {
-		for (int i = 0; i < v.s_info_size(); i++) {
-			const VariantGraphVertex::sample_info& s = v.s_info(i);
+	void VariantGraph::update_idx_vertex_id_map(const VariantGraphVertex* v) {
+		for (uint32_t i = 0; i < v->s_info_size(); i++) {
+			const VariantGraphVertex::sample_info& s = v->s_info(i);
 			if (s.sample_id() == "ref")
-				idx_vertex_id[s.index()] = v.vertex_id();
+				idx_vertex_id[s.index()] = v->vertex_id();
 		}
 	}
 
@@ -544,7 +556,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 																											VariantGraphVertex::sample_info&
 																											sample) const {
 		VariantGraphVertex cur_vertex = vertex_list.vertex(v);
-		for (int i = 0; i < cur_vertex.s_info_size(); i++) {
+		for (uint32_t i = 0; i < cur_vertex.s_info_size(); i++) {
 			const VariantGraphVertex::sample_info& s = cur_vertex.s_info(i);
 			if (s.sample_id() == sample_id) {
 				sample = s;
@@ -614,7 +626,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 			std::vector<Graph::vertex> neighbors;
 			for (const auto v_id : topology.out_neighbors(id)) {
 				VariantGraphVertex vertex = vertex_list.vertex(v_id);
-				for (int i = 0; i < vertex.s_info_size(); i++) {
+				for (uint32_t i = 0; i < vertex.s_info_size(); i++) {
 					const VariantGraphVertex::sample_info& s = vertex.s_info(i);
 					if (s.sample_id() != "ref" && s.sample_id() == sample_id) {
 						*v = v_id; 
@@ -654,15 +666,16 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 	void VariantGraph::add_sample_to_vertex(Graph::vertex id, uint64_t
 																					sample_idx, const std::string
 																					sample_id, bool gt1, bool gt2) {
-		VariantGraphVertex::sample_info sample;
-		sample.set_index(sample_idx);
-		sample.set_sample_id(sample_id);
-		sample.set_gt_1(gt1);
-		sample.set_gt_2(gt2);
+		VariantGraphVertex::sample_info sample(sample_idx, sample_id, gt1, gt2);
+		//sample.set_index(sample_idx);
+		//sample.set_sample_id(sample_id);
+		//sample.set_gt_1(gt1);
+		//sample.set_gt_2(gt2);
 
-		VariantGraphVertex::sample_info* s =
-			vertex_list.mutable_vertex(id)->add_s_info();
-		*s = sample;
+		vertex_list.mutable_vertex(id)->add_sample(sample);
+		//VariantGraphVertex::sample_info* s =
+			//vertex_list.mutable_vertex(id)->add_s_info();
+		//*s = sample;
 		//s->set_index(sample_idx);
 		//s->set_sample_id(sample_id);
 		//s->set_gt_1(gt1);
@@ -783,8 +796,9 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 				// update cache
 				cache.insert(sample_id, exist_vertex);
 			} else {
-				VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
-																											 sample_id, gt1, gt2);
+				const VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
+																														 sample_id, gt1,
+																														 gt2);
 
 				// update cache
 				cache.insert(sample_id, sample_vertex->vertex_id());
@@ -823,8 +837,9 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 				// update cache
 				cache.insert(sample_id, exist_vertex);
 			} else {
-				VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
-																											 sample_id, gt1, gt2);
+				const VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
+																														 sample_id, gt1,
+																														 gt2);
 
 				// update cache
 				cache.insert(sample_id, sample_vertex->vertex_id());
@@ -885,12 +900,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 																																	 v, const
 																																	 std::string
 																																	 sample_id)
-	{
-		vg = g; 
-		cur = vg->vertex_list.vertex(v);
-		s_id = sample_id;
-		is_done = false;
-	}
+		: vg(g), cur(vg->vertex_list.vertex(v)), s_id(sample_id), is_done(false) {}
 
 	const VariantGraphVertex*
 		VariantGraph::VariantGraphPathIterator::operator*(void) const {

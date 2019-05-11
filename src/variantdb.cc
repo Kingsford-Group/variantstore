@@ -11,7 +11,6 @@
 
 #include <stdlib.h>
 
-#include "dot_graph.h"
 #include "index.h"
 #include "variant_graph.h"
 
