@@ -29,7 +29,7 @@ LOC_SRC=src
 OBJDIR=obj
 SER=ser
 
-CXXFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
+CXXFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -fopenmp -m64 -I. -I$(LOC_INCLUDE)
 
 CFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
 
@@ -70,7 +70,8 @@ $(OBJDIR)/test_variantgraph.o: 		$(LOC_SRC)/test_variantgraph.cc \
 																	$(LOC_INCLUDE)/variant_graph.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
 																	$(LOC_INCLUDE)/graph.h \
-																	$(LOC_INCLUDE)/dot_graph.h
+																	$(LOC_INCLUDE)/dot_graph.h \
+																	$(LOC_INCLUDE)/stream.hpp
 $(OBJDIR)/test_index.o: 					$(LOC_SRC)/test_index.cc \
 																	$(LOC_INCLUDE)/index.h \
 																	$(LOC_INCLUDE)/variant_graph.h \
@@ -80,7 +81,8 @@ $(OBJDIR)/variantdb.o: 						$(LOC_SRC)/variantdb.cc \
 																	$(LOC_INCLUDE)/variant_graph.h \
 																	$(LOC_INCLUDE)/index.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
-																	$(LOC_INCLUDE)/graph.h 
+																	$(LOC_INCLUDE)/graph.h \
+																	$(LOC_INCLUDE)/stream.hpp
 
 $(OBJDIR)/variantgraphvertex.pb.o: 	$(LOC_SRC)/variantgraphvertex.pb.cc \
 																		$(LOC_INCLUDE)/variantgraphvertex.pb.h

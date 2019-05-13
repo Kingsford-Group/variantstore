@@ -26,6 +26,7 @@
 
 #include "vcflib/Variant.h"
 #include "lru/lru.hpp"
+#include "stream.hpp"
 
 #include "variantgraphvertex.pb.h"
 #include "graph.h"
@@ -181,6 +182,8 @@ namespace variantdb {
 																													bool gt2); 
 			void add_mutation(std::string ref, std::string alt, uint64_t pos,
 												std::vector<sample_struct>& sample_list);
+			void fix_sample_indexes(const std::vector<std::string> sample_list);
+
 			// we only split vertices from the ref.
 			// splits the vertex into two. Connects the cur vertex and
 			// the new one. sets the vertex_id of the new vertex.
@@ -246,10 +249,22 @@ namespace variantdb {
 		// load vertex list
 		std::string vertex_list_name = prefix + "/vertex_list.proto";
 		fstream input(vertex_list_name, ios::in | ios::binary);
-		if (!vertex_list.ParseFromIstream(&input)) {
+
+		function<void(VariantGraphVertex&)> lambda = [this](VariantGraphVertex& v)
+		{
+			VariantGraphVertex* vertex = vertex_list.add_vertex();
+			*vertex = v;
+    };
+
+		if (!stream::for_each(input, lambda)) {
 			ERROR("Failed to parse vertex list.");
 			abort();
 		}
+
+		//if (!vertex_list.ParseFromIstream(&input)) {
+			//ERROR("Failed to parse vertex list.");
+			//abort();
+		//}
 		// load seq buffer
 		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
 		sdsl::load_from_file(seq_buffer, seq_buffer_name);
@@ -268,10 +283,21 @@ namespace variantdb {
 		// serialize vertex list
 		std::string vertex_list_name = prefix + "/vertex_list.proto";
 		std::fstream output(vertex_list_name, ios::out | ios::trunc | ios::binary);
-		if (!vertex_list.SerializeToOstream(&output)) {
+
+		std::function<VariantGraphVertex(uint64_t)> lambda =
+			[this](uint64_t n) {
+			return vertex_list.vertex(n);
+		};
+	
+		if (!stream::write(output, vertex_list.vertex_size(), lambda)) {
 			ERROR("Failed to write vertex list.");
 			abort();
 		}	
+
+		//if (!vertex_list.SerializeToOstream(&output)) {
+			//ERROR("Failed to write vertex list.");
+			//abort();
+		//}	
 		// serialize seq buffer
 		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
 		seq_buffer.resize(seq_buffer.size());
