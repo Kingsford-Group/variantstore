@@ -34,8 +34,8 @@ namespace variantdb {
 
 #define CACHE_SIZE 256
 
-// to map a sample --> vertex ids.
-using Cache = LRU::Cache<std::string, Graph::vertex>;
+	// to map a sample --> vertex ids.
+	using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 	// Construction:
 	// Create a variant graph based on a reference genome.
@@ -64,6 +64,12 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 	// Node list schema: <Vertex_ID, Offset, Length, Index, Sample_ID>
 	// Sequence buffer
 	// Graph topology structure
+
+	typedef struct {
+		std::string sample_id;
+		bool gt1;
+		bool gt2;
+	} sample_struct;
 
 	class VariantGraph {
 		public:
@@ -174,7 +180,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 																													sample_id, bool gt1,
 																													bool gt2); 
 			void add_mutation(std::string ref, std::string alt, uint64_t pos,
-												std::string sample_id, bool gt1, bool gt2);
+												std::vector<sample_struct>& sample_list);
 			// we only split vertices from the ref.
 			// splits the vertex into two. Connects the cur vertex and
 			// the new one. sets the vertex_id of the new vertex.
@@ -210,31 +216,31 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 	VariantGraph::VariantGraph(const std::string& ref_file, const
 														 std::vector<std::string>& vcfs) :
-		cache(CACHE_SIZE), topology(1<<20) {
-		// Verify that the version of the library that we linked against is
-		// compatible with the version of the headers we compiled against.
-		GOOGLE_PROTOBUF_VERIFY_VERSION;
+		cache(CACHE_SIZE) {
+			// Verify that the version of the library that we linked against is
+			// compatible with the version of the headers we compiled against.
+			GOOGLE_PROTOBUF_VERIFY_VERSION;
 
 #ifdef DEBUG_MODE
-		cache.monitor();
+			cache.monitor();
 #endif
 
-		std::string ref;
-		read_fasta(ref_file, chr, ref);
-		ref_length = ref.size();
-		// initialize the seq buffer
-		sdsl::util::assign(seq_buffer, sdsl::int_vector<>(0, 0, 3));
+			std::string ref;
+			read_fasta(ref_file, chr, ref);
+			ref_length = ref.size();
+			// initialize the seq buffer
+			sdsl::util::assign(seq_buffer, sdsl::int_vector<>(0, 0, 3));
 
-		// add ref node
-		// we set the index to 1.
-		VariantGraphVertex *v = add_vertex(ref, 1, "ref", 0, 0);
+			// add ref node
+			// we set the index to 1.
+			VariantGraphVertex *v = add_vertex(ref, 1, "ref", 0, 0);
 
-		// update idx->vertex_id map
-		update_idx_vertex_id_map(*v);
+			// update idx->vertex_id map
+			update_idx_vertex_id_map(*v);
 
-		// Add vcf files
-		add_vcfs(vcfs);
-	}
+			// Add vcf files
+			add_vcfs(vcfs);
+		}
 
 	VariantGraph::VariantGraph(const std::string& prefix) : topology(prefix) {
 		// load vertex list
@@ -297,6 +303,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 					num_samples_in_mutation = 0;
 				}
 				for (const auto alt : var.alt) {
+					std::vector<sample_struct> sample_list;
 					if (std::regex_match(alt, std::regex("^[ACTG]+$"))) {
 						for (const auto sample : var.samples) {
 							auto gt = sample.second.find("GT");
@@ -346,14 +353,16 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 								}
 							}
 							if (add) {
-								add_mutation(var.ref, alt, var.position, sample.first, gt1,
-														 gt2);
+								sample_struct s = {sample.first, gt1, gt2};
+								sample_list.emplace_back(s);
 								num_samples_in_mutation++;
 							}
 						}
 					} else {
 						//ERROR("Unsupported variant allele: " << alt);
 					}
+					if (sample_list.size() > 0)
+						add_mutation(var.ref, alt, var.position, sample_list);
 				}
 			}
 			PRINT("Num mutations: " << num_mutations);
@@ -413,22 +422,19 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 																									const std::vector<VariantGraphVertex::sample_info>&
 																									samples) {
 		// create vertex object and add to vertex_list
-		VariantGraphVertex v;
-		v.set_vertex_id(id);
-		v.set_offset(offset);
-		v.set_length(length);
+		VariantGraphVertex* v = vertex_list.add_vertex();
+		v->set_vertex_id(id);
+		v->set_offset(offset);
+		v->set_length(length);
 		for (const auto sample : samples) {
-			VariantGraphVertex::sample_info* s = v.add_s_info();
-			*s = sample;
-			//s->set_index(sample.index());
-			//s->set_sample_id(sample.sample_id());
-			//s->set_gt_1(sample.gt_1());
-			//s->set_gt_2(sample.gt_2());
+			VariantGraphVertex::sample_info* s = v->add_s_info();
+			s->set_index(sample.index());
+			s->set_sample_id(sample.sample_id());
+			s->set_gt_1(sample.gt_1());
+			s->set_gt_2(sample.gt_2());
 		}
-		VariantGraphVertex* vertex = vertex_list.add_vertex();
-		*vertex = v;
 
-		return vertex;
+		return v;
 	}
 
 	void VariantGraph::split_vertex(uint64_t vertex_id, uint64_t pos,
@@ -439,6 +445,10 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 		// create vertex object and add to vertex_list
 		uint64_t offset = cur_vertex.offset() + pos - 1;
 		uint64_t length = cur_vertex.length() - pos  + 1;
+		if (length == 0) {
+			ERROR("Vertex length is 0");
+			abort();
+		}
 		VariantGraphVertex::sample_info s;
 		s.set_index(cur_vertex.s_info(0).index() + pos - 1);
 		s.set_sample_id(cur_vertex.s_info(0).sample_id());
@@ -493,7 +503,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 	uint64_t VariantGraph::get_ref_length(void) const {
 		return ref_length;
 	}
-			
+
 	double VariantGraph::get_cache_hit_rate(void) const {
 #ifdef DEBUG_MODE
 		return cache.stats().hit_rate();
@@ -611,7 +621,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 	bool VariantGraph::get_neighbor_vertex(Graph::vertex id, const std::string
 																				 sample_id, Graph::vertex* v)
 		const {
-			std::vector<Graph::vertex> neighbors;
+			uint32_t min_idx = UINT32_MAX;
 			for (const auto v_id : topology.out_neighbors(id)) {
 				VariantGraphVertex vertex = vertex_list.vertex(v_id);
 				for (int i = 0; i < vertex.s_info_size(); i++) {
@@ -620,53 +630,29 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 						*v = v_id; 
 						return true;
 					} else if (s.sample_id() == "ref") {	// if sample_id is not found follow "ref" path
-						*v = v_id;
-						neighbors.emplace_back(v_id);
+						// if there are multiple outgoing ref vertexes then we return the
+						// one with the smallest index.
+						if (min_idx > s.index()) {
+							*v = v_id;
+							min_idx = s.index();
+						}
 					}
 				}
 			}
-			if (neighbors.size() > 0) {
-				if (neighbors.size() > 2) {
-					ERROR("More than two neighbors on ref path at vertex id: " << id);
-					abort();
-				}
-				if (neighbors.size() == 1) {
-					*v = neighbors[0];
-					return true;
-				} else {
-					*v = std::min(neighbors[0], neighbors[1]);
-					return true;
-				}
-				//for (uint64_t i = 0; i < neighbors.size(); i++) {
-					//for (uint64_t j = 0; j < neighbors.size(); j++) {
-						//if (i != j && topology.is_edge(std::make_pair(neighbors[i],
-																													//neighbors[j]))) {
-							//*v = neighbors[i];
-							//return true;
-						//}
-					//}
-				//}
-			}
-
+			if (*v != 0)
+				return true;
 			return false;
 		}
 
 	void VariantGraph::add_sample_to_vertex(Graph::vertex id, uint64_t
 																					sample_idx, const std::string
 																					sample_id, bool gt1, bool gt2) {
-		VariantGraphVertex::sample_info sample;
-		sample.set_index(sample_idx);
-		sample.set_sample_id(sample_id);
-		sample.set_gt_1(gt1);
-		sample.set_gt_2(gt2);
-
 		VariantGraphVertex::sample_info* s =
 			vertex_list.mutable_vertex(id)->add_s_info();
-		*s = sample;
-		//s->set_index(sample_idx);
-		//s->set_sample_id(sample_id);
-		//s->set_gt_1(gt1);
-		//s->set_gt_2(gt2);
+		s->set_index(sample_idx);
+		s->set_sample_id(sample_id);
+		s->set_gt_1(gt1);
+		s->set_gt_2(gt2);
 	}
 
 	bool VariantGraph::check_if_mutation_exists(Graph::vertex prev,
@@ -700,8 +686,8 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 	}
 
 	void VariantGraph::add_mutation(std::string ref, std::string alt, uint64_t
-																	pos, std::string sample_id,
-																	bool gt1, bool gt2) {
+																	pos, std::vector<sample_struct>& sample_list)
+	{
 		// find the type mutation
 		enum MUTATION_TYPE mutation;
 		if (ref.size() == alt.size())
@@ -712,7 +698,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 			mutation = INSERTION;
 
 		//DEBUG("Adding mutation: " << mutation_string(mutation) << " " << ref <<
-					//" " << alt << " " << pos << " " << sample_id);
+		//" " << alt << " " << pos << " " << sample_list.size());
 		// update pos and alt/ref if it's an insertion/deletion.
 		if (mutation == INSERTION) {
 			pos = pos + ref.size();
@@ -737,7 +723,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 		VariantGraphVertex ref_vertex = vertex_list.vertex(ref_vertex_id);
 		// check if the mapping is consistant with the vertex structure.
 		//assert(ref_vertex_idx == get_sample_from_vertex(ref_vertex_id,
-																										//"ref").index());
+		//"ref").index());
 
 		if (mutation == SUBSTITUTION) {
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
@@ -767,36 +753,86 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 				// split the vertex
 				split_vertex(ref_vertex_id, ref.size() + 1, &next_ref_vertex_id);
-			} else if (ref_vertex_idx < pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into three
+			} else if (ref_vertex_idx == pos && ref_vertex.length() < ref.size()) { // substitution will skip 1 or more vertexes.
+				// find the next ref vertex
+				VariantGraphVertex next_ref_vertex;
+				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
+				do {
+					++temp_itr;
+					next_ref_vertex = vertex_list.vertex(temp_itr->second);
+				} while (temp_itr->first < pos && temp_itr->first +
+								 next_ref_vertex.length() < pos + ref.size());
+				if (temp_itr->first + next_ref_vertex.length() == pos +
+						ref.size()) {
+					get_neighbor_vertex(temp_itr->second, "ref", &next_ref_vertex_id);
+				} else {
+					// split the vertex
+					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
+											 &next_ref_vertex_id);
+				}
+				temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
+				if (temp_itr->first != ref_vertex_idx) {
+					ERROR("Vertex id not found in the map");
+					abort();
+				}
+				--temp_itr;
+				prev_ref_vertex_id = temp_itr->second;
+			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
+								 > pos + ref.size()) { // vertex needs to be split into three
 				// split the vertex
 				uint64_t split_pos = pos - ref_vertex.offset();
 				split_vertex(ref_vertex_id, split_pos, split_pos + ref.size(),
 										 &prev_ref_vertex_id, &next_ref_vertex_id);
 				std::swap(ref_vertex_id, prev_ref_vertex_id);
+			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
+								 < pos + ref.size()) { // split the current vertex to get prev_vertex
+				prev_ref_vertex_id = ref_vertex_id;
+				split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
+										 &ref_vertex_id);	
+				// find the next ref vertex
+				VariantGraphVertex next_ref_vertex;
+				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
+				do {
+					++temp_itr;
+					next_ref_vertex = vertex_list.vertex(temp_itr->second);
+				} while (temp_itr->first < pos && temp_itr->first +
+								 next_ref_vertex.length() < pos + ref.size());
+				if (temp_itr->first + next_ref_vertex.length() == pos +
+						ref.size()) {
+					get_neighbor_vertex(temp_itr->second, "ref", &next_ref_vertex_id);
+				} else {
+					// split the vertex
+					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
+											 &next_ref_vertex_id);
+				}
 			}
-			// find the index of the sample at this position in the graph.
-			uint64_t sample_idx = find_sample_index(prev_ref_vertex_id, sample_id);
-			Graph::vertex exist_vertex = 0;
-			if (check_if_mutation_exists(prev_ref_vertex_id, next_ref_vertex_id, alt,
-																	 &exist_vertex)) {
-				add_sample_to_vertex(exist_vertex, sample_idx, sample_id, gt1, gt2);
-				// update cache
-				cache.insert(sample_id, exist_vertex);
-			} else {
-				VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
-																											 sample_id, gt1, gt2);
+			// create a vertex for the mutation using the first sample from the
+			// list.
+			std::string sample_id = sample_list[0].sample_id;
+			bool gt1 = sample_list[0].gt1;
+			bool gt2 = sample_list[0].gt2;
+			//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id, sample_id);
+			VariantGraphVertex* sample_vertex = add_vertex(alt, 0,
+																										 sample_id, gt1, gt2);
+			// make connections for the new vertex in the graph
+			topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
+			topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
 
-				// update cache
-				cache.insert(sample_id, sample_vertex->vertex_id());
-				// make connections for the new vertex in the graph
-				topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
-				topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
+			// remove the first sample from the list
+			sample_list.erase(sample_list.begin());
+
+			// add rest of the samples to the vertex.
+			for (auto sample : sample_list) {
+				//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id,
+				//sample.sample_id);
+				add_sample_to_vertex(sample_vertex->vertex_id(), 0,
+														 sample.sample_id, sample.gt1, sample.gt2);
 			}
 		} else if (mutation == INSERTION) {
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
 			// Either we got the vertex where there's already an insertion
 			// or the vertex contains the seq with @pos
-			if (ref_vertex_idx == pos && ref_vertex.length() == 1) { // splitting not needed
+			if (ref_vertex_idx == pos) { // splitting not needed
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
@@ -807,30 +843,38 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 				prev_ref_vertex_id = temp_itr->second;
 
 				// find the next ref vertex
-				get_neighbor_vertex(ref_vertex_id, "ref", &next_ref_vertex_id);		
-			} else if (ref_vertex_idx <= pos) {	// vertex needs to be split into two
+				next_ref_vertex_id = ref_vertex_id;
+			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
+								 > pos) {	// vertex needs to be split into two
 				// split the vertex
 				split_vertex(ref_vertex_id, pos - ref_vertex_idx + 1,
 										 &next_ref_vertex_id);
 				prev_ref_vertex_id = ref_vertex_id;
+			} else { // to handle insertions after ref seq length. 
+				prev_ref_vertex_id = ref_vertex_id;
 			}
-			// find the index of the sample at this position in the graph.
-			uint64_t sample_idx = find_sample_index(prev_ref_vertex_id, sample_id);
-			Graph::vertex exist_vertex = 0;
-			if (check_if_mutation_exists(prev_ref_vertex_id, next_ref_vertex_id, alt,
-																	 &exist_vertex)) {
-				add_sample_to_vertex(exist_vertex, sample_idx, sample_id, gt1, gt2);
-				// update cache
-				cache.insert(sample_id, exist_vertex);
-			} else {
-				VariantGraphVertex* sample_vertex = add_vertex(alt, sample_idx,
-																											 sample_id, gt1, gt2);
-
-				// update cache
-				cache.insert(sample_id, sample_vertex->vertex_id());
-				// make connections for the new vertex in the graph
-				topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
+			// create a vertex for the mutation using the first sample from the
+			// list.
+			std::string sample_id = sample_list[0].sample_id;
+			bool gt1 = sample_list[0].gt1;
+			bool gt2 = sample_list[0].gt2;
+			//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id, sample_id);
+			VariantGraphVertex* sample_vertex = add_vertex(alt, 0,
+																										 sample_id, gt1, gt2);
+			// make connections for the new vertex in the graph
+			topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
+			if (next_ref_vertex_id != 0)
 				topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
+
+			// remove the first sample from the list
+			sample_list.erase(sample_list.begin());
+
+			// add rest of the samples to the vertex.
+			for (auto sample : sample_list) {
+				//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id,
+				//sample.sample_id);
+				add_sample_to_vertex(sample_vertex->vertex_id(), 0,
+														 sample.sample_id, sample.gt1, sample.gt2);
 			}
 		} else { // it's deletion
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
@@ -860,19 +904,66 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 
 				// split the vertex
 				split_vertex(ref_vertex_id, ref.size() + 1, &next_ref_vertex_id);
-			} else if (ref_vertex_idx < pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into three
+			} else if (ref_vertex_idx == pos && ref_vertex.length() < ref.size()) { // deletion will skip 1 or more vertexes
+				// find the next ref vertex
+				VariantGraphVertex next_ref_vertex;
+				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
+				do {
+					++temp_itr;
+					next_ref_vertex = vertex_list.vertex(temp_itr->second);
+				} while (temp_itr->first < pos && temp_itr->first +
+								 next_ref_vertex.length() < pos + ref.size());
+				if (temp_itr->first + next_ref_vertex.length() == pos +
+						ref.size()) {
+					get_neighbor_vertex(temp_itr->second, "ref", &next_ref_vertex_id);
+				} else {
+					// split the vertex
+					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
+											 &next_ref_vertex_id);
+				}
+				temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
+				if (temp_itr->first != ref_vertex_idx) {
+					ERROR("Vertex id not found in the map");
+					abort();
+				}
+				--temp_itr;
+				prev_ref_vertex_id = temp_itr->second;
+			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
+								 > pos + ref.size()) { // vertex needs to be split into three
 				// split the vertex
 				uint64_t split_pos = pos - ref_vertex.offset();
 				split_vertex(ref_vertex_id, split_pos, split_pos + ref.size(),
 										 &prev_ref_vertex_id, &next_ref_vertex_id);
 				std::swap(ref_vertex_id, prev_ref_vertex_id);
+			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
+								 < pos + ref.size()) { // split the current vertex to get prev_vertex
+				prev_ref_vertex_id = ref_vertex_id;
+				split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
+										 &ref_vertex_id);	
+				// find the next ref vertex
+				VariantGraphVertex next_ref_vertex;
+				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
+				do {
+					++temp_itr;
+					next_ref_vertex = vertex_list.vertex(temp_itr->second);
+				} while (temp_itr->first < pos && temp_itr->first +
+								 next_ref_vertex.length() < pos + ref.size());
+				if (temp_itr->first + next_ref_vertex.length() == pos +
+						ref.size()) {
+					get_neighbor_vertex(temp_itr->second, "ref", &next_ref_vertex_id);
+				} else {
+					// split the vertex
+					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
+											 &next_ref_vertex_id);
+				}
 			}
-			// find the index of the sample at this position in the graph.
-			uint64_t sample_idx = find_sample_index(prev_ref_vertex_id, sample_id);
-			add_sample_to_vertex(next_ref_vertex_id, sample_idx, sample_id, gt1,
-													 gt2);
-			// update cache
-			cache.insert(sample_id, next_ref_vertex_id);
+			// add samples to the vertex.
+			for (auto sample : sample_list) {
+				//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id,
+				//sample.sample_id);
+				add_sample_to_vertex(next_ref_vertex_id, 0, sample.sample_id,
+														 sample.gt1, sample.gt2);
+			}
 			// make connections for the new vertex in the graph
 			topology.add_edge(prev_ref_vertex_id, next_ref_vertex_id);
 		}
@@ -931,7 +1022,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 	const VariantGraphVertex*
 		VariantGraph::VariantGraphIterator::operator*(void) const {
 			return &vg->vertex_list.vertex(*itr);
-	}
+		}
 
 	void VariantGraph::VariantGraphIterator::operator++(void) {
 		++itr;
@@ -940,7 +1031,7 @@ using Cache = LRU::Cache<std::string, Graph::vertex>;
 	bool VariantGraph::VariantGraphIterator::done(void) const {
 		return itr.done();
 	}
-	
+
 	VariantGraph::VariantGraphIterator VariantGraph::find(Graph::vertex v,
 																												uint64_t radius) {
 		return VariantGraphIterator(this, v, radius);
