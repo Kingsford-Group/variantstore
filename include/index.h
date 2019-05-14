@@ -66,7 +66,8 @@ namespace variantdb {
 			uint64_t node_id = (*it)->vertex_id();
 			Graph::vertex v = node_id;
 			VariantGraphVertex::sample_info sample;
-			if (!vg->get_sample_from_vertex_if_exists(v, "ref", sample)) {
+			// ref sample id is 0
+			if (!vg->get_sample_from_vertex_if_exists(v, 0, sample)) {
 				ERROR("Ref sample not found in the vertex: " << v);
 				abort();
 			}

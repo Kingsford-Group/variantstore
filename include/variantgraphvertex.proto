@@ -10,7 +10,7 @@ message VariantGraphVertex {
 
 	message sample_info {
 		uint32 index = 1;
-		string sample_id = 2;
+		uint32 sample_id = 2;
 		// two bits for genotype info.
 		bool gt_1 = 3;
 		bool gt_2 = 4;

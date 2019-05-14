@@ -149,7 +149,7 @@ namespace variantdb {
 	Graph::Graph(std::string prefix) {
 		std::string adj_list_name("/adj_list.cqf");
 		std::string vertex_list_name("/aux_vertex_list.sdsl");
-		std::string list_lengths_name("/list_lengths.sdsl");
+		std::string list_lengths_name("/aux_vertex_list_lengths.sdsl");
 		// load cqf
 		adj_list = CQF<KeyObject>(prefix + adj_list_name, FREAD);
 
@@ -179,7 +179,7 @@ namespace variantdb {
 	void Graph::serialize(std::string prefix) {
 		std::string adj_list_name("/adj_list.cqf");
 		std::string vertex_list_name("/aux_vertex_list.sdsl");
-		std::string list_lengths_name("/list_lengths.sdsl");
+		std::string list_lengths_name("/aux_vertex_list_lengths.sdsl");
 		// serialize the cqf
 		adj_list.serialize(prefix + adj_list_name);
 		// determine the size of aux_vertex_list
@@ -199,10 +199,10 @@ namespace variantdb {
 			list_lengths[l_idx++] = list.size();
 		}
 		// compress and serialize
-		//sdsl::util::bit_compress(vertex_list);
-		//sdsl::util::bit_compress(list_lengths);
 		vertex_list.resize(vertex_list.size());
 		list_lengths.resize(list_lengths.size());
+		//sdsl::util::bit_compress(vertex_list);
+		//sdsl::util::bit_compress(list_lengths);
 		sdsl::store_to_file(vertex_list, prefix + vertex_list_name);
 		sdsl::store_to_file(list_lengths, prefix + list_lengths_name);
 	}

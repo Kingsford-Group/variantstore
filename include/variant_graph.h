@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <regex>
 
 #include <assert.h>
@@ -36,7 +37,7 @@ namespace variantdb {
 #define CACHE_SIZE 256
 
 	// to map a sample --> vertex ids.
-	using Cache = LRU::Cache<std::string, Graph::vertex>;
+	using Cache = LRU::Cache<uint32_t, Graph::vertex>;
 
 	// Construction:
 	// Create a variant graph based on a reference genome.
@@ -67,7 +68,7 @@ namespace variantdb {
 	// Graph topology structure
 
 	typedef struct {
-		std::string sample_id;
+		uint32_t sample_id;
 		bool gt1;
 		bool gt2;
 	} sample_struct;
@@ -103,8 +104,7 @@ namespace variantdb {
 			void print_vertex_info(const VariantGraphVertex& v) const;
 			const std::string get_sequence(const VariantGraphVertex& v) const;
 
-			bool get_sample_from_vertex_if_exists(Graph::vertex v, const std::string
-																						sample_id,
+			bool get_sample_from_vertex_if_exists(Graph::vertex v, uint32_t sample_id,
 																						VariantGraphVertex::sample_info&
 																						sample) const;
 
@@ -134,10 +134,14 @@ namespace variantdb {
 					void operator++(void);
 					bool done(void) const;
 
+					// to make the variant graph access the private constructor.
+					friend class VariantGraph;
 				private:
+					VariantGraphPathIterator(const VariantGraph* g, Graph::vertex v,
+																	 uint32_t sample_id);
 					const VariantGraph* vg;
 					VariantGraphVertex cur;
-					std::string s_id;
+					uint32_t s_id;
 					bool is_done;
 			};
 
@@ -157,16 +161,18 @@ namespace variantdb {
 				DELETION,
 				SUBSTITUTION
 			};
+			VariantGraph::VariantGraphPathIterator find_(uint64_t vertex_id, uint32_t
+																								 	 sample_id) const;
 
 			const std::string mutation_string(MUTATION_TYPE m) const;
 
 			void update_idx_vertex_id_map(const VariantGraphVertex& v);
-			uint64_t find_sample_index(Graph::vertex ref_v_id, std::string
-																 sample_id) const;
-			bool get_neighbor_vertex(Graph::vertex id, const std::string sample_id,
+			uint64_t find_sample_index(Graph::vertex ref_v_id, uint32_t sample_id)
+				const;
+			bool get_neighbor_vertex(Graph::vertex id, uint32_t sample_id,
 															 Graph::vertex* v) const;
-			void add_sample_to_vertex(Graph::vertex id, uint64_t sample_idx, const
-																std::string sample_id, bool gt1, bool gt2);
+			void add_sample_to_vertex(Graph::vertex id, uint64_t sample_idx, uint32_t
+																sample_id, bool gt1, bool gt2);
 			bool check_if_mutation_exists(Graph::vertex prev, Graph::vertex next,
 																		const std::string alt, Graph::vertex* v)
 				const;
@@ -197,12 +203,11 @@ namespace variantdb {
 												new_vertex_2);
 			// returns the vertex_id of the new vertex
 			VariantGraphVertex* add_vertex(uint64_t offset, uint64_t length,
-																		 uint64_t index, const std::string&
-																		 sample_id, bool gt1, bool gt2);
+																		 uint64_t index, uint32_t sample_id, bool
+																		 gt1, bool gt2);
 			// returns the vertex_id of the new vertex
 			VariantGraphVertex* add_vertex(const std::string& seq, uint64_t index,
-																		 const std::string& sample_id, bool gt1,
-																		 bool gt2);
+																		 uint32_t sample_id, bool gt1, bool gt2);
 
 			uint64_t seq_length{0};
 			uint64_t num_vertices{0};
@@ -215,6 +220,7 @@ namespace variantdb {
 			VariantGraphVertexList vertex_list;
 			sdsl::int_vector<> seq_buffer;
 			Graph topology;
+			std::unordered_map<std::string, uint32_t> sampleid_map;
 	};
 
 	VariantGraph::VariantGraph(const std::string& ref_file, const
@@ -236,7 +242,9 @@ namespace variantdb {
 
 			// add ref node
 			// we set the index to 1.
-			VariantGraphVertex *v = add_vertex(ref, 1, "ref", 0, 0);
+			sampleid_map.insert(std::make_pair("ref", sampleid_map.size()));
+			// ref id is 0
+			VariantGraphVertex *v = add_vertex(ref, 1, 0, 0, 0);
 
 			// update idx->vertex_id map
 			update_idx_vertex_id_map(*v);
@@ -261,17 +269,21 @@ namespace variantdb {
 			abort();
 		}
 
-		//if (!vertex_list.ParseFromIstream(&input)) {
-			//ERROR("Failed to parse vertex list.");
-			//abort();
-		//}
 		// load seq buffer
 		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
 		sdsl::load_from_file(seq_buffer, seq_buffer_name);
-		// load topology
-		//topology = Graph(prefix);	
 		num_vertices = topology.get_num_vertices() + 1;
 		seq_length = seq_buffer.size();
+
+		//load sampleid map
+		std::string sampleid_map_name = prefix + "/sampleid_map.lst";
+		std::ifstream sampleid_file(sampleid_map_name);
+		std::string sample;
+		uint32_t id;
+		while (sampleid_file >> sample >> id)
+			sampleid_map.insert(std::make_pair(sample, id));
+
+		sampleid_file.close();
 	}
 
 	VariantGraph::~VariantGraph() {
@@ -294,10 +306,6 @@ namespace variantdb {
 			abort();
 		}	
 
-		//if (!vertex_list.SerializeToOstream(&output)) {
-			//ERROR("Failed to write vertex list.");
-			//abort();
-		//}	
 		// serialize seq buffer
 		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
 		seq_buffer.resize(seq_buffer.size());
@@ -305,6 +313,13 @@ namespace variantdb {
 		sdsl::store_to_file(seq_buffer, seq_buffer_name);
 		// serialize topology
 		topology.serialize(prefix);
+
+		// serialize sampleid_map
+		std::string sampleid_map_name = prefix + "/sampleid_map.lst";
+		std::ofstream sampleid_file(sampleid_map_name);
+		for (const auto sample : sampleid_map)
+			sampleid_file << sample.first << " " << sample.second << "\n";
+		sampleid_file.close();
 	}
 
 	void VariantGraph::add_vcfs(const std::vector<std::string>& vcfs) {
@@ -315,8 +330,10 @@ namespace variantdb {
 
 			PRINT("Adding mutations from: " << vcf << " #Samples:" <<
 						variantFile.sampleNames.size());
-			// substitutions are always only one base at a time.
-			// Insertions/deletions can be multiple bases.
+			// insert samples into sampleid_map
+			for (const auto sample : variantFile.sampleNames)
+				sampleid_map.insert(std::make_pair(sample, sampleid_map.size()));
+
 			long int num_mutations = 0;
 			uint32_t num_samples_in_mutation = 0;
 			while (variantFile.getNextVariant(var)) {
@@ -379,9 +396,15 @@ namespace variantdb {
 								}
 							}
 							if (add) {
-								sample_struct s = {sample.first, gt1, gt2};
-								sample_list.emplace_back(s);
-								num_samples_in_mutation++;
+								auto it = sampleid_map.find(sample.first);
+								if (it == sampleid_map.end()) {
+									ERROR("Unkown sample: " << sample.first);
+									abort();
+								} else {
+									sample_struct s = {it->second, gt1, gt2};
+									sample_list.emplace_back(s);
+									num_samples_in_mutation++;
+								}
 							}
 						}
 					} else {
@@ -396,8 +419,8 @@ namespace variantdb {
 	}
 
 	VariantGraphVertex* VariantGraph::add_vertex(uint64_t offset, uint64_t length,
-																							 uint64_t index, const
-																							 std::string& sample_id, bool
+																							 uint64_t index, uint32_t
+																							 sample_id, bool
 																							 gt1, bool gt2) {
 		// create vertex object and add to vertex_list
 		VariantGraphVertex::sample_info s;
@@ -416,8 +439,8 @@ namespace variantdb {
 	}
 
 	VariantGraphVertex* VariantGraph::add_vertex(const std::string& seq,
-																							 uint64_t index, const
-																							 std::string& sample_id, bool
+																							 uint64_t index, uint32_t
+																							 sample_id, bool
 																							 gt1, bool gt2) {
 		// resize the seq_buffer.
 		seq_buffer.resize(seq_buffer.size() + seq.size());
@@ -550,7 +573,7 @@ namespace variantdb {
 		std::string samples;
 		for (int i = 0; i < v.s_info_size(); i++) {
 			const VariantGraphVertex::sample_info& s = v.s_info(i);
-			samples.append("Sample id: " + s.sample_id());
+			samples.append("Sample id: " + std::to_string((int)s.sample_id()));
 			samples.append(" Index: " +  std::to_string((int)s.index()) + " ");
 		}
 		PRINT("ID: " << v.vertex_id() << " Offset: " << v.offset() <<
@@ -570,13 +593,14 @@ namespace variantdb {
 	void VariantGraph::update_idx_vertex_id_map(const VariantGraphVertex& v) {
 		for (int i = 0; i < v.s_info_size(); i++) {
 			const VariantGraphVertex::sample_info& s = v.s_info(i);
-			if (s.sample_id() == "ref")
+			// ref id is 0
+			if (s.sample_id() == 0)
 				idx_vertex_id[s.index()] = v.vertex_id();
 		}
 	}
 
-	bool VariantGraph::get_sample_from_vertex_if_exists(Graph::vertex v, const
-																											std::string sample_id,
+	bool VariantGraph::get_sample_from_vertex_if_exists(Graph::vertex v,
+																											uint32_t sample_id,
 																											VariantGraphVertex::sample_info&
 																											sample) const {
 		VariantGraphVertex cur_vertex = vertex_list.vertex(v);
@@ -591,7 +615,7 @@ namespace variantdb {
 	}
 
 	uint64_t VariantGraph::find_sample_index(Graph::vertex ref_v_id,
-																					 const std::string sample_id) const {
+																					 uint32_t sample_id) const {
 		Graph::vertex cur_vertex_id = ref_v_id;
 		VariantGraphVertex cur_vertex = vertex_list.vertex(cur_vertex_id);
 		// check if the cur vertex contains the sample
@@ -603,7 +627,8 @@ namespace variantdb {
 		if (cache.contains(sample_id))
 			cur_vertex_id = cache.lookup(sample_id);
 		else {	// else traverse back in the graph to find a vertex with @sample_id
-			get_sample_from_vertex_if_exists(ref_v_id, "ref", sample);
+			// ref id is 0
+			get_sample_from_vertex_if_exists(ref_v_id, 0, sample);
 			uint64_t cur_index = sample.index();
 			auto temp_itr = idx_vertex_id.lower_bound(cur_index);
 			--temp_itr;
@@ -630,11 +655,12 @@ namespace variantdb {
 		uint64_t cur_distance = 0;
 		if (get_sample_from_vertex_if_exists(cur_vertex_id, sample_id, sample)) {
 			cur_distance += sample.index();
-		} else if (get_sample_from_vertex_if_exists(cur_vertex_id, "ref", sample)) {
+			// ref id is 0
+		} else if (get_sample_from_vertex_if_exists(cur_vertex_id, 0, sample)) {
 			cur_distance += sample.index();
 		}
 		// traverse the graph forward till you find the @ref_v_id
-		auto it = this->find(cur_vertex_id, sample_id);
+		auto it = this->find_(cur_vertex_id, sample_id);
 		while (!it.done() && (*it)->vertex_id() != ref_v_id) {
 			cur_distance += (*it)->length();
 			++it;
@@ -644,18 +670,17 @@ namespace variantdb {
 	}
 
 	// if there is not neighbor with @sample_id then set @v to "ref"
-	bool VariantGraph::get_neighbor_vertex(Graph::vertex id, const std::string
-																				 sample_id, Graph::vertex* v)
-		const {
+	bool VariantGraph::get_neighbor_vertex(Graph::vertex id, uint32_t sample_id,
+																				 Graph::vertex* v) const {
 			uint32_t min_idx = UINT32_MAX;
 			for (const auto v_id : topology.out_neighbors(id)) {
 				VariantGraphVertex vertex = vertex_list.vertex(v_id);
 				for (int i = 0; i < vertex.s_info_size(); i++) {
 					const VariantGraphVertex::sample_info& s = vertex.s_info(i);
-					if (s.sample_id() != "ref" && s.sample_id() == sample_id) {
+					if (s.sample_id() != 0 && s.sample_id() == sample_id) {
 						*v = v_id; 
 						return true;
-					} else if (s.sample_id() == "ref") {	// if sample_id is not found follow "ref" path
+					} else if (s.sample_id() == 0) {	// if sample_id is not found follow "ref" path
 						// if there are multiple outgoing ref vertexes then we return the
 						// one with the smallest index.
 						if (min_idx > s.index()) {
@@ -671,8 +696,8 @@ namespace variantdb {
 		}
 
 	void VariantGraph::add_sample_to_vertex(Graph::vertex id, uint64_t
-																					sample_idx, const std::string
-																					sample_id, bool gt1, bool gt2) {
+																					sample_idx, uint32_t  sample_id,
+																					bool gt1, bool gt2) {
 		VariantGraphVertex::sample_info* s =
 			vertex_list.mutable_vertex(id)->add_s_info();
 		s->set_index(sample_idx);
@@ -766,7 +791,7 @@ namespace variantdb {
 				prev_ref_vertex_id = temp_itr->second;
 
 				// find the next ref vertex
-				get_neighbor_vertex(ref_vertex_id, "ref", &next_ref_vertex_id);		
+				get_neighbor_vertex(ref_vertex_id, 0, &next_ref_vertex_id);		
 			} else if (ref_vertex_idx == pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into two
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
@@ -790,7 +815,7 @@ namespace variantdb {
 								 next_ref_vertex.length() < pos + ref.size());
 				if (temp_itr->first + next_ref_vertex.length() == pos +
 						ref.size()) {
-					get_neighbor_vertex(temp_itr->second, "ref", &next_ref_vertex_id);
+					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
 				} else {
 					// split the vertex
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
@@ -825,7 +850,7 @@ namespace variantdb {
 								 next_ref_vertex.length() < pos + ref.size());
 				if (temp_itr->first + next_ref_vertex.length() == pos +
 						ref.size()) {
-					get_neighbor_vertex(temp_itr->second, "ref", &next_ref_vertex_id);
+					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
 				} else {
 					// split the vertex
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
@@ -834,10 +859,9 @@ namespace variantdb {
 			}
 			// create a vertex for the mutation using the first sample from the
 			// list.
-			std::string sample_id = sample_list[0].sample_id;
+			uint32_t sample_id = sample_list[0].sample_id;
 			bool gt1 = sample_list[0].gt1;
 			bool gt2 = sample_list[0].gt2;
-			//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id, sample_id);
 			VariantGraphVertex* sample_vertex = add_vertex(alt, 0,
 																										 sample_id, gt1, gt2);
 			// make connections for the new vertex in the graph
@@ -849,8 +873,6 @@ namespace variantdb {
 
 			// add rest of the samples to the vertex.
 			for (auto sample : sample_list) {
-				//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id,
-				//sample.sample_id);
 				add_sample_to_vertex(sample_vertex->vertex_id(), 0,
 														 sample.sample_id, sample.gt1, sample.gt2);
 			}
@@ -881,10 +903,9 @@ namespace variantdb {
 			}
 			// create a vertex for the mutation using the first sample from the
 			// list.
-			std::string sample_id = sample_list[0].sample_id;
+			uint32_t sample_id = sample_list[0].sample_id;
 			bool gt1 = sample_list[0].gt1;
 			bool gt2 = sample_list[0].gt2;
-			//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id, sample_id);
 			VariantGraphVertex* sample_vertex = add_vertex(alt, 0,
 																										 sample_id, gt1, gt2);
 			// make connections for the new vertex in the graph
@@ -897,8 +918,6 @@ namespace variantdb {
 
 			// add rest of the samples to the vertex.
 			for (auto sample : sample_list) {
-				//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id,
-				//sample.sample_id);
 				add_sample_to_vertex(sample_vertex->vertex_id(), 0,
 														 sample.sample_id, sample.gt1, sample.gt2);
 			}
@@ -917,7 +936,7 @@ namespace variantdb {
 				prev_ref_vertex_id = temp_itr->second;
 
 				// find the next ref vertex
-				get_neighbor_vertex(ref_vertex_id, "ref", &next_ref_vertex_id);	
+				get_neighbor_vertex(ref_vertex_id, 0, &next_ref_vertex_id);	
 			} else if (ref_vertex_idx == pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into two
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
@@ -941,7 +960,7 @@ namespace variantdb {
 								 next_ref_vertex.length() < pos + ref.size());
 				if (temp_itr->first + next_ref_vertex.length() == pos +
 						ref.size()) {
-					get_neighbor_vertex(temp_itr->second, "ref", &next_ref_vertex_id);
+					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
 				} else {
 					// split the vertex
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
@@ -976,7 +995,7 @@ namespace variantdb {
 								 next_ref_vertex.length() < pos + ref.size());
 				if (temp_itr->first + next_ref_vertex.length() == pos +
 						ref.size()) {
-					get_neighbor_vertex(temp_itr->second, "ref", &next_ref_vertex_id);
+					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
 				} else {
 					// split the vertex
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
@@ -985,8 +1004,6 @@ namespace variantdb {
 			}
 			// add samples to the vertex.
 			for (auto sample : sample_list) {
-				//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id,
-				//sample.sample_id);
 				add_sample_to_vertex(next_ref_vertex_id, 0, sample.sample_id,
 														 sample.gt1, sample.gt2);
 			}
@@ -995,12 +1012,37 @@ namespace variantdb {
 		}
 	}
 
+	void VariantGraph::fix_sample_indexes(const std::vector<std::string>
+																				sample_list) {
+
+	}
+
 	VariantGraph::VariantGraphPathIterator::VariantGraphPathIterator(const
 																																	 VariantGraph*
 																																	 g,
 																																	 Graph::vertex
 																																	 v, const
 																																	 std::string
+																																	 sample_id)
+	{
+		vg = g; 
+		cur = vg->vertex_list.vertex(v);
+		auto it = vg->sampleid_map.find(sample_id);
+		if (it == vg->sampleid_map.end()) {
+			ERROR("Sample not found");
+			abort();
+		} else {
+			s_id = it->second;
+		}
+
+		is_done = false;
+	}
+
+	VariantGraph::VariantGraphPathIterator::VariantGraphPathIterator(const
+																																	 VariantGraph*
+																																	 g,
+																																	 Graph::vertex
+																																	 v, uint32_t
 																																	 sample_id)
 	{
 		vg = g; 
@@ -1031,6 +1073,13 @@ namespace variantdb {
 																														vertex_id, const
 																														std::string
 																														sample_id) const {
+		return VariantGraphPathIterator(this, vertex_id, sample_id);	
+	}
+	
+	VariantGraph::VariantGraphPathIterator VariantGraph::find_(uint64_t
+																														 vertex_id,
+																														 uint32_t
+																														 sample_id) const {
 		return VariantGraphPathIterator(this, vertex_id, sample_id);	
 	}
 
