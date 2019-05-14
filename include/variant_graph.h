@@ -99,6 +99,7 @@ namespace variantdb {
 			uint64_t get_seq_length(void) const;
 			const std::string get_chr(void) const;
 			uint64_t get_ref_length(void) const;
+			std::string get_sample_name(uint32_t id) const;
 			double get_cache_hit_rate(void) const;
 
 			void print_vertex_info(const VariantGraphVertex& v) const;
@@ -137,8 +138,6 @@ namespace variantdb {
 					// to make the variant graph access the private constructor.
 					friend class VariantGraph;
 				private:
-					VariantGraphPathIterator(const VariantGraph* g, Graph::vertex v,
-																	 uint32_t sample_id);
 					const VariantGraph* vg;
 					VariantGraphVertex cur;
 					uint32_t s_id;
@@ -161,9 +160,6 @@ namespace variantdb {
 				DELETION,
 				SUBSTITUTION
 			};
-			VariantGraph::VariantGraphPathIterator find_(uint64_t vertex_id, uint32_t
-																								 	 sample_id) const;
-
 			const std::string mutation_string(MUTATION_TYPE m) const;
 
 			void update_idx_vertex_id_map(const VariantGraphVertex& v);
@@ -188,7 +184,7 @@ namespace variantdb {
 																													bool gt2); 
 			void add_mutation(std::string ref, std::string alt, uint64_t pos,
 												std::vector<sample_struct>& sample_list);
-			void fix_sample_indexes(const std::vector<std::string> sample_list);
+			void fix_sample_indexes(void);
 
 			// we only split vertices from the ref.
 			// splits the vertex into two. Connects the cur vertex and
@@ -214,6 +210,7 @@ namespace variantdb {
 			std::string chr;
 			uint64_t ref_length;
 			std::map<uint64_t, uint64_t> idx_vertex_id;
+			std::unordered_map<uint32_t, std::string> idsample_map;
 			Cache cache;
 
 			// structures to persist when serializing variant graph.
@@ -243,6 +240,7 @@ namespace variantdb {
 			// add ref node
 			// we set the index to 1.
 			sampleid_map.insert(std::make_pair("ref", sampleid_map.size()));
+			idsample_map.insert(std::make_pair(0, "ref"));
 			// ref id is 0
 			VariantGraphVertex *v = add_vertex(ref, 1, 0, 0, 0);
 
@@ -280,8 +278,10 @@ namespace variantdb {
 		std::ifstream sampleid_file(sampleid_map_name);
 		std::string sample;
 		uint32_t id;
-		while (sampleid_file >> sample >> id)
+		while (sampleid_file >> sample >> id)  {
 			sampleid_map.insert(std::make_pair(sample, id));
+			idsample_map.insert(std::make_pair(id, sample));
+		}
 
 		sampleid_file.close();
 	}
@@ -331,8 +331,10 @@ namespace variantdb {
 			PRINT("Adding mutations from: " << vcf << " #Samples:" <<
 						variantFile.sampleNames.size());
 			// insert samples into sampleid_map
-			for (const auto sample : variantFile.sampleNames)
+			for (const auto sample : variantFile.sampleNames) {
 				sampleid_map.insert(std::make_pair(sample, sampleid_map.size()));
+				idsample_map.insert(std::make_pair(sampleid_map.size() - 1, sample));
+			}
 
 			long int num_mutations = 0;
 			uint32_t num_samples_in_mutation = 0;
@@ -560,6 +562,14 @@ namespace variantdb {
 		return 0;
 	}
 
+	std::string VariantGraph::get_sample_name(uint32_t id) const {
+		auto it = idsample_map.find(id);
+		if (it == idsample_map.end()) {
+			ERROR("Unknown sample id: " << id);
+		}
+		return it->second;
+	}
+
 	const std::string VariantGraph::mutation_string(MUTATION_TYPE m) const {
 		if (m == INSERTION)
 			return std::string("INSERTION");
@@ -660,7 +670,11 @@ namespace variantdb {
 			cur_distance += sample.index();
 		}
 		// traverse the graph forward till you find the @ref_v_id
-		auto it = this->find_(cur_vertex_id, sample_id);
+		auto map_it = idsample_map.find(sample_id);
+		if (map_it == idsample_map.end()) {
+			ERROR("Sample id not found: " << sample_id);
+		}
+		auto it = this->find(cur_vertex_id, map_it->second);
 		while (!it.done() && (*it)->vertex_id() != ref_v_id) {
 			cur_distance += (*it)->length();
 			++it;
@@ -1012,8 +1026,7 @@ namespace variantdb {
 		}
 	}
 
-	void VariantGraph::fix_sample_indexes(const std::vector<std::string>
-																				sample_list) {
+	void VariantGraph::fix_sample_indexes(void) {
 
 	}
 
@@ -1035,19 +1048,6 @@ namespace variantdb {
 			s_id = it->second;
 		}
 
-		is_done = false;
-	}
-
-	VariantGraph::VariantGraphPathIterator::VariantGraphPathIterator(const
-																																	 VariantGraph*
-																																	 g,
-																																	 Graph::vertex
-																																	 v, uint32_t
-																																	 sample_id)
-	{
-		vg = g; 
-		cur = vg->vertex_list.vertex(v);
-		s_id = sample_id;
 		is_done = false;
 	}
 
@@ -1076,13 +1076,6 @@ namespace variantdb {
 		return VariantGraphPathIterator(this, vertex_id, sample_id);	
 	}
 	
-	VariantGraph::VariantGraphPathIterator VariantGraph::find_(uint64_t
-																														 vertex_id,
-																														 uint32_t
-																														 sample_id) const {
-		return VariantGraphPathIterator(this, vertex_id, sample_id);	
-	}
-
 	// iterator will be positioned at the start of the path.
 	VariantGraph::VariantGraphPathIterator VariantGraph::find(const std::string
 																														sample_id) const {
