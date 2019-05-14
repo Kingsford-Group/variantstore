@@ -75,7 +75,7 @@ namespace variantdb {
 			DEBUG("At index " << idx
 								<< " has node " << node_id);
 
-			b[idx] = 1;
+			b[idx-1] = 1;
 			node_list[node_list_sz-1] = node_id;
 			++it;
 		}
@@ -103,7 +103,7 @@ namespace variantdb {
 		if ( pos >= rank_rrrb.size())
 			return node_list[node_list.size()-1];
 
-		uint64_t node_idx = rank_rrrb(pos);
+		uint64_t node_idx = rank_rrrb(pos-1);
 		if ( node_idx == 0 )
 			return node_list[0];
 
