@@ -144,11 +144,13 @@ std::string query_sample_from_sample ( const VariantGraph *vg, const Index *idx,
 
   while (!it.done()) {
     temp.assign(vg->get_sequence(*(*it)));
-    DEBUG("Check node: " << (*it)->vertex_id() << ", Reference Index: "
+    DEBUG("Check node: " << (*it)->vertex_id() << ", Sample Index: "
           << sample_pos << ", Seq " << temp);
     uint64_t l = (*it)->length();
     uint64_t next_sample_pos = sample_pos + l;
 
+    //TODO: assert next_sample_pos
+    
     if (record_seq == true && next_sample_pos < pos_y) {
       seq += temp;
     } else if (record_seq == true && next_sample_pos >= pos_y) {
