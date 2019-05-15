@@ -51,13 +51,14 @@ namespace variantdb {
     return false;
   }
 
-	std::string get_samples(const VariantGraphVertex* v) {
+	std::string get_samples(const VariantGraphVertex* v, const VariantGraph *vg)
+	{
 		std::string samples;
 		samples += "[ label=\"" + std::to_string(v->vertex_id()) + " l:" +
 			std::to_string(static_cast<int>(v->length())) + "\n(";
     for (int i = 0; i < v->s_info_size(); ++i) {
 			const VariantGraphVertex::sample_info& s = v->s_info(i);
-			samples += std::to_string(static_cast<int>(s.sample_id())) + " i:" +
+			samples += vg->get_sample_name(s.sample_id()) + " i:" +
 				std::to_string(static_cast<int>(s.index()));
 			if (i < v->s_info_size() - 1)
 				samples += "\n";
@@ -84,7 +85,8 @@ namespace variantdb {
 
     VariantGraph::VariantGraphIterator it = vg->find(v, radius);
     while(!it.done()) {
-			labels += std::to_string((*it)->vertex_id()) + get_samples(*it) + "\n";
+			labels += std::to_string((*it)->vertex_id()) + get_samples(*it, vg) +
+				"\n";
       ++it;
 		}
 
