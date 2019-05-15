@@ -105,7 +105,8 @@ namespace variantdb {
 			void print_vertex_info(const VariantGraphVertex& v) const;
 			const std::string get_sequence(const VariantGraphVertex& v) const;
 
-			bool get_sample_from_vertex_if_exists(Graph::vertex v, uint32_t sample_id,
+			bool get_sample_from_vertex_if_exists(Graph::vertex v, const std::string
+																						sample_id,
 																						VariantGraphVertex::sample_info&
 																						sample) const;
 
@@ -178,6 +179,9 @@ namespace variantdb {
 				DELETION,
 				SUBSTITUTION
 			};
+			bool get_sample_from_vertex_if_exists(Graph::vertex v, uint32_t sample_id,
+																						VariantGraphVertex::sample_info&
+																						sample) const;
 			const std::string mutation_string(MUTATION_TYPE m) const;
 
 			void update_idx_vertex_id_map(const VariantGraphVertex& v);
@@ -643,6 +647,19 @@ namespace variantdb {
 			}
 		}
 		return false;
+	}
+
+	bool VariantGraph::get_sample_from_vertex_if_exists(Graph::vertex v,
+																											const std::string
+																											sample_id,
+																											VariantGraphVertex::sample_info&
+																											sample) const {
+		auto map_it = sampleid_map.find(sample_id);
+		if (map_it == sampleid_map.end()) {
+			ERROR("Sample not found: " << sample_id);
+		}
+
+		return get_sample_from_vertex_if_exists(v, map_it->second, sample);	
 	}
 
 	uint64_t VariantGraph::find_sample_index(Graph::vertex ref_v_id,
