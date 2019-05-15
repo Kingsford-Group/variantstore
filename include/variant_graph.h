@@ -153,26 +153,6 @@ namespace variantdb {
 			VariantGraph::VariantGraphPathIterator find(const std::string sample_id)
 				const;
 
-			class VariantGraphPathMutableIterator {
-				public:
-					VariantGraphPathMutableIterator(VariantGraph* g, Graph::vertex v,
-																					const std::string sample_id);
-					VariantGraphVertex* operator*(void);
-					void operator++(void);
-					bool done(void) const;
-
-				private:
-					VariantGraph *vg;
-					VariantGraphVertex *cur;
-					uint32_t s_id;
-					bool is_done;
-			};
-			
-			// iterator will be positioned at the start of the path.
-			VariantGraph::VariantGraphPathMutableIterator mutable_find(const
-																																 std::string
-																																 sample_id);
-
 		private:
 			enum MUTATION_TYPE {
 				INSERTION,
@@ -226,6 +206,43 @@ namespace variantdb {
 			// returns the vertex_id of the new vertex
 			VariantGraphVertex* add_vertex(const std::string& seq, uint64_t index,
 																		 uint32_t sample_id, bool gt1, bool gt2);
+
+			// iterator for a breadth-first traversal in the variant graph
+			class VariantGraphMutableIterator {
+				public:
+					VariantGraphMutableIterator(VariantGraph* g, Graph::vertex v,
+																			uint64_t r);
+					VariantGraphVertex* operator*(void);
+					void operator++(void);
+					bool done(void) const;
+
+				private:
+					VariantGraph *vg;
+					Graph::GraphIterator itr;
+			};
+
+			VariantGraphMutableIterator mutable_find(Graph::vertex v = 0, uint64_t
+																							 radius = UINT64_MAX);
+
+			class VariantGraphPathMutableIterator {
+				public:
+					VariantGraphPathMutableIterator(VariantGraph* g, Graph::vertex v,
+																					const std::string sample_id);
+					VariantGraphVertex* operator*(void);
+					void operator++(void);
+					bool done(void) const;
+
+				private:
+					VariantGraph *vg;
+					VariantGraphVertex *cur;
+					uint32_t s_id;
+					bool is_done;
+			};
+			
+			// iterator will be positioned at the start of the path.
+			VariantGraph::VariantGraphPathMutableIterator mutable_find(const
+																																 std::string
+																																 sample_id);
 
 			uint64_t seq_length{0};
 			uint64_t num_vertices{0};
@@ -1073,6 +1090,7 @@ namespace variantdb {
 	}
 
 	void VariantGraph::fix_sample_indexes(void) {
+#if 1
 		for (const auto sample : sampleid_map) {
 			if (sample.first == "ref")
 				continue;
@@ -1090,38 +1108,81 @@ namespace variantdb {
 				++path;
 			}
 		}
+#else	
+		// Optimized solution.
+		// Perform a BFS on the graph. From each vertex, explore the neighbors and
+		// is a sample_info is stored at the vertex then update the sample index
+		// as vertex_index + vertex_len + delta
+		// We update the delta if we travel from a vertex with sample vertex to a
+		// ref vertex. 
 
-		// trying the optimized solution. Not working yet.
-#if 0
-		// map to keep track of indexes.
-		std::unordered_map<uint32_t, uint32_t> sampleid_index;
-    VariantGraph::VariantGraphIterator it = vg->find();
+		// map to keep track of delta for samples.
+		std::unordered_map<uint32_t, int32_t> sampleid_delta;
 
-		// init the index map with all 0s
-		for (int i = 0; i < idsample_map.size(); ++i)
-			sampleid_index.insert(std::make_pair(i, 0));
+		// init the index map with all deltas as 0
+		for (const auto sample : idsample_map)
+			sampleid_delta.insert(std::make_pair(sample.first, 0));
 
+		// init BFS iterator
+		auto it = mutable_find();
 		while(!it.done()) {
 			auto cur_vertex = *it;
-			
 			// get neighbors of the vertex
-			auto neighbors = vg->find(cur_vertex->vertex_id(), 1);
-			while (!neighbors.done()) {
-				auto cur_neighbor = *neighbors;
-				// for each sample other than "ref" in the vertex update the index
-				for (int i = 0; i < cur_neighbor->s_info_size(); ++i) {
-					VariantGraphVertex::sample_info* s = cur_neighbor->mutable_s_info(i);
-					if (s->sample_id() != 0) {
-						auto map_it = sampleid_index.find(s->sample_id());
-						if (map_it == sampleid_index.end()) {
-							ERROR("Unknown sample id: " << s->sample_id());
-							abort();
+			VariantGraphVertex::sample_info ref_sample; 
+			if (get_sample_from_vertex_if_exists(cur_vertex->vertex_id(), 0,
+																					 ref_sample)) { // this is a ref vertex
+				uint32_t ref_index = ref_sample.index();
+				for (auto neighbor_id :
+						 topology.out_neighbors(cur_vertex->vertex_id())) {
+					auto cur_neighbor = vertex_list.mutable_vertex(neighbor_id);
+					// for each sample other than "ref" in the vertex update the index
+					for (int i = 0; i < cur_neighbor->s_info_size(); ++i) {
+						VariantGraphVertex::sample_info* s = cur_neighbor->mutable_s_info(i);
+						if (s->sample_id() != 0 && s->index() == 0) {	// 0 is the ref sample
+							auto map_it = sampleid_delta.find(s->sample_id());
+							if (map_it == sampleid_delta.end()) {
+								ERROR("Unknown sample id: " << s->sample_id());
+								abort();
+							}
+							int32_t delta = map_it->second;
+							int32_t sample_index = ref_index + cur_vertex->length() + delta;
+							if (sample_index < 0) {
+								ERROR("Sample index is less the 0: " <<
+											get_sample_name(s->sample_id()) << " " <<
+											cur_vertex->vertex_id());
+								abort();
+							}
+							s->set_index(sample_index);
 						}
-						uint32_t cur_index = map_it->second;
-						s.set_index(cur_index + cur_vertex.length());
 					}
 				}
-				++neighbors;
+			} else { // this is not a ref vertex
+				// only sample vertexes should only have one outgoing edge.
+				if (topology.out_neighbors(cur_vertex->vertex_id()).size() > 1) {
+					ERROR("Sample vertex has more than 1 neighbor: " <<
+								cur_vertex->vertex_id());
+					abort();
+				}
+				for (auto neighbor_id :
+						 topology.out_neighbors(cur_vertex->vertex_id())) {
+					auto cur_neighbor = vertex_list.mutable_vertex(neighbor_id);
+					// for each sample other than "ref" in the vertex update the index
+					uint32_t cur_length = cur_vertex->length();
+					// for each sample update the delta
+					for (int i = 0; i < cur_vertex->s_info_size(); ++i) {
+						const VariantGraphVertex::sample_info s = cur_vertex->s_info(i);
+						uint32_t cur_index = s.index();
+						VariantGraphVertex::sample_info ref_sample; 
+						if (!get_sample_from_vertex_if_exists(cur_neighbor->vertex_id(), 0,
+																								 ref_sample)) { // this is a ref vertex
+							ERROR("Ref vertex not found as a neighbor from sample vertex. "
+										<< cur_neighbor->vertex_id());
+							abort();
+						}
+						sampleid_delta[s.sample_id()] = cur_index + cur_length -
+							ref_sample.index();
+					}
+				}
 			}
 			++it;
 		}
@@ -1242,6 +1303,32 @@ namespace variantdb {
 	VariantGraph::VariantGraphIterator VariantGraph::find(Graph::vertex v,
 																												uint64_t radius) {
 		return VariantGraphIterator(this, v, radius);
+	}
+
+	VariantGraph::VariantGraphMutableIterator::VariantGraphMutableIterator(VariantGraph*
+																																				 g,
+																																				 Graph::vertex
+																																				 v,
+																																				 uint64_t
+																																				 r) :
+		vg(g), itr(&g->topology, v, r) {};
+
+	VariantGraphVertex*
+		VariantGraph::VariantGraphMutableIterator::operator*(void) {
+			return vg->vertex_list.mutable_vertex(*itr);
+		}
+
+	void VariantGraph::VariantGraphMutableIterator::operator++(void) {
+		++itr;
+	}
+
+	bool VariantGraph::VariantGraphMutableIterator::done(void) const {
+		return itr.done();
+	}
+
+	VariantGraph::VariantGraphMutableIterator
+		VariantGraph::mutable_find(Graph::vertex v, uint64_t radius) {
+		return VariantGraphMutableIterator(this, v, radius);
 	}
 
 }
