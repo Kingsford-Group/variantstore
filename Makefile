@@ -1,4 +1,4 @@
-TARGETS=variantdb test_graphcontainer test_variantgraph test_index
+TARGETS=variantdb test_graphcontainer test_variantgraph test_index test_query
 
 ifdef D
 	DEBUG=-g -DDEBUG_MODE
@@ -21,7 +21,7 @@ endif
 CXX = g++ -std=c++17
 CC = gcc -std=gnu11
 LD= g++ -std=c++17
-dot= dot -Grankdir=LR -Tpng 
+dot= dot -Grankdir=LR -Tpng
 
 LOC_INCLUDE=include
 LOC_LIB=lib
@@ -35,7 +35,7 @@ CFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
 
 LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -L$(LOC_LIB) -lm -lvcflib -lhts -lz \
 					 -lbz2 -llzma -lrt -lpthread -lssl -lcrypto -lboost_system -lsdsl \
-						`pkg-config --cflags --libs protobuf` -ltcmalloc 
+						`pkg-config --cflags --libs protobuf` -ltcmalloc
 
 #
 # declaration of dependencies
@@ -62,6 +62,10 @@ variantdb:							$(OBJDIR)/variantdb.o \
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
+test_query:							$(OBJDIR)/test_query.o \
+												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
+												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 # dependencies between .o files and .cc (or .c) files
 $(OBJDIR)/test_graphcontainer.o: 	$(LOC_SRC)/test_graphcontainer.cc \
 																	$(LOC_INCLUDE)/gqf_cpp.h \
@@ -83,7 +87,11 @@ $(OBJDIR)/variantdb.o: 						$(LOC_SRC)/variantdb.cc \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
 																	$(LOC_INCLUDE)/graph.h \
 																	$(LOC_INCLUDE)/stream.hpp
-
+$(OBJDIR)/test_query.o: 					$(LOC_SRC)/test_query.cc \
+																	$(LOC_INCLUDE)/index.h \
+																	$(LOC_INCLUDE)/variant_graph.h \
+																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
+																	$(LOC_INCLUDE)/graph.h
 $(OBJDIR)/variantgraphvertex.pb.o: 	$(LOC_SRC)/variantgraphvertex.pb.cc \
 																		$(LOC_INCLUDE)/variantgraphvertex.pb.h
 $(OBJDIR)/gqf.o: 				$(LOC_SRC)/gqf/gqf.c $(LOC_INCLUDE)/gqf/gqf.h
@@ -126,4 +134,3 @@ $(SER):
 
 clean:
 	rm -rf $(OBJDIR) $(SER)/graph.png core $(TARGETS)
-
