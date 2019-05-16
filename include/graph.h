@@ -430,9 +430,27 @@ namespace variantdb {
 		cur = cur_vertex;
 		q.pop();
 		if (hop < r) {
+			std::vector<Graph::vertex> ordered_neighbors;
 			for (const auto v : g->out_neighbors(cur)) {
-				q.push(std::make_pair(v, hop + 1));
+				// to handle the order of vertexes when there's an insert mutation.
+				// We always insert sample vertex first and ref vertex at the end.
+				std::vector<Graph::vertex> intersect;
+				std::vector<Graph::vertex> vec1, vec2;
+				auto set1 = g->out_neighbors(cur);
+				auto set2 = g->out_neighbors(v);
+				std::copy(set1.begin(), set2.end(), std::back_inserter(vec1));
+				std::copy(set2.begin(), set2.end(), std::back_inserter(vec2));
+				std::sort(vec1.begin(), vec1.end());
+				std::sort(vec2.begin(), vec2.end());
+				std::set_intersection(vec1.begin(), vec1.end(), vec2.begin(),
+															vec2.end(), std::back_inserter(intersect));
+				if (intersect.size() > 0)  
+					ordered_neighbors.emplace(ordered_neighbors.begin(), v);
+				else
+					ordered_neighbors.emplace(ordered_neighbors.end(), v);
 			}
+			for (const auto v : ordered_neighbors)
+				q.push(std::make_pair(v, hop + 1));
 		}
 	}
 

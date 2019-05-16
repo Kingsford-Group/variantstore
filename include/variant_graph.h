@@ -1090,7 +1090,7 @@ namespace variantdb {
 	}
 
 	void VariantGraph::fix_sample_indexes(void) {
-#if 1
+#if 0
 		for (const auto sample : sampleid_map) {
 			if (sample.first == "ref")
 				continue;
@@ -1113,9 +1113,10 @@ namespace variantdb {
 		// Perform a BFS on the graph. From each vertex, explore the neighbors and
 		// is a sample_info is stored at the vertex then update the sample index
 		// as vertex_index + vertex_len + delta
-		// We update the delta if we travel from a vertex with sample vertex to a
-		// ref vertex. 
-
+		// We update the delta if we travel from a vertex with sample info to a
+		// ref vertex. Or from a ref vertex to a sample vertex where sample index
+		// is already been set.
+		PRINT("Fixing indexes");
 		// map to keep track of delta for samples.
 		std::unordered_map<uint32_t, int32_t> sampleid_delta;
 
@@ -1153,6 +1154,9 @@ namespace variantdb {
 								abort();
 							}
 							s->set_index(sample_index);
+						} else if (s->sample_id() != 0 && s->index() != 0) {	// reset the sample index
+							sampleid_delta[s->sample_id()] =  s->index() - (ref_index +
+																															cur_vertex->length());
 						}
 					}
 				}
