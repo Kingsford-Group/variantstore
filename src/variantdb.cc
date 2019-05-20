@@ -44,7 +44,7 @@ main ( int argc, char *argv[] )
 	VariantGraph vg(ref_file, vcfs);
 
 	console->info("Graph stats:");
-	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: ",
+	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
 								vg.get_chr(), vg.get_num_vertices() , vg.get_num_edges(),
 								vg.get_seq_length());
 	console->info("Creating Index");
