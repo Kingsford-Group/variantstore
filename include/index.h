@@ -68,20 +68,19 @@ namespace variantdb {
 			VariantGraphVertex::sample_info sample;
 			// ref sample id is 0
 			if (!vg->get_sample_from_vertex_if_exists(v, "ref", sample)) {
-				ERROR("Ref sample not found in the vertex: " << v);
+				console->error("Ref sample not found in the vertex: {}", v);
 				abort();
 			}
 			uint64_t idx = 	sample.index();
 
-			DEBUG("At index " << idx
-								<< " has node " << node_id);
+			console->debug("At index {}  has node ", idx, node_id);
 
 			b[idx-1] = 1;
 			node_list[node_list_sz-1] = node_id;
 			++it;
 		}
 
-		std::cout << std::endl;
+		//std::cout << std::endl;
 		// Compress it & Construct rank support vector from vector
 		sdsl::util::assign(rrrb, sdsl::rrr_vector<BLOCK_SIZE>(b));
 		sdsl::util::assign(rank_rrrb,

@@ -13,6 +13,7 @@
 #include "variant_graph.h"
 
 using namespace variantdb;
+std::shared_ptr<spdlog::logger> console;
 
 void print_index_info(const Index &idx, uint64_t len)
 {
@@ -82,6 +83,7 @@ main ( int argc, char *argv[] )
 
 	//std::string filename = argv[1];
 
+	console = spdlog::default_logger();
 	PRINT("Creating variant graph");
 	std::string ref_file(argv[1]);
 	std::string vcf_file(argv[2]);

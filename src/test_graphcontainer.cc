@@ -24,6 +24,7 @@
 #include "graph.h"
 
 using namespace variantdb;
+std::shared_ptr<spdlog::logger> console;
 
 int test_correctness(const Graph& graph, std::unordered_map<uint32_t,
 											std::unordered_set<uint32_t>>& adj_list,
@@ -124,6 +125,7 @@ main ( int argc, char *argv[] )
 	//typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS>
 		//BoostGraph;
 
+	console = spdlog::default_logger();
 	Graph graph(nslots);
 	//BoostGraph bg(nslots);
 

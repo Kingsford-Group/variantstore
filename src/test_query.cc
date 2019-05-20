@@ -9,6 +9,7 @@
 #include "query.h"
 
 using namespace variantdb;
+std::shared_ptr<spdlog::logger> console;
 
 int
 main ( int argc, char *argv[] )
@@ -18,6 +19,7 @@ main ( int argc, char *argv[] )
 		exit(1);
 	}
 
+	console = spdlog::default_logger();
 	//Construct vg & index
 	PRINT("Creating variant graph");
 	std::string ref_file(argv[1]);

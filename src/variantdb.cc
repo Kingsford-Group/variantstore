@@ -11,11 +11,15 @@
 
 #include <stdlib.h>
 
+#include "spdlog/spdlog.h"
+
 #include "dot_graph.h"
 #include "index.h"
 #include "variant_graph.h"
 
 using namespace variantdb;
+
+std::shared_ptr<spdlog::logger> console;
 
 /* 
  * ===  FUNCTION  ======================================================================
@@ -31,24 +35,25 @@ main ( int argc, char *argv[] )
 		exit(1);
 	}
 
+	console = spdlog::default_logger();
 	std::string ref_file(argv[1]);
 	std::string vcf_file(argv[2]);
 	
-	PRINT("Creating variant graph");
+	console->info("Creating variant graph");
 	std::vector<std::string> vcfs = {vcf_file};
 	VariantGraph vg(ref_file, vcfs);
 
-	PRINT("Graph stats:");
-	PRINT("Chromosome: " << vg.get_chr() << " #Vertices: " << vg.get_num_vertices()
-				<< " #Edges: " << vg.get_num_edges()
-				<< " Seq length: " << vg.get_seq_length());
-	PRINT("Creating Index");
+	console->info("Graph stats:");
+	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: ",
+								vg.get_chr(), vg.get_num_vertices() , vg.get_num_edges(),
+								vg.get_seq_length());
+	console->info("Creating Index");
 	Index idx(&vg);
 
-	PRINT("Serialing variant graph to disk");
+	console->info("Serializing variant graph to disk");
 	vg.serialize(argv[3]);
 
-	PRINT("Serialing index to disk");
+	console->info("Serializing index to disk");
 	idx.serialize(argv[3]);
 
 	return EXIT_SUCCESS;

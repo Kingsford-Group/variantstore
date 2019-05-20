@@ -15,18 +15,19 @@
 #include "variant_graph.h"
 
 using namespace variantdb;
+std::shared_ptr<spdlog::logger> console;
 
 void print_index_info(const Index &idx, uint64_t len)
 {
-  PRINT("Sequence length is");
-  PRINT("Pos\tNode_id");
+	PRINT("Sequence length is");
+	PRINT("Pos\tNode_id");
 
-  for (uint64_t i=0; i<len; i++)
-  {
-    uint64_t node_id = idx.find(i);
-    PRINT(i << ":" << node_id);
-  }
-  return;
+	for (uint64_t i=0; i<len; i++)
+	{
+		uint64_t node_id = idx.find(i);
+		PRINT(i << ":" << node_id);
+	}
+	return;
 }
 
 void print_vg_info(VariantGraph& vg, std::string& vcf_file) {
@@ -68,29 +69,30 @@ void print_vg_info(VariantGraph& vg, std::string& vcf_file) {
 			std::cout << vg.get_sequence(**itr);
 			++itr;
 		}
-    PRINT("");
+		PRINT("");
 	}
 	PRINT("");
 }
 
 
-int
+	int
 main ( int argc, char *argv[] )
 {
-if (argc < 2) {
-  fprintf(stderr, "Please specify the reference fasta file and vcf file.\n");
-  exit(1);
-}
+	if (argc < 2) {
+		fprintf(stderr, "Please specify the reference fasta file and vcf file.\n");
+		exit(1);
+	}
 
-//std::string filename = argv[1];
+	console = spdlog::default_logger();
+	//std::string filename = argv[1];
 
-PRINT("Creating variant graph");
-std::string ref_file(argv[1]);
-std::string vcf_file(argv[2]);
-std::vector<std::string> vcfs = {vcf_file};
-VariantGraph vg(ref_file, vcfs);
+	PRINT("Creating variant graph");
+	std::string ref_file(argv[1]);
+	std::string vcf_file(argv[2]);
+	std::vector<std::string> vcfs = {vcf_file};
+	VariantGraph vg(ref_file, vcfs);
 
-print_vg_info(vg, vcf_file);
-createDotGraph(&vg, "graph");
-return 0;
+	print_vg_info(vg, vcf_file);
+	createDotGraph(&vg, "graph");
+	return 0;
 }

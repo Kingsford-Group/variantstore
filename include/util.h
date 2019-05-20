@@ -17,10 +17,18 @@
 #include <fstream>
 #include <unordered_map>
 
+#include "spdlog/spdlog.h"
+
 #ifdef DEBUG_MODE
 #define PRINT_DEBUG 1
 #else
 #define PRINT_DEBUG 0
+#endif
+
+extern std::shared_ptr<spdlog::logger> console;
+
+#ifdef DEBUG_MODE
+console->set_level(spdlog::level::debug);
 #endif
 
 #define DEBUG(x) do { \

@@ -102,7 +102,7 @@ namespace variantdb {
 			std::string get_sample_name(uint32_t id) const;
 			double get_cache_hit_rate(void) const;
 
-			void print_vertex_info(const VariantGraphVertex& v) const;
+			std::string print_vertex_info(const VariantGraphVertex& v) const;
 			const std::string get_sequence(const VariantGraphVertex& v) const;
 
 			bool get_sample_from_vertex_if_exists(Graph::vertex v, const std::string
@@ -305,7 +305,7 @@ namespace variantdb {
     };
 
 		if (!stream::for_each(input, lambda)) {
-			ERROR("Failed to parse vertex list.");
+			console->error("Failed to parse vertex list.");
 			abort();
 		}
 
@@ -320,6 +320,8 @@ namespace variantdb {
 		std::ifstream sampleid_file(sampleid_map_name);
 		std::string sample;
 		uint32_t id;
+		// read chr name
+		sampleid_file >> sample >> chr;
 		while (sampleid_file >> sample >> id)  {
 			sampleid_map.insert(std::make_pair(sample, id));
 			idsample_map.insert(std::make_pair(id, sample));
@@ -344,7 +346,7 @@ namespace variantdb {
 		};
 	
 		if (!stream::write(output, vertex_list.vertex_size(), lambda)) {
-			ERROR("Failed to write vertex list.");
+			console->error("Failed to write vertex list.");
 			abort();
 		}	
 
@@ -359,6 +361,8 @@ namespace variantdb {
 		// serialize sampleid_map
 		std::string sampleid_map_name = prefix + "/sampleid_map.lst";
 		std::ofstream sampleid_file(sampleid_map_name);
+		// write the chromosome name.
+		sampleid_file << "chr: " << chr << "\n";
 		for (const auto sample : sampleid_map)
 			sampleid_file << sample.first << " " << sample.second << "\n";
 		sampleid_file.close();
@@ -370,8 +374,8 @@ namespace variantdb {
 			variantFile.open(vcf);
 			vcflib::Variant var(variantFile);
 
-			PRINT("Adding mutations from: " << vcf << " #Samples:" <<
-						variantFile.sampleNames.size());
+			console->info("Adding mutations from: {} #Samples:", vcf,
+										variantFile.sampleNames.size());
 			// insert samples into sampleid_map
 			for (const auto sample : variantFile.sampleNames) {
 				sampleid_map.insert(std::make_pair(sample, sampleid_map.size()));
@@ -383,10 +387,10 @@ namespace variantdb {
 			while (variantFile.getNextVariant(var)) {
 				num_mutations += 1;
 				if (num_mutations % 10000 == 0) {
-					PRINT("Mutations added: " << num_mutations << " #Vertices: " <<
-								get_num_vertices() << " #Edges: " << get_num_edges());
-					PRINT("Average num samples in mutations: " <<
-								num_samples_in_mutation / (double)10000);
+					console->debug("Mutations added: {} #Vertices: {} #Edges: ",
+												num_mutations, get_num_vertices(), get_num_edges());
+					console->debug("Average num samples in mutations: {}",
+												num_samples_in_mutation / (double)10000);
 					num_samples_in_mutation = 0;
 				}
 				for (const auto alt : var.alt) {
@@ -442,7 +446,7 @@ namespace variantdb {
 							if (add) {
 								auto it = sampleid_map.find(sample.first);
 								if (it == sampleid_map.end()) {
-									ERROR("Unkown sample: " << sample.first);
+									console->error("Unkown sample: {}", sample.first);
 									abort();
 								} else {
 									sample_struct s = {it->second, gt1, gt2};
@@ -452,13 +456,13 @@ namespace variantdb {
 							}
 						}
 					} else {
-						//ERROR("Unsupported variant allele: " << alt);
+						//console->error("Unsupported variant allele: {}", alt);
 					}
 					if (sample_list.size() > 0)
 						add_mutation(var.ref, alt, var.position, sample_list);
 				}
 			}
-			PRINT("Num mutations: " << num_mutations);
+			console->info("Num mutations: {}", num_mutations);
 		}
 	}
 
@@ -532,14 +536,14 @@ namespace variantdb {
 
 	void VariantGraph::split_vertex(uint64_t vertex_id, uint64_t pos,
 																	Graph::vertex* new_vertex) {
-		//DEBUG("Splitting vertex: " << vertex_id << " " << pos);
+		console->debug("Splitting vertex: {} {}", vertex_id, pos);
 		const VariantGraphVertex cur_vertex = vertex_list.vertex(vertex_id);
 
 		// create vertex object and add to vertex_list
 		uint64_t offset = cur_vertex.offset() + pos - 1;
 		uint64_t length = cur_vertex.length() - pos  + 1;
 		if (length == 0) {
-			ERROR("Vertex length is 0");
+			console->error("Vertex length is 0");
 			abort();
 		}
 		VariantGraphVertex::sample_info s;
@@ -607,7 +611,7 @@ namespace variantdb {
 	std::string VariantGraph::get_sample_name(uint32_t id) const {
 		auto it = idsample_map.find(id);
 		if (it == idsample_map.end()) {
-			ERROR("Unknown sample id: " << id);
+			console->error("Unknown sample id: {}", id);
 		}
 		return it->second;
 	}
@@ -621,15 +625,16 @@ namespace variantdb {
 			return std::string("SUBSTITUTION");
 	}
 
-	void VariantGraph::print_vertex_info(const VariantGraphVertex& v) const {
+	std::string VariantGraph::print_vertex_info(const VariantGraphVertex& v) const {
 		std::string samples;
 		for (int i = 0; i < v.s_info_size(); i++) {
 			const VariantGraphVertex::sample_info& s = v.s_info(i);
 			samples.append("Sample id: " + std::to_string((int)s.sample_id()));
 			samples.append(" Index: " +  std::to_string((int)s.index()) + " ");
 		}
-		PRINT("ID: " << v.vertex_id() << " Offset: " << v.offset() <<
-					" length: " << v.length() << " Samples: " << samples); 
+		return "ID: " + std::to_string(v.vertex_id()) + " Offset: " +
+			std::to_string(v.offset()) + " length: " + std::to_string(v.length()) +
+			" Samples: " + samples; 
 	}
 
 	const std::string VariantGraph::get_sequence(const VariantGraphVertex& v)
@@ -673,7 +678,7 @@ namespace variantdb {
 																											sample) const {
 		auto map_it = sampleid_map.find(sample_id);
 		if (map_it == sampleid_map.end()) {
-			ERROR("Sample not found: " << sample_id);
+			console->error("Sample not found: {}", sample_id);
 		}
 
 		return get_sample_from_vertex_if_exists(v, map_it->second, sample);	
@@ -727,7 +732,7 @@ namespace variantdb {
 		// traverse the graph forward till you find the @ref_v_id
 		auto map_it = idsample_map.find(sample_id);
 		if (map_it == idsample_map.end()) {
-			ERROR("Sample id not found: " << sample_id);
+			console->error("Sample id not found: {}", sample_id);
 		}
 		auto it = this->find(cur_vertex_id, map_it->second);
 		while (!it.done() && (*it)->vertex_id() != ref_v_id) {
@@ -817,8 +822,9 @@ namespace variantdb {
 		else
 			mutation = INSERTION;
 
-		//DEBUG("Adding mutation: " << mutation_string(mutation) << " " << ref <<
-		//" " << alt << " " << pos << " " << sample_list.size());
+		console->debug("Adding mutation: {} {} {} {} {}",
+									 mutation_string(mutation), ref, alt, pos,
+									 sample_list.size());
 		// update pos and alt/ref if it's an insertion/deletion.
 		if (mutation == INSERTION) {
 			pos = pos + ref.size();
@@ -853,7 +859,7 @@ namespace variantdb {
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
-					ERROR("Vertex id not found in the map");
+					console->error("Vertex id not found in the map");
 					abort();
 				}
 				--temp_itr;
@@ -865,7 +871,7 @@ namespace variantdb {
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
-					ERROR("Vertex id not found in the map");
+					console->error("Vertex id not found in the map");
 					abort();
 				}
 				--temp_itr;
@@ -892,7 +898,7 @@ namespace variantdb {
 				}
 				temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
-					ERROR("Vertex id not found in the map");
+					console->error("Vertex id not found in the map");
 					abort();
 				}
 				--temp_itr;
@@ -956,7 +962,7 @@ namespace variantdb {
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
-					ERROR("Vertex id not found in the map");
+					console->error("Vertex id not found in the map");
 					abort();
 				}
 				--temp_itr;
@@ -1004,7 +1010,7 @@ namespace variantdb {
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
-					ERROR("Vertex id not found in the map");
+					console->error("Vertex id not found in the map");
 					abort();
 				}
 				--temp_itr;
@@ -1016,7 +1022,7 @@ namespace variantdb {
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
-					ERROR("Vertex id not found in the map");
+					console->error("Vertex id not found in the map");
 					abort();
 				}
 				--temp_itr;
@@ -1043,7 +1049,7 @@ namespace variantdb {
 				}
 				temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
-					ERROR("Vertex id not found in the map");
+					console->error("Vertex id not found in the map");
 					abort();
 				}
 				--temp_itr;
@@ -1116,7 +1122,7 @@ namespace variantdb {
 		// We update the delta if we travel from a vertex with sample info to a
 		// ref vertex. Or from a ref vertex to a sample vertex where sample index
 		// is already been set.
-		PRINT("Fixing indexes");
+		console->info("Fixing indexes");
 		// map to keep track of delta for samples.
 		std::unordered_map<uint32_t, int32_t> sampleid_delta;
 
@@ -1142,15 +1148,15 @@ namespace variantdb {
 						if (s->sample_id() != 0 && s->index() == 0) {	// 0 is the ref sample
 							auto map_it = sampleid_delta.find(s->sample_id());
 							if (map_it == sampleid_delta.end()) {
-								ERROR("Unknown sample id: " << s->sample_id());
+								console->error("Unknown sample id: {}", s->sample_id());
 								abort();
 							}
 							int32_t delta = map_it->second;
 							int32_t sample_index = ref_index + cur_vertex->length() + delta;
 							if (sample_index < 0) {
-								ERROR("Sample index is less the 0: " <<
-											get_sample_name(s->sample_id()) << " " <<
-											cur_vertex->vertex_id());
+								console->error("Sample index is less the 0: {} {}",
+															 get_sample_name(s->sample_id()),
+															 cur_vertex->vertex_id());
 								abort();
 							}
 							s->set_index(sample_index);
@@ -1163,8 +1169,8 @@ namespace variantdb {
 			} else { // this is not a ref vertex
 				// only sample vertexes should only have one outgoing edge.
 				if (topology.out_neighbors(cur_vertex->vertex_id()).size() > 1) {
-					ERROR("Sample vertex has more than 1 neighbor: " <<
-								cur_vertex->vertex_id());
+					console->error("Sample vertex has more than 1 neighbor: {}",
+												 cur_vertex->vertex_id());
 					abort();
 				}
 				for (auto neighbor_id :
@@ -1179,8 +1185,8 @@ namespace variantdb {
 						VariantGraphVertex::sample_info ref_sample; 
 						if (!get_sample_from_vertex_if_exists(cur_neighbor->vertex_id(), 0,
 																								 ref_sample)) { // this is a ref vertex
-							ERROR("Ref vertex not found as a neighbor from sample vertex. "
-										<< cur_neighbor->vertex_id());
+							console->error("Ref vertex not found as a neighbor from sample vertex. {}",
+														 cur_neighbor->vertex_id());
 							abort();
 						}
 						sampleid_delta[s.sample_id()] = cur_index + cur_length -
@@ -1205,7 +1211,7 @@ namespace variantdb {
 		cur = vg->vertex_list.vertex(v);
 		auto it = vg->sampleid_map.find(sample_id);
 		if (it == vg->sampleid_map.end()) {
-			ERROR("Sample not found");
+			console->error("Sample not found");
 			abort();
 		} else {
 			s_id = it->second;
@@ -1252,7 +1258,7 @@ namespace variantdb {
 		cur = vg->vertex_list.mutable_vertex(v);
 		auto it = vg->sampleid_map.find(sample_id);
 		if (it == vg->sampleid_map.end()) {
-			ERROR("Sample not found");
+			console->error("Sample not found");
 			abort();
 		} else {
 			s_id = it->second;

@@ -28,60 +28,60 @@ Graph::vertex get_prev_vertex_with_sample ( VariantGraph *vg, Index *idx,
                                             const string sample_id,
                                             uint64_t &ref_pos,
                                             uint64_t &sample_pos) {
-  uint64_t cur_pos = pos;
-  Graph::vertex v = idx->find(cur_pos); // the node right before cur_pos
-  Graph::vertex v_find = v;
-  VariantGraphVertex::sample_info sample;
-  VariantGraphVertex::sample_info sample_find;
-  bool sample_found = false;
+	uint64_t cur_pos = pos;
+	Graph::vertex v = idx->find(cur_pos); // the node right before cur_pos
+	Graph::vertex v_find = v;
+	VariantGraphVertex::sample_info sample;
+	VariantGraphVertex::sample_info sample_find;
+	bool sample_found = false;
 
-  while (true) { // do until find sample or to the front of graph
-    Graph::vertex cur_v = v;
-    Graph::vertex new_v = cur_v;
+	while (true) { // do until find sample or to the front of graph
+		Graph::vertex cur_v = v;
+		Graph::vertex new_v = cur_v;
 
-    // find the node before cur_v in the reference
-    while (new_v == cur_v && cur_pos > 1) {
-      cur_pos = cur_pos - 1;
-      new_v = idx->find(cur_pos);
-    }
-    v = new_v;
+		// find the node before cur_v in the reference
+		while (new_v == cur_v && cur_pos > 1) {
+			cur_pos = cur_pos - 1;
+			new_v = idx->find(cur_pos);
+		}
+		v = new_v;
 
-    // if reach the first node in the graph, return the first node
-    if (cur_pos <= 1) {
-      ref_pos = 1;
-      v_find = v;
-      assert(v_find == 0);
-      vg->get_sample_from_vertex_if_exists(v_find, REF, sample_find);
-      sample_pos = sample_find.index();
-      break;
-    }
+		// if reach the first node in the graph, return the first node
+		if (cur_pos <= 1) {
+			ref_pos = 1;
+			v_find = v;
+			assert(v_find == 0);
+			vg->get_sample_from_vertex_if_exists(v_find, REF, sample_find);
+			sample_pos = sample_find.index();
+			break;
+		}
 
-    // check all outgoing edges of v by BFS, report of a node containing sample
-    // is found. ref_pos is updated whenever a node with ref is encountered
-    VariantGraph::VariantGraphIterator it = vg->find(v, 1);
-    ++it;
-    while(!it.done()) {
-      v = (*it)->vertex_id();
+		// check all outgoing edges of v by BFS, report of a node containing sample
+		// is found. ref_pos is updated whenever a node with ref is encountered
+		VariantGraph::VariantGraphIterator it = vg->find(v, 1);
+		++it;
+		while(!it.done()) {
+			v = (*it)->vertex_id();
 
-      // TODO: consider consecutive mutation
-      if (vg->get_sample_from_vertex_if_exists(v, REF, sample))
-      { ref_pos = sample.index(); }
+			// TODO: consider consecutive mutation
+			if (vg->get_sample_from_vertex_if_exists(v, REF, sample))
+			{ ref_pos = sample.index(); }
 			if (vg->get_sample_from_vertex_if_exists(v, sample_id, sample_find))
-      {
-        v_find = v;
-        sample_found = true;
-        sample_pos = sample_find.index();
-      }
-      ++it;
-    }
+			{
+				v_find = v;
+				sample_found = true;
+				sample_pos = sample_find.index();
+			}
+			++it;
+		}
 
-    if (sample_found == true) {break;}
-  }
+		if (sample_found == true) {break;}
+	}
 
-  DEBUG("The closest node before " << pos << " contain sample "
-      << sample_id << " is node " << v_find << ". Ref Index: " << cur_pos);
+	console->debug("The closest node before {}  contain sample {} is node {}. Ref Index: {}",
+								 pos, sample_id, v_find, cur_pos);
 
-  return v_find;
+	return v_find;
 } // get_prev_vertex_with_sample()
 
 
@@ -104,8 +104,8 @@ std::string query_sample_from_ref ( VariantGraph *vg, Index *idx,
 
   while (!it.done()) {
     temp.assign(vg->get_sequence(*(*it))); // store seq of current node
-    DEBUG("Check node: " << (*it)->vertex_id() << ", reference Index: "
-          << ref_pos << ", seq: " << temp);
+		console->debug("Check node: {}, reference Index: {}, seq: {}",
+									 (*it)->vertex_id(), ef_pos, temp);
     uint64_t l = (*it)->length();
 
     // if there no outgoing node containing ref
@@ -125,7 +125,7 @@ std::string query_sample_from_ref ( VariantGraph *vg, Index *idx,
       ++bfs_it;
     }
 
-    DEBUG("Next reference index: " << next_ref_pos);
+    console->debug("Next reference index: {}", next_ref_pos);
 
 
     if (record_seq == true && next_ref_pos < pos_y) {
@@ -173,8 +173,8 @@ std::string query_sample_from_sample ( VariantGraph *vg, Index *idx,
                                             ref_pos, sample_pos);
   }
 
-  DEBUG("Closest notes containing sample with sample_pos < "
-        << pos_x << ": " << closest_v);
+	console->debug("Closest nodes containing sample with sample_pos < {}: {}",
+								 pos_x, closest_v);
 
   // DFS from such node and record seq btw [pos_x, pos_y) in sample's coordinate
   VariantGraph::VariantGraphPathIterator it = vg->find(closest_v, sample_id);
@@ -183,8 +183,8 @@ std::string query_sample_from_sample ( VariantGraph *vg, Index *idx,
 
   while (!it.done()) {
     temp.assign(vg->get_sequence(*(*it)));
-    DEBUG("Check node: " << (*it)->vertex_id() << ", sample Index: "
-          << sample_pos << ", seq " << temp);
+		console->debug("Check node: {}, sample Index: {}, seq {}",
+									 (*it)->vertex_id(), sample_pos, temp);
     uint64_t l = (*it)->length();
     uint64_t next_sample_pos = sample_pos + l;
 
