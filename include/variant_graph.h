@@ -169,6 +169,7 @@ namespace variantdb {
 				const;
 			bool get_neighbor_vertex(Graph::vertex id, uint32_t sample_id,
 															 Graph::vertex* v) const;
+			const std::string get_sequence(uint64_t start, uint32_t length) const;
 			void add_sample_to_vertex(Graph::vertex id, uint64_t sample_idx, uint32_t
 																sample_id, bool gt1, bool gt2);
 			bool check_if_mutation_exists(Graph::vertex prev, Graph::vertex next,
@@ -321,7 +322,7 @@ namespace variantdb {
 		std::string sample;
 		uint32_t id;
 		// read chr name
-		sampleid_file >> sample >> chr;
+		sampleid_file >> chr >> ref_length;
 		while (sampleid_file >> sample >> id)  {
 			sampleid_map.insert(std::make_pair(sample, id));
 			idsample_map.insert(std::make_pair(id, sample));
@@ -361,8 +362,8 @@ namespace variantdb {
 		// serialize sampleid_map
 		std::string sampleid_map_name = prefix + "/sampleid_map.lst";
 		std::ofstream sampleid_file(sampleid_map_name);
-		// write the chromosome name.
-		sampleid_file << "chr: " << chr << "\n";
+		// write the chromosome name and length
+		sampleid_file << chr << " " << std::to_string(ref_length) << "\n";
 		for (const auto sample : sampleid_map)
 			sampleid_file << sample.first << " " << sample.second << "\n";
 		sampleid_file.close();
@@ -385,6 +386,14 @@ namespace variantdb {
 			long int num_mutations = 0;
 			uint32_t num_samples_in_mutation = 0;
 			while (variantFile.getNextVariant(var)) {
+				// verify mutation.
+				if (var.sequenceName != chr || var.position < 1 ||
+						(uint64_t)var.position > ref_length || var.ref !=
+						get_sequence(var.position, var.ref.size())) {
+					console->error("Unsupported mutation: {} {} {}", var.sequenceName,
+												 var.position, var.ref);
+					continue;
+				}
 				num_mutations += 1;
 				if (num_mutations % 100000 == 0) {
 					console->debug("Mutations added: {} #Vertices: {} #Edges: ",
@@ -457,6 +466,7 @@ namespace variantdb {
 						}
 					} else {
 						//console->error("Unsupported variant allele: {}", alt);
+						continue;
 					}
 					if (sample_list.size() > 0)
 						add_mutation(var.ref, alt, var.position, sample_list);
@@ -641,6 +651,15 @@ namespace variantdb {
 		const {
 			std::string seq;
 			for (uint64_t i = v.offset(); i < v.offset() + v.length(); i++) {
+				seq += map_int((uint8_t)seq_buffer[i]);
+			}
+			return seq;
+		}
+
+	const std::string VariantGraph::get_sequence(uint64_t start, uint32_t length)
+		const {
+			std::string seq;
+			for (uint64_t i = start; i < start + length; i++) {
 				seq += map_int((uint8_t)seq_buffer[i]);
 			}
 			return seq;

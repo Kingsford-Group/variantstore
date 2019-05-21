@@ -36,6 +36,10 @@ main ( int argc, char *argv[] )
 	}
 
 	console = spdlog::default_logger();
+#ifdef DEBUG_MODE
+	console->set_level(spdlog::level::debug);
+#endif
+
 	std::string ref_file(argv[1]);
 	std::string vcf_file(argv[2]);
 	

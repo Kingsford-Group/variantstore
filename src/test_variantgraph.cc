@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "spdlog/spdlog.h"
+
 #include "dot_graph.h"
 #include "variant_graph.h"
 
@@ -22,7 +24,8 @@ void print_vg_info(VariantGraph& vg, std::string& vcf_file,
 									 std::vector<std::string> sampleNames) {
 	PRINT("Graph stats:");
 	PRINT("Chromosome: " << vg.get_chr() << " #Vertices: " << vg.get_num_vertices()
-				<< " Seq length: " << vg.get_seq_length());
+				<< " Seq length: " << vg.get_seq_length() << " Ref length: " <<
+				vg.get_ref_length());
 
 	PRINT("Variant Graph nodes:");
 	//for (int i = 0; i < 8; i++) {
@@ -78,6 +81,10 @@ main ( int argc, char *argv[] )
 	//std::string filename = argv[1];
 
 	console = spdlog::default_logger();
+#ifdef DEBUG_MODE
+	console->set_level(spdlog::level::debug);
+#endif
+
 	PRINT("Creating variant graph");
 	std::string ref_file(argv[1]);
 	std::string vcf_file(argv[2]);
@@ -98,7 +105,7 @@ main ( int argc, char *argv[] )
 
 	PRINT("Printing variant graph info from file vg");
 	print_vg_info(file_vg, vcf_file, variantFile.sampleNames);
-	
+
 	createDotGraph(&file_vg, "./ser");
 
 	return EXIT_SUCCESS;

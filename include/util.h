@@ -27,10 +27,6 @@
 
 extern std::shared_ptr<spdlog::logger> console;
 
-#ifdef DEBUG_MODE
-console->set_level(spdlog::level::debug);
-#endif
-
 #define DEBUG(x) do { \
 	if (PRINT_DEBUG) { std::cerr << x << std::endl; } \
 } while (0)
