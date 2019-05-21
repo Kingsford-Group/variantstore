@@ -13,13 +13,14 @@
 #ifndef __INDEX_H__
 #define __INDEX_H_
 
-#include "variant_graph.h"
-#include "variantgraphvertex.pb.h"
-#include "graph.h"
 #include <sdsl/bit_vectors.hpp>
 #include <sdsl/int_vector.hpp>
 #include <sdsl/util.hpp>
 #include <vector>
+
+#include "variant_graph.h"
+#include "variantgraphvertex.pb.h"
+#include "graph.h"
 
 const uint16_t BLOCK_SIZE = 127;
 
@@ -79,14 +80,13 @@ namespace variantdb {
 
 			if (b[idx-1] == 0) {
 				console->error("Found a loop in the ref path at node: {}", node_id);
-				PRINT(vg->print_vertex_info(**it));
-				auto node = vg->find(node_id, 5);
-				++node;
 
-				while (!node.done()) {
-					PRINT(vg->print_vertex_info(**node));
-					++node;
-				}
+				createDotGraph(vg, "./ser", node_id, 5);
+				//auto node = vg->find(node_id, 5);
+				//while (!node.done()) {
+				//PRINT(vg->print_vertex_info(**node));
+				//++node;
+				//}
 
 				abort();
 			}
