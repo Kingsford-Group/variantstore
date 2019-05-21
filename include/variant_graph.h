@@ -465,8 +465,8 @@ namespace variantdb {
 							}
 						}
 					} else {
-						console->error("Unsupported variant allele: {} {}", var.position,
-													 alt);
+						//console->error("Unsupported variant allele: {} {}", var.position,
+													 //alt);
 						continue;
 					}
 					if (sample_list.size() > 0)
