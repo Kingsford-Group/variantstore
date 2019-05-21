@@ -36,7 +36,9 @@ namespace variantdb {
 		Index(const std::string prefix);
 		~Index();
 		// Query node_id given position
-		uint64_t find(uint64_t pos) const;
+		Graph::vertex find(const uint64_t pos) const;
+		Graph::vertex find(const uint64_t pos, uint64_t &ref_node_rank) const;
+		Graph::vertex previous(const uint64_t ref_node_rank) const;
 		void serialize(const std::string prefix);
 
 	private:
@@ -68,19 +70,20 @@ namespace variantdb {
 			VariantGraphVertex::sample_info sample;
 			// ref sample id is 0
 			if (!vg->get_sample_from_vertex_if_exists(v, "ref", sample)) {
-				console->error("Ref sample not found in the vertex: {}", v);
+				ERROR("Ref sample not found in the vertex: " << v);
 				abort();
 			}
 			uint64_t idx = 	sample.index();
 
-			console->debug("At index {}  has node ", idx, node_id);
+			DEBUG("At index " << idx
+								<< " has node " << node_id);
 
 			b[idx-1] = 1;
 			node_list[node_list_sz-1] = node_id;
 			++it;
 		}
 
-		//std::cout << std::endl;
+		std::cout << std::endl;
 		// Compress it & Construct rank support vector from vector
 		sdsl::util::assign(rrrb, sdsl::rrr_vector<BLOCK_SIZE>(b));
 		sdsl::util::assign(rank_rrrb,
@@ -98,7 +101,7 @@ namespace variantdb {
 		return;
 	} // Index(const std::string filename)
 
-	uint64_t Index::find(uint64_t pos) const
+	Graph::vertex Index::find(const uint64_t pos) const
 	{
 		if ( pos >= rank_rrrb.size())
 			return node_list[node_list.size()-1];
@@ -109,6 +112,27 @@ namespace variantdb {
 
 		return node_list[node_idx-1];
 	} // find(uint64_t pos)
+
+	Graph::vertex Index::find(const uint64_t pos, uint64_t &ref_node_rank) const
+	{
+		if ( pos >= rank_rrrb.size())
+		{
+			ref_node_rank = node_list.size()-1;
+			return node_list[node_list.size()-1];
+		}
+		uint64_t node_idx = rank_rrrb(pos-1);
+		if ( node_idx == 0 )
+			node_idx = 1;
+
+		ref_node_rank = node_idx - 1;
+		return node_list[node_idx-1];
+	} // find(uint64_t pos)
+
+	Graph::vertex Index::previous(const uint64_t ref_node_rank) const
+	{
+		if (ref_node_rank == 0) { return node_list[0]; }
+		return node_list[ref_node_rank-1];
+	}
 
 	void Index::serialize(const std::string prefix)
 	{
