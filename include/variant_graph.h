@@ -374,7 +374,7 @@ namespace variantdb {
 			variantFile.open(vcf);
 			vcflib::Variant var(variantFile);
 
-			console->info("Adding mutations from: {} #Samples:", vcf,
+			console->info("Adding mutations from: {} #Samples: {}", vcf,
 										variantFile.sampleNames.size());
 			// insert samples into sampleid_map
 			for (const auto sample : variantFile.sampleNames) {
@@ -386,11 +386,11 @@ namespace variantdb {
 			uint32_t num_samples_in_mutation = 0;
 			while (variantFile.getNextVariant(var)) {
 				num_mutations += 1;
-				if (num_mutations % 10000 == 0) {
+				if (num_mutations % 100000 == 0) {
 					console->debug("Mutations added: {} #Vertices: {} #Edges: ",
 												num_mutations, get_num_vertices(), get_num_edges());
 					console->debug("Average num samples in mutations: {}",
-												num_samples_in_mutation / (double)10000);
+												num_samples_in_mutation / (double)100000);
 					num_samples_in_mutation = 0;
 				}
 				for (const auto alt : var.alt) {
