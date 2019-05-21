@@ -67,9 +67,8 @@ namespace variantdb {
     return samples;
   }
 
-  bool createDotGraph(VariantGraph *vg, std::string prefix, Graph::vertex v = 0,
-                      uint64_t radius = UINT64_MAX)
-  {
+	bool createDotGraph(const VariantGraph *vg, std::string prefix,
+											Graph::vertex v = 0, uint64_t radius = UINT64_MAX) {
     std::ofstream dotfile;
     dotfile.open (prefix + "/graph.dot");
 		std::string labels = "";

@@ -125,7 +125,7 @@ namespace variantdb {
 			};
 
 			VariantGraphIterator find(Graph::vertex v = 0, uint64_t radius =
-																UINT64_MAX);
+																UINT64_MAX) const;
 
 			// iterator traversing a specific path in the variant graph
 			class VariantGraphPathIterator {
@@ -389,7 +389,7 @@ namespace variantdb {
 				// verify mutation.
 				if (var.sequenceName != chr || var.position < 1 ||
 						(uint64_t)var.position > ref_length || var.ref !=
-						get_sequence(var.position, var.ref.size())) {
+						get_sequence(var.position - 1, var.ref.size())) {
 					console->error("Unsupported mutation: {} {} {}", var.sequenceName,
 												 var.position, var.ref);
 					continue;
@@ -465,7 +465,8 @@ namespace variantdb {
 							}
 						}
 					} else {
-						//console->error("Unsupported variant allele: {}", alt);
+						console->error("Unsupported variant allele: {} {}", var.position,
+													 alt);
 						continue;
 					}
 					if (sample_list.size() > 0)
@@ -1330,7 +1331,8 @@ namespace variantdb {
 	}
 
 	VariantGraph::VariantGraphIterator VariantGraph::find(Graph::vertex v,
-																												uint64_t radius) {
+																												uint64_t radius) const
+	{
 		return VariantGraphIterator(this, v, radius);
 	}
 

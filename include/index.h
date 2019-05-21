@@ -77,8 +77,17 @@ namespace variantdb {
 
 			console->debug("At index {} has node {}", idx, node_id);
 
-			if (b[idx-1] == 1) {
+			if (b[idx-1] == 0) {
 				console->error("Found a loop in the ref path at node: {}", node_id);
+				PRINT(vg->print_vertex_info(**it));
+				auto node = vg->find(node_id, 5);
+				++node;
+
+				while (!node.done()) {
+					PRINT(vg->print_vertex_info(**node));
+					++node;
+				}
+
 				abort();
 			}
 			b[idx-1] = 1;
