@@ -51,12 +51,11 @@ main ( int argc, char *argv[] )
 	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
 								vg.get_chr(), vg.get_num_vertices() , vg.get_num_edges(),
 								vg.get_seq_length());
-	console->info("Creating Index");
-	Index idx(&vg);
-
 	console->info("Serializing variant graph to disk");
 	vg.serialize(argv[3]);
 
+	console->info("Creating Index");
+	Index idx(&vg);
 	console->info("Serializing index to disk");
 	idx.serialize(argv[3]);
 

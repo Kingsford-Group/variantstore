@@ -177,6 +177,7 @@ namespace variantdb {
 				const;
 			bool check_if_mutation_exists(Graph::vertex prev, uint64_t offset,
 																		uint64_t length, Graph::vertex* v) const;
+			void validate_ref_path_edge(Graph::vertex src, Graph::vertex dest) const;
 			VariantGraphVertex* create_vertex(uint64_t id, uint64_t offset, uint64_t
 																				length,
 																				const std::vector<VariantGraphVertex::sample_info>&
@@ -574,11 +575,13 @@ namespace variantdb {
 
 		// move outgoing connections from old_node to the new_node
 		for (const auto v : topology.out_neighbors(vertex_id)) {
+			validate_ref_path_edge(*new_vertex, v);
 			topology.add_edge(*new_vertex, v);
 			topology.remove_edge(vertex_id, v);
 		}
 
 		// add the edge
+		validate_ref_path_edge(vertex_id, *new_vertex);
 		topology.add_edge(vertex_id, *new_vertex);
 
 		// increment vertex count
@@ -817,6 +820,19 @@ namespace variantdb {
 		return false;
 	}
 
+	void VariantGraph::validate_ref_path_edge(Graph::vertex src, Graph::vertex
+																						dest) const {
+		VariantGraphVertex::sample_info src_sample, dest_sample;
+		if (!get_sample_from_vertex_if_exists(src, 0, src_sample) &&
+				!get_sample_from_vertex_if_exists(dest, 0, dest_sample)) {
+			if (src_sample.index() >= dest_sample.index()) {
+				console->error("Source ref index is not smaller than dest ref index {}:{} {}:{}",
+											 src, src_sample.index(), dest, dest_sample.index());
+				abort();
+			}
+		}
+	}
+
 	bool VariantGraph::check_if_mutation_exists(Graph::vertex prev,
 																							uint64_t offset, uint64_t length,
 																							Graph::vertex* v) const {
@@ -951,6 +967,14 @@ namespace variantdb {
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
 											 &next_ref_vertex_id);
 				}
+			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
+								 == pos + ref.size()) { // split the current vertex to get prev_vertex
+				prev_ref_vertex_id = ref_vertex_id;
+				split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
+										 &ref_vertex_id);	
+
+				// find the next ref vertex
+				get_neighbor_vertex(ref_vertex_id, 0, &next_ref_vertex_id);		
 			}
 			// create a vertex for the mutation using the first sample from the
 			// list.
@@ -996,6 +1020,11 @@ namespace variantdb {
 				split_vertex(ref_vertex_id, pos - ref_vertex_idx + 1,
 										 &next_ref_vertex_id);
 				prev_ref_vertex_id = ref_vertex_id;
+			} else if (ref_vertex_idx + ref_vertex.length() == pos) { // splitting not needed
+				prev_ref_vertex_id = ref_vertex_id;
+
+				// find the next ref vertex
+				get_neighbor_vertex(ref_vertex_id, 0, &next_ref_vertex_id);		
 			} else { // to handle insertions after ref seq length. 
 				prev_ref_vertex_id = ref_vertex_id;
 			}
@@ -1102,6 +1131,14 @@ namespace variantdb {
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
 											 &next_ref_vertex_id);
 				}
+			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
+								 == pos + ref.size()) { // split the current vertex to get prev_vertex
+				prev_ref_vertex_id = ref_vertex_id;
+				split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
+										 &ref_vertex_id);	
+
+				// find the next ref vertex
+				get_neighbor_vertex(ref_vertex_id, 0, &next_ref_vertex_id);	
 			}
 			// add samples to the vertex.
 			for (auto sample : sample_list) {
@@ -1111,6 +1148,7 @@ namespace variantdb {
 														 sample.gt1, sample.gt2);
 			}
 			// make connections for the new vertex in the graph
+			validate_ref_path_edge(prev_ref_vertex_id, next_ref_vertex_id);
 			topology.add_edge(prev_ref_vertex_id, next_ref_vertex_id);
 		}
 	}
