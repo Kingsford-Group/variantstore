@@ -81,7 +81,7 @@ namespace variantdb {
 			if (b[idx-1] == 1) {
 				console->error("Found a loop in the ref path at node: {}", node_id);
 
-				createDotGraph(vg, "./ser", node_id-5, 10);
+				createDotGraph(vg, "./", node_id-5, 10);
 				//auto node = vg->find(node_id, 5);
 				//while (!node.done()) {
 				//PRINT(vg->print_vertex_info(**node));
