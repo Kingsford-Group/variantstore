@@ -9,6 +9,7 @@
 #include <map>
 #include <iterator>
 
+#include "dot_graph.h"
 #include "index.h"
 #include "variant_graph.h"
 
@@ -84,6 +85,9 @@ main ( int argc, char *argv[] )
 	//std::string filename = argv[1];
 
 	console = spdlog::default_logger();
+#ifdef DEBUG_MODE
+	console->set_level(spdlog::level::debug);
+#endif
 	PRINT("Creating variant graph");
 	std::string ref_file(argv[1]);
 	std::string vcf_file(argv[2]);
