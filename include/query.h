@@ -226,8 +226,10 @@ bool get_samples ( const VariantGraphVertex* v, VariantGraph *vg,
   for (int i = 0; i < v->s_info_size(); ++i) {
     const VariantGraphVertex::sample_info& s = v->s_info(i);
     std::string sample_id = vg->get_sample_name(s.sample_id());
-    sample_ids.push_back(sample_id);
-    if (sample_id != REF) {is_var = true;}
+    if (sample_id != REF) {
+      sample_ids.push_back(sample_id);
+      is_var = true;
+    }
   }
   return is_var;
 }
@@ -246,6 +248,8 @@ struct Variant {
 /* ----------------------------------------------------------------------------
 Support Func: Return true if found the closest variants at or after the given pos. Return false is no variant is found reaching the end of the graph
 */
+
+// TODO: consider insertion, deletion 
 bool next_variant_in_ref ( VariantGraph *vg, Index *idx, const uint64_t pos,
                            Variant &var) {
   bool found_var = false;
@@ -291,6 +295,7 @@ bool next_variant_in_ref ( VariantGraph *vg, Index *idx, const uint64_t pos,
 
     ++it;
   } // end DFS in ref
+
   return found_var;
 }
 
@@ -302,6 +307,9 @@ bool closest_var ( VariantGraph *vg, Index *idx, const uint64_t pos,
                    Variant &var) {
   bool found_var = false;
   // find next_var_in_ref
+  Variant next_var;
+  next_variant_in_ref(vg, idx, pos, next_var);
+  uint64_t next_var_pos = next_var.var_pos;
   // find prev var in ref ???
 
   return found_var;
@@ -347,52 +355,77 @@ std::vector <Variant> get_sample_var_in_sample ( VariantGraph *vg, Index *idx,
 
   sample_pos = sample_pos - seq_len;
 
-  DEBUG("Closest note before node containing sample with sample_pos < "
-        << pos_x << ": " << closest_v);
+  DEBUG("Closest ref note before node containing sample with sample_pos < "
+        << pos_x << ": " << closest_v << "Sample pos: " << sample_pos);
 
   // DFS from such node and record seq btw [pos_x, pos_y) in sample's coordinate
   VariantGraph::VariantGraphPathIterator it = vg->find(closest_v, sample_id);
   std::string cur_ref;
+  VariantGraphVertex prev_v;
 
   while (!it.done()) {
     Graph::vertex cur_v = (*it)->vertex_id();
     std::vector <std::string> samples_in_node;
+    Variant var;
     // get next ref_pos & sample_pos
     uint64_t l = (*it)->length();
-    // if there no outgoing node containing ref
-    // TODO: consider consecutive mutation
     uint64_t next_ref_pos = ref_pos + l;
     uint64_t next_sample_pos = sample_pos + l;
     std::string next_ref;
+    VariantGraphVertex::sample_info sample;
+
     // Check outgoing nodes, update ref_pos to the index of node containing ref
     VariantGraph::VariantGraphIterator bfs_it = vg->find((*it)->vertex_id(), 1);
     ++bfs_it;
     while (!bfs_it.done()) {
       Graph::vertex v = (*bfs_it)->vertex_id();
-      VariantGraphVertex::sample_info sample;
       if (vg->get_sample_from_vertex_if_exists(v, REF, sample)) {
         next_ref_pos = sample.index();
         next_ref = vg->get_sequence(*(*bfs_it));
       }
-
       ++bfs_it;
     }
 
-    if (sample_pos >= pos_x && sample_pos < pos_y &&
-        vg->get_sample_from_vertex_if_exists(cur_v, sample_id, sample)){
-      Variant var;
-      std::string alt = vg->get_sequence(*(*it));
+    if (sample_pos >= pos_y) {break;}
+
+    if (sample_pos > pos_x && vg->get_sample_from_vertex_if_exists(cur_v,
+                                                                   sample_id,
+                                                                   sample)) {
+      std::string alt;
+      // Insertion
+      if (ref_pos == next_ref_pos) {
+        cur_ref = vg->get_sequence(prev_v);
+        ref_pos --;
+        cur_ref = cur_ref.substr(cur_ref.length() - 1, 1);
+        DEBUG("There is an insertion at (ref): " << ref_pos);
+        alt = cur_ref + vg->get_sequence(*(*it));
+      } else
+      // Deletion
+      if (vg->get_sample_from_vertex_if_exists(cur_v, REF, sample)) {
+        DEBUG("There is a deletion at (ref): " << ref_pos);
+        alt = vg->get_sequence(prev_v).substr(cur_ref.length() - 1, 1);
+        cur_ref = alt + cur_ref;
+        ref_pos --;
+      } else {
+        DEBUG("There is a substitution at (ref): " << ref_pos);
+        alt = vg->get_sequence(*(*it));
+      }
+
       var.alts.push_back(alt);
       var.ref = cur_ref;
+      var.var_pos = ref_pos;
       get_samples((*it), vg, var.alt_sample_map[alt]);
       vars.push_back(var);
-    } // Not variant or variant node does not contain sample_id
+    }
 
     cur_ref = next_ref;
     ref_pos = next_ref_pos;
     sample_pos = next_sample_pos;
+    prev_v = *(*it);
     ++it;
   }
+
+  return vars;
 } // get_sample_var_in_sample()
 
 
@@ -408,8 +441,10 @@ std::vector <Variant> get_sample_var_in_ref ( VariantGraph *vg, Index *idx,
 } // mut_in_ref()
 
 
+/* ----------------------------------------------------------------------------
 // Given a variant (ref & alt) and the position
 // Return samples has such variant in the reference coordinate
+*/
 std::vector <std::string> samples_has_var ( VariantGraph *vg, Index *idx,
                                        const uint64_t pos, const string ref,
                                        const string alt) {

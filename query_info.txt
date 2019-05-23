@@ -27,8 +27,8 @@ Correctness test: TBD.
 Function: get_sample_var_in_sample
 Given: starting position (pos_x), ending position (pos_y), patient's id (sample_id),
 Return: the variants in the patient's genome from pos_x to pos_y (exclusively) in the patient's coordinate.
-Implementation: TBD.
-Manual test: TBD.
+Implementation: done.
+Manual test: done.
 Correctness test: TBD.
 
 -------------------------------------------------------------------------------

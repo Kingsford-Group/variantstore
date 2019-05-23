@@ -174,7 +174,7 @@ int main ( int argc, char *argv[] ) {
 	auto avg_time = duration.count() / num_queried;
 	PRINT("The average time taken for query is: "	<< avg_time << " seconds");
 	return 0;
-	*/
+
 
 	// test next_variant_in_ref
 	PRINT("TEST get_prev_vertex_with_sample");
@@ -189,12 +189,41 @@ int main ( int argc, char *argv[] ) {
   {
 		Variant var;
     PRINT("Query...");
-    next_variant_in_ref(&vg, &idx, pos, var);
-		print_var(&var);
+    if (!next_variant_in_ref(&vg, &idx, pos, var))
+		{
+			PRINT("Not found!");
+		} else {
+			print_var(&var);
+		}
+
     PRINT("Please specify position: ");
     std::cin >> pos;
     PRINT("Please specify sample id: ");
 		std::cin.ignore();
     std::getline(std::cin, sample_id);
+  }
+	*/
+
+	// test get_sample_var_in_sample
+	PRINT("TEST query_sample_from_sample");
+  int pos_x = 1;
+  int pos_y = 1;
+
+  while (pos_x != -1)
+  {
+    std::string sample_id;
+    PRINT("Please specify position_x: ");
+    std::cin >> pos_x;
+    PRINT("Please specify position_y: ");
+    std::cin >> pos_y;
+    PRINT("Please specify sample id: ");
+    std::cin.ignore();
+    std::getline(std::cin, sample_id);
+    PRINT("Query...");
+		std::vector <Variant> vars;
+    vars = get_sample_var_in_sample(&vg, &idx, pos_x, pos_y, sample_id);
+    for (auto it = vars.begin(); it != vars.end(); it++) {
+			print_var(&(*it));
+		}
   }
 }
