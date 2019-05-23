@@ -13,10 +13,9 @@
 #include <vector>
 #include <map>
 #include <cassert>
+
 #include "index.h"
 #include "variant_graph.h"
-#include "vcflib/Variant.h"
-#include "variantgraphvertex.pb.h"
 
 std::string REF = "ref";
 

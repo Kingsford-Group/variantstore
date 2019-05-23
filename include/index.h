@@ -19,8 +19,6 @@
 #include <vector>
 
 #include "variant_graph.h"
-#include "variantgraphvertex.pb.h"
-#include "graph.h"
 
 const uint16_t BLOCK_SIZE = 127;
 
