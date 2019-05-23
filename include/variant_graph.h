@@ -550,14 +550,15 @@ namespace variantdb {
 																	Graph::vertex* new_vertex) {
 		console->debug("Splitting vertex: {} {}", vertex_id, pos);
 		const VariantGraphVertex cur_vertex = vertex_list.vertex(vertex_id);
+		if (pos > cur_vertex.length()) {
+			console->error("Split position is greater than vertex length. {} {} {}",
+										 vertex_id, cur_vertex.length(), pos);
+			abort();
+		}
 
 		// create vertex object and add to vertex_list
 		uint64_t offset = cur_vertex.offset() + pos - 1;
 		uint64_t length = cur_vertex.length() - pos  + 1;
-		if (length == 0) {
-			console->error("Vertex length is 0");
-			abort();
-		}
 		VariantGraphVertex::sample_info s;
 		s.set_index(cur_vertex.s_info(0).index() + pos - 1);
 		s.set_sample_id(cur_vertex.s_info(0).sample_id());
@@ -891,7 +892,8 @@ namespace variantdb {
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
 			// Either we got the vertex where there's already a substition 
 			// or the vertex contains the seq with @pos
-			if (ref_vertex_idx == pos && ref_vertex.length() == ref.size()) { // splitting not needed
+			if (ref_vertex_idx == pos && ref_vertex.length() == ref.size()) {
+				// splitting not needed. mutation spans the whole vertex.
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
@@ -903,7 +905,9 @@ namespace variantdb {
 
 				// find the next ref vertex
 				get_neighbor_vertex(ref_vertex_id, 0, &next_ref_vertex_id);		
-			} else if (ref_vertex_idx == pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into two
+			} else if (ref_vertex_idx == pos && ref_vertex.length() > ref.size()) {
+				// vertex needs to be split into two. mutation is contained in the
+				// vertex.
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
@@ -915,15 +919,15 @@ namespace variantdb {
 
 				// split the vertex
 				split_vertex(ref_vertex_id, ref.size() + 1, &next_ref_vertex_id);
-			} else if (ref_vertex_idx == pos && ref_vertex.length() < ref.size()) { // substitution will skip 1 or more vertexes.
-				// find the next ref vertex
+			} else if (ref_vertex_idx == pos && ref_vertex.length() < ref.size()) {
+				// splitting needed. mutation spans one or more vertexes.
+				// find the next ref vertex which contains the pos + ref.size()
 				VariantGraphVertex next_ref_vertex;
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				do {
 					++temp_itr;
 					next_ref_vertex = vertex_list.vertex(temp_itr->second);
-				} while (temp_itr->first < pos && temp_itr->first +
-								 next_ref_vertex.length() < pos + ref.size());
+				} while (temp_itr->first + next_ref_vertex.length() < pos + ref.size());
 				if (temp_itr->first + next_ref_vertex.length() == pos +
 						ref.size()) {
 					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
@@ -932,6 +936,8 @@ namespace variantdb {
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
 											 &next_ref_vertex_id);
 				}
+
+				// find the prev vertex.
 				temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
 					console->error("Vertex id not found in the map");
@@ -940,25 +946,29 @@ namespace variantdb {
 				--temp_itr;
 				prev_ref_vertex_id = temp_itr->second;
 			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
-								 > pos + ref.size()) { // vertex needs to be split into three
+								 > pos + ref.size()) {
+				// vertex needs to be split into three. mutation contained in the
+				// vertex.
 				// split the vertex
 				uint64_t split_pos = pos - ref_vertex.offset();
 				split_vertex(ref_vertex_id, split_pos, split_pos + ref.size(),
 										 &prev_ref_vertex_id, &next_ref_vertex_id);
 				std::swap(ref_vertex_id, prev_ref_vertex_id);
 			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
-								 < pos + ref.size()) { // split the current vertex to get prev_vertex
+								 < pos + ref.size()) {
+				// split the current vertex to get prev_vertex. mutation spans one or
+				// more vertexes.
 				prev_ref_vertex_id = ref_vertex_id;
 				split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
-										 &ref_vertex_id);	
+										 &ref_vertex_id);
+
 				// find the next ref vertex
 				VariantGraphVertex next_ref_vertex;
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				do {
 					++temp_itr;
 					next_ref_vertex = vertex_list.vertex(temp_itr->second);
-				} while (temp_itr->first < pos && temp_itr->first +
-								 next_ref_vertex.length() < pos + ref.size());
+				} while (temp_itr->first + next_ref_vertex.length() < pos + ref.size());
 				if (temp_itr->first + next_ref_vertex.length() == pos +
 						ref.size()) {
 					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
@@ -1055,7 +1065,8 @@ namespace variantdb {
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
 			// Either we got the vertex where there's already a deletion
 			// or the vertex contains the seq with @pos
-			if (ref_vertex_idx == pos && ref_vertex.length() == ref.size()) { // splitting not needed
+			if (ref_vertex_idx == pos && ref_vertex.length() == ref.size()) {
+				// splitting not needed
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
@@ -1067,7 +1078,8 @@ namespace variantdb {
 
 				// find the next ref vertex
 				get_neighbor_vertex(ref_vertex_id, 0, &next_ref_vertex_id);	
-			} else if (ref_vertex_idx == pos && ref_vertex.length() > ref.size()) { // vertex needs to be split into two
+			} else if (ref_vertex_idx == pos && ref_vertex.length() > ref.size()) { 
+				// vertex needs to be split into two
 				// find the prev ref vertex
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				if (temp_itr->first != ref_vertex_idx) {
@@ -1079,15 +1091,15 @@ namespace variantdb {
 
 				// split the vertex
 				split_vertex(ref_vertex_id, ref.size() + 1, &next_ref_vertex_id);
-			} else if (ref_vertex_idx == pos && ref_vertex.length() < ref.size()) { // deletion will skip 1 or more vertexes
+			} else if (ref_vertex_idx == pos && ref_vertex.length() < ref.size()) {
+				// deletion will skip 1 or more vertexes
 				// find the next ref vertex
 				VariantGraphVertex next_ref_vertex;
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				do {
 					++temp_itr;
 					next_ref_vertex = vertex_list.vertex(temp_itr->second);
-				} while (temp_itr->first < pos && temp_itr->first +
-								 next_ref_vertex.length() < pos + ref.size());
+				} while (temp_itr->first + next_ref_vertex.length() < pos + ref.size());
 				if (temp_itr->first + next_ref_vertex.length() == pos +
 						ref.size()) {
 					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
@@ -1121,10 +1133,8 @@ namespace variantdb {
 				do {
 					++temp_itr;
 					next_ref_vertex = vertex_list.vertex(temp_itr->second);
-				} while (temp_itr->first < pos && temp_itr->first +
-								 next_ref_vertex.length() < pos + ref.size());
-				if (temp_itr->first + next_ref_vertex.length() == pos +
-						ref.size()) {
+				} while (temp_itr->first + next_ref_vertex.length() < pos + ref.size());
+				if (temp_itr->first + next_ref_vertex.length() == pos + ref.size()) {
 					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
 				} else {
 					// split the vertex
