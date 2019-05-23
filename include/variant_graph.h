@@ -29,6 +29,7 @@
 #include "lru/lru.hpp"
 #include "stream.hpp"
 
+#include "util.h"
 #include "variantgraphvertex.pb.h"
 #include "graph.h"
 
@@ -253,10 +254,12 @@ namespace variantdb {
 			std::map<uint64_t, uint64_t> idx_vertex_id;
 			std::unordered_map<uint32_t, std::string> idsample_map;
 			Cache cache;
+			//sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE> rrr_sample_vector;
 
 			// structures to persist when serializing variant graph.
 			VariantGraphVertexList vertex_list;
 			sdsl::int_vector<> seq_buffer;
+			//sdsl::bit_vector sample_vector;
 			Graph topology;
 			std::unordered_map<std::string, uint32_t> sampleid_map;
 	};

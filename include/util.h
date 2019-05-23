@@ -25,6 +25,7 @@
 #define PRINT_DEBUG 0
 #endif
 
+#define SDSL_BITVECTOR_BLOCK_SIZE 127
 extern std::shared_ptr<spdlog::logger> console;
 
 #define DEBUG(x) do { \

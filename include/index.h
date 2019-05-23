@@ -18,9 +18,8 @@
 #include <sdsl/util.hpp>
 #include <vector>
 
+#include "util.h"
 #include "variant_graph.h"
-
-const uint16_t BLOCK_SIZE = 127;
 
 namespace variantdb {
 	class Index {
@@ -42,8 +41,8 @@ namespace variantdb {
 
 	private:
 		//bit_vector bound_vec;
-		sdsl::rrr_vector<BLOCK_SIZE> rrrb;
-		sdsl::rrr_vector<BLOCK_SIZE>::rank_1_type rank_rrrb;
+		sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE> rrrb;
+		sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type rank_rrrb;
 		sdsl::int_vector<> node_list;
 	};
 
@@ -88,9 +87,9 @@ namespace variantdb {
 		}
 
 		// Compress it & Construct rank support vector from vector
-		sdsl::util::assign(rrrb, sdsl::rrr_vector<BLOCK_SIZE>(b));
+		sdsl::util::assign(rrrb, sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>(b));
 		sdsl::util::assign(rank_rrrb,
-			sdsl::rrr_vector<BLOCK_SIZE>::rank_1_type(&rrrb));
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type(&rrrb));
 		sdsl::util::bit_compress(node_list);
 		return;
 	} // Index(const VariantGraph vg)
@@ -100,7 +99,7 @@ namespace variantdb {
 		sdsl::load_from_file(rrrb, prefix + "/index.sdsl");
 		sdsl::load_from_file(node_list, prefix + "/ref_node_id.sdsl");
 		sdsl::util::assign(rank_rrrb,
-			sdsl::rrr_vector<BLOCK_SIZE>::rank_1_type(&rrrb));
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type(&rrrb));
 		return;
 	} // Index(const std::string filename)
 
