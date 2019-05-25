@@ -222,7 +222,8 @@ namespace variantdb {
 		sample_ids = {};
 		for (int i = 0; i < v->s_info_size(); ++i) {
 			const VariantGraphVertex::sample_info& s = v->s_info(i);
-			std::string sample_id = vg->get_sample_name(s.sample_id());
+			std::string sample_id =
+				vg->get_sample_name(vg->get_sample_id(v->sampleclass_id(), i));
 			if (sample_id != REF) {
 				sample_ids.push_back(sample_id);
 				is_var = true;
