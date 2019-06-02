@@ -250,16 +250,15 @@ namespace variantdb {
 			uint64_t seq_length{0};
 			uint64_t num_vertices{0};
 			std::string chr;
-			uint64_t ref_length;
+			uint64_t ref_length{0};
+			uint64_t num_samples{0};
 			std::map<uint64_t, uint64_t> idx_vertex_id;
 			std::unordered_map<uint32_t, std::string> idsample_map;
 			Cache cache;
-			//sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE> rrr_sample_vector;
 
 			// structures to persist when serializing variant graph.
 			VariantGraphVertexList vertex_list;
 			sdsl::int_vector<> seq_buffer;
-			//sdsl::bit_vector sample_vector;
 			Graph topology;
 			std::unordered_map<std::string, uint32_t> sampleid_map;
 	};
@@ -307,29 +306,46 @@ namespace variantdb {
 		{
 			VariantGraphVertex* vertex = vertex_list.add_vertex();
 			*vertex = v;
-    };
+		};
 
 		if (!stream::for_each(input, lambda)) {
-			console->error("Failed to parse vertex list.");
+			console->error("Failed to parse vertex list {}.", vertex_list_name);
 			abort();
 		}
 
 		// load seq buffer
 		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
-		sdsl::load_from_file(seq_buffer, seq_buffer_name);
+		if (!sdsl::load_from_file(seq_buffer, seq_buffer_name)) {
+			console->error("Failed to load seq buffer {}.", seq_buffer_name);
+			abort();
+		}
 		num_vertices = topology.get_num_vertices() + 1;
 		seq_length = seq_buffer.size();
 
 		//load sampleid map
 		std::string sampleid_map_name = prefix + "/sampleid_map.lst";
 		std::ifstream sampleid_file(sampleid_map_name);
+		if (!sampleid_file.good()) {
+			console->error("Failed to open sampleid map file {}.", sampleid_map_name);
+			abort();
+		}
 		std::string sample;
 		uint32_t id;
 		// read chr name
 		sampleid_file >> chr >> ref_length;
+		// read num samples
+		sampleid_file >> sample >> num_samples;
+		if (num_samples <= 0) {
+			console->error("Num samples is less or equal to 0.");
+			abort();
+		}
 		while (sampleid_file >> sample >> id)  {
 			sampleid_map.insert(std::make_pair(sample, id));
 			idsample_map.insert(std::make_pair(id, sample));
+		}
+		if (num_samples != sampleid_map.size()) {
+			console->error("Num samples is not equal to num entries in samples file.");
+			abort();
 		}
 
 		sampleid_file.close();
@@ -347,11 +363,11 @@ namespace variantdb {
 
 		std::function<VariantGraphVertex(uint64_t)> lambda =
 			[this](uint64_t n) {
-			return vertex_list.vertex(n);
-		};
-	
+				return vertex_list.vertex(n);
+			};
+
 		if (!stream::write(output, vertex_list.vertex_size(), lambda)) {
-			console->error("Failed to write vertex list.");
+			console->error("Failed to write vertex list.", vertex_list_name);
 			abort();
 		}	
 
@@ -360,14 +376,27 @@ namespace variantdb {
 		seq_buffer.resize(seq_buffer.size());
 		sdsl::util::bit_compress(seq_buffer);
 		sdsl::store_to_file(seq_buffer, seq_buffer_name);
+		if (!sdsl::store_to_file(seq_buffer, seq_buffer_name)) {
+			console->error("Failed to serialize seq buffer {}.", seq_buffer_name);
+			abort();
+		}
+
 		// serialize topology
 		topology.serialize(prefix);
 
 		// serialize sampleid_map
 		std::string sampleid_map_name = prefix + "/sampleid_map.lst";
 		std::ofstream sampleid_file(sampleid_map_name);
+		if (!sampleid_file.good()) {
+			console->error("Failed to open sampleid file {}.", sampleid_map_name);
+			abort();
+		}
+
 		// write the chromosome name and length
 		sampleid_file << chr << " " << std::to_string(ref_length) << "\n";
+		// write num samples
+		sampleid_file << chr << " " << std::to_string(num_samples) << "\n";
+
 		for (const auto sample : sampleid_map)
 			sampleid_file << sample.first << " " << sample.second << "\n";
 		sampleid_file.close();
@@ -386,6 +415,7 @@ namespace variantdb {
 				sampleid_map.insert(std::make_pair(sample, sampleid_map.size()));
 				idsample_map.insert(std::make_pair(sampleid_map.size() - 1, sample));
 			}
+			num_samples += sampleid_map.size();
 
 			long int num_mutations = 0;
 			uint32_t num_samples_in_mutation = 0;
