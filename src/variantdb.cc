@@ -48,9 +48,9 @@ main ( int argc, char *argv[] )
 	VariantGraph vg(ref_file, vcfs);
 
 	console->info("Graph stats:");
-	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
+	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {} #Sample classes: {}",
 								vg.get_chr(), vg.get_num_vertices() , vg.get_num_edges(),
-								vg.get_seq_length());
+								vg.get_seq_length(), vg.get_num_sample_classes());
 	console->info("Serializing variant graph to disk");
 	vg.serialize(argv[3]);
 

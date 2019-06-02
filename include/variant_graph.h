@@ -101,6 +101,7 @@ namespace variantdb {
 			uint64_t get_seq_length(void) const;
 			const std::string get_chr(void) const;
 			uint64_t get_ref_length(void) const;
+			uint64_t get_num_sample_classes(void) const;
 			std::string get_sample_name(uint32_t id) const;
 			double get_cache_hit_rate(void) const;
 
@@ -215,7 +216,7 @@ namespace variantdb {
 														 sampleclass_id);
 			uint32_t find_sample_vector_or_add(const std::vector<sample_struct>&
 																				 sample_list);
-			void update_vertex_sample_class(Graph::vertex vertex_id, const
+			bool update_vertex_sample_class(Graph::vertex vertex_id, const
 																			std::vector<sample_struct>& sample_list);
 			uint32_t get_popcnt(uint32_t sampleclass_id) const;
 
@@ -619,37 +620,62 @@ namespace variantdb {
 				sampleclass_map.insert(std::make_pair(vec_hash, sampleclass_id));
 				add_sample_vector(vector, sampleclass_id);	// bit vectors are stored 0-based.
 				// validate: query each sample id from the bit vector.
-				int i = 0;
-				for (const auto sample : sample_list) {
-					uint32_t id = get_sample_id(sampleclass_id, i++);
-					if (id != sample.sample_id) {
-						console->error("Bit vector construction/query failed. Sample class id: {}",
-													 sampleclass_id);
-						abort();
-					}
-				}
+				//int i = 0;
+				//for (const auto sample : sample_list) {
+					//uint32_t id = get_sample_id(sampleclass_id, i++);
+					//if (id != sample.sample_id) {
+						//console->error("Bit vector construction/query failed. Sample class id: {}",
+													 //sampleclass_id);
+						//abort();
+					//}
+				//}
 				return sampleclass_id;
 		 } else {
 			 return it->second;
 		 }
 	}
 
-	void VariantGraph::update_vertex_sample_class(Graph::vertex vertex_id, const
+	bool VariantGraph::update_vertex_sample_class(Graph::vertex vertex_id, const
 																								std::vector<sample_struct>&
 																								sample_list) {
-		auto list = sample_list;
+		std::map<uint32_t, sample_struct> sample_indexes;
+		std::vector<sample_struct> list;  
+		for (const auto sample : sample_list)
+			sample_indexes.insert(std::make_pair(sample.sample_id, sample));
+
 		VariantGraphVertex *v = vertex_list.mutable_vertex(vertex_id);
+		uint64_t ref_index = 0;
 		for (int i = v->s_info_size() - 1; i >= 0; i--) {
 			sample_struct s = {get_sample_id(v->sampleclass_id(), i), 0, 0};
-			list.emplace(list.begin(), s);
+			// save ref index
+			if (s.sample_id == 0)
+				ref_index = v->s_info(i).index();
+			sample_indexes.insert(std::make_pair(s.sample_id, s));
 		}
+		for (const auto sample : sample_indexes)
+			list.emplace_back(sample.second);
+
 		uint32_t class_id = find_sample_vector_or_add(list);
 		v->set_sampleclass_id(class_id);
-		if (list.size() != get_popcnt(class_id)) {
-			console->error("Sample class update failed. list size: {} popcnt: {}",
-										 list.size(), get_popcnt(class_id));
-			abort();
+		// validate list size and popcnt of the vector.
+		//if (list.size() != get_popcnt(class_id)) {
+			//console->error("Sample class update failed. list size: {} popcnt: {}",
+										 //list.size(), get_popcnt(class_id));
+			//return false;
+		//}
+
+		// clear s_info and reinsert sample indexes in the order of sample_ids.
+		v->clear_s_info();
+		for (const auto sample : list) {
+			//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id,
+			//sample.sample_id);
+			if (sample.sample_id == 0)
+				add_sample_to_vertex(vertex_id, ref_index, sample.gt1, sample.gt2);
+			else
+				add_sample_to_vertex(vertex_id, 0, sample.gt1, sample.gt2);
 		}
+
+		return true;
 	}
 
 	uint32_t VariantGraph::get_sample_id(uint32_t sampleclass_id, uint32_t
@@ -670,8 +696,10 @@ namespace variantdb {
 																	 num_samples%64);
 
 			// select based on index.
-			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE> rrr_vec(sampleclass_vector);
-			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::select_1_type select_vec(&rrr_vec);
+			//sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE> rrr_vec(sampleclass_vector);
+			//sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::select_1_type select_vec(&rrr_vec);
+			sdsl::bit_vector::select_1_type select_vec(&sampleclass_vector);
+
 
 			// index 0 means the first 1 in the select vector.
 			uint32_t sample_id = select_vec(index + 1);
@@ -700,8 +728,9 @@ namespace variantdb {
 																												 num_samples%64),
 																	 num_samples%64);
 
-			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE> rrr_vec(sampleclass_vector);
-			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type rank_vec(&rrr_vec);
+			//sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE> rrr_vec(sampleclass_vector);
+			//sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type rank_vec(&rrr_vec);
+			sdsl::rank_support_v<1> rank_vec(&sampleclass_vector);
 
 			return rank_vec(num_samples);
 		}
@@ -736,7 +765,7 @@ namespace variantdb {
 
 	void VariantGraph::split_vertex(uint64_t vertex_id, uint64_t pos,
 																	Graph::vertex* new_vertex) {
-		console->debug("Splitting vertex: {} {}", vertex_id, pos);
+		//console->debug("Splitting vertex: {} {}", vertex_id, pos);
 		const VariantGraphVertex cur_vertex = vertex_list.vertex(vertex_id);
 		if (pos > cur_vertex.length()) {
 			console->error("Split position is greater than vertex length. {} {} {}",
@@ -804,6 +833,10 @@ namespace variantdb {
 
 	uint64_t VariantGraph::get_ref_length(void) const {
 		return ref_length;
+	}
+
+	uint64_t VariantGraph::get_num_sample_classes(void) const {
+		return sampleclass_map.size();
 	}
 
 	double VariantGraph::get_cache_hit_rate(void) const {
@@ -1052,9 +1085,9 @@ namespace variantdb {
 		else
 			mutation = INSERTION;
 
-		console->debug("Adding mutation: {} {} {} {} {}",
-									 mutation_string(mutation), ref, alt, pos,
-									 sample_list.size());
+		//console->debug("Adding mutation: {} {} {} {} {}",
+									 //mutation_string(mutation), ref, alt, pos,
+									 //sample_list.size());
 		// update pos and alt/ref if it's an insertion/deletion.
 		if (mutation == INSERTION) {
 			pos = pos + ref.size();
@@ -1202,13 +1235,14 @@ namespace variantdb {
 				add_sample_to_vertex(sample_vertex->vertex_id(), 0,
 														 sample.gt1, sample.gt2);
 			}
-			if ((uint32_t)sample_vertex->s_info_size() !=
-					get_popcnt(sample_vertex->sampleclass_id())) {
-				console->error("Num of samples {} is not equal to num of 1s in the sample class {}.",
-											 sample_vertex->s_info_size(),
-											 get_popcnt(sampleclass_id));
-				abort();
-			}
+			// validate popcnt and s_info size.
+			//if ((uint32_t)sample_vertex->s_info_size() !=
+					//get_popcnt(sample_vertex->sampleclass_id())) {
+				//console->error("Num of samples {} is not equal to num of 1s in the sample class {}.",
+											 //sample_vertex->s_info_size(),
+											 //get_popcnt(sampleclass_id));
+				//abort();
+			//}
 		} else if (mutation == INSERTION) {
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
 			// Either we got the vertex where there's already an insertion
@@ -1263,13 +1297,14 @@ namespace variantdb {
 				add_sample_to_vertex(sample_vertex->vertex_id(), 0,
 														 sample.gt1, sample.gt2);
 			}
-			if ((uint32_t)sample_vertex->s_info_size() !=
-					get_popcnt(sample_vertex->sampleclass_id())) {
-				console->error("Num of samples {} is not equal to num of 1s in the sample class {}.",
-											 sample_vertex->s_info_size(),
-											 get_popcnt(sampleclass_id));
-				abort();
-			}
+			// validate popcnt and s_info size.
+			//if ((uint32_t)sample_vertex->s_info_size() !=
+					//get_popcnt(sample_vertex->sampleclass_id())) {
+				//console->error("Num of samples {} is not equal to num of 1s in the sample class {}.",
+											 //sample_vertex->s_info_size(),
+											 //get_popcnt(sampleclass_id));
+				//abort();
+			//}
 		} else { // it's deletion
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
 			// Either we got the vertex where there's already a deletion
@@ -1362,23 +1397,22 @@ namespace variantdb {
 
 			// update sample class.
 			// if it's a new ref vertex update sample class.
-			if (vertex_list.vertex(next_ref_vertex_id).sampleclass_id() == 0)
-				update_vertex_sample_class(next_ref_vertex_id, sample_list);
-			// add samples to the vertex.
-			for (auto sample : sample_list) {
-				//uint64_t sample_idx = find_sample_index(prev_ref_vertex_id,
-				//sample.sample_id);
-				add_sample_to_vertex(next_ref_vertex_id, 0, sample.gt1, sample.gt2);
+			//if (vertex_list.vertex(next_ref_vertex_id).sampleclass_id() == 0)
+			if (!update_vertex_sample_class(next_ref_vertex_id, sample_list)) {
+				console->error("Unsupported mutation: {} {} {} {} {}",
+											 mutation_string(mutation), ref, alt, pos,
+											 sample_list.size());
 			}
 			const VariantGraphVertex next_ref_vertex =
 				vertex_list.vertex(next_ref_vertex_id);
-			if ((uint32_t)next_ref_vertex.s_info_size() !=
-					get_popcnt(next_ref_vertex.sampleclass_id())) {
-				console->error("Num of samples {} is not equal to num of 1s in the sample class {}.",
-											 next_ref_vertex.s_info_size(),
-											 get_popcnt(next_ref_vertex.sampleclass_id()));
-				abort();
-			}
+			// validate popcnt and s_info size.
+			//if ((uint32_t)next_ref_vertex.s_info_size() !=
+					//get_popcnt(next_ref_vertex.sampleclass_id())) {
+				//console->error("Num of samples {} is not equal to num of 1s in the sample class {}.",
+											 //next_ref_vertex.s_info_size(),
+											 //get_popcnt(next_ref_vertex.sampleclass_id()));
+				//abort();
+			//}
 			// make connections for the new vertex in the graph
 			validate_ref_path_edge(prev_ref_vertex_id, next_ref_vertex_id);
 			topology.add_edge(prev_ref_vertex_id, next_ref_vertex_id);
@@ -1458,7 +1492,7 @@ namespace variantdb {
 					}
 				}
 			} else { // this is not a ref vertex
-				// only sample vertexes should only have one outgoing edge.
+				// only-sample vertexes should only have one outgoing edge.
 				if (topology.out_neighbors(cur_vertex->vertex_id()).size() > 1) {
 					console->error("Sample vertex has more than 1 neighbor: {}",
 												 cur_vertex->vertex_id());
@@ -1470,8 +1504,8 @@ namespace variantdb {
 					// for each sample other than "ref" in the vertex update the index
 					uint32_t cur_length = cur_vertex->length();
 					// for each sample update the delta
-					for (int i = 0; i < cur_vertex->s_info_size(); ++i) {
-						const VariantGraphVertex::sample_info s = cur_vertex->s_info(i);
+					for (int i = 0; i < cur_neighbor->s_info_size(); ++i) {
+						const VariantGraphVertex::sample_info s = cur_neighbor->s_info(i);
 						uint32_t s_id = get_sample_id(cur_neighbor->sampleclass_id(), i);
 						uint32_t cur_index = s.index();
 						VariantGraphVertex::sample_info ref_sample; 
