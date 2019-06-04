@@ -246,12 +246,12 @@ namespace variantdb {
 		 Support Func: Return true if found the closest variants at or after the given pos. Return false is no variant is found reaching the end of the graph
 		 */
 
-	// TODO: consider insertion, deletion 
 	bool next_variant_in_ref ( VariantGraph *vg, Index *idx, const uint64_t pos,
 														 Variant &var) {
 		bool found_var = false;
 		Graph::vertex v = idx->find(pos); // the node before pos
 		VariantGraph::VariantGraphPathIterator it = vg->find(v, REF);
+
 		while (!it.done()) {
 			console->info("Check vertes: {}", (*it)->vertex_id());
 			VariantGraph::VariantGraphIterator bfs_it=vg->find((*it)->vertex_id(), 1);
@@ -263,30 +263,75 @@ namespace variantdb {
 			{
 				console->info("Check bfs vertes: {}", (*bfs_it)->vertex_id());
 				num_out_nodes++;
-				Graph::vertex out_v = (*bfs_it)->vertex_id();
+				//Graph::vertex out_v = (*bfs_it)->vertex_id();
 				std::vector <std::string> sample_ids;
 				// got variant nodes' samples_ids
-				if (get_samples((*bfs_it), vg, sample_ids)) {
-					std::string alt = vg->get_sequence(*(*bfs_it));
-					var.alts.push_back(alt);
+				if (get_samples((*bfs_it), vg, sample_ids)) { // found var
 					found_var = true;
-					var.alt_sample_map[alt] = sample_ids;
+					VariantGraphVertex::sample_info sample;
+					// Deletion
+					if (vg->get_sample_from_vertex_if_exists((*bfs_it)-> vertex_id(),
+																																REF, sample)) {
+						console->info("Found a deletion");
+						std::string alt = vg->get_sequence(*(*it));
+						alt = alt.substr(alt.length()-1, 1); // last character
+						++it;
+						std::string ref = alt + vg->get_sequence(*(*it));
+						var.ref.assign(ref);
+						var.alts.push_back(alt);
+						var.alt_sample_map[alt] = sample_ids;
+						var.var_pos = sample.index() - 1;
+					} else {
+						vg->get_sample_from_vertex_if_exists((*it)-> vertex_id(), REF,
+																									sample);
+						uint64_t prev_ref_idx = sample.index();
+						// dfs from bfs_it in sample's path
+						VariantGraph::VariantGraphPathIterator dfs_it = vg->find((*bfs_it)->
+																																vertex_id(), sample_ids[0]);
+						++dfs_it;
+						if (!vg->get_sample_from_vertex_if_exists((*dfs_it)-> vertex_id(),
+																																	REF, sample))
+						{
+							console->error("consecutive mutation near {}", pos);
+						}
+
+						uint64_t next_ref_idx = sample.index();
+						std::string prev_ref = vg->get_sequence(*(*it));
+
+						// Insertion
+						if (next_ref_idx == prev_ref_idx + prev_ref.length()) {
+							console->info("Found an insertion");
+							std::string ref = prev_ref.substr(prev_ref.length()-1, 1);
+							var.ref.assign(ref);
+							std::string alt = ref + vg->get_sequence(*(*bfs_it));
+							var.alts.push_back(alt);
+							var.alt_sample_map[alt] = sample_ids;
+							var.var_pos = sample.index() - 1;
+						} else {
+						// substitution
+
+							++it;
+							std::string alt = vg->get_sequence(*(*bfs_it));
+							var.alts.push_back(alt);
+							var.alt_sample_map[alt] = sample_ids;
+							var.ref.assign(vg->get_sequence(*(*it)));
+							if (vg->get_sample_from_vertex_if_exists((*it)-> vertex_id(),REF,
+																												sample)) {
+								var.var_pos = sample.index();
+								console->info("Found a substitution at {}", var.var_pos);
+							} else {
+								console->error("{} is not in the reference path", (*it)->
+																																	vertex_id());
+								abort();
+							}
+						}
+					}
 				}
+
 				++bfs_it;
 			}
-			console->debug("Num outgoing edges for node {} is: {}", v, num_out_nodes);
 
 			if (found_var == true) {
-				++it;
-				var.ref.assign(vg->get_sequence(*(*it)));
-				VariantGraphVertex::sample_info sample;
-				if (vg->get_sample_from_vertex_if_exists((*it)->vertex_id(),REF,sample))
-					var.var_pos = sample.index();
-				else
-				{
-					console->error("{} is not in the reference path", (*it)->vertex_id());
-					abort();
-				}
 				break;
 			}
 
@@ -297,19 +342,42 @@ namespace variantdb {
 	}
 
 
+	void copy_var (Variant *src, Variant & dst) {
+		dst.var_pos = src->var_pos;
+		dst.ref = src->ref;
+		std::copy(src->alts.begin(), src->alts.end(), dst.alts.begin());
+		dst.alt_sample_map.insert(src->alt_sample_map.begin(), src->alt_sample_map.end());
+		return;
+	}
+
 	/* ----------------------------------------------------------------------------
 		 Find a variant near given position
 		 */
 	bool closest_var ( VariantGraph *vg, Index *idx, const uint64_t pos,
 										 Variant &var) {
 		bool found_var = false;
-		// find next_var_in_ref
 		Variant next_var;
-		next_variant_in_ref(vg, idx, pos, next_var);
-		uint64_t next_var_pos = next_var.var_pos;
-		// find prev var in ref ???
 
-		return found_var;
+		if (next_variant_in_ref(vg, idx, pos, next_var)) {
+			uint64_t next_var_pos = next_var.var_pos;
+			Variant prev_var;
+			next_variant_in_ref(vg, idx, pos-(next_var_pos-pos), prev_var);
+			uint64_t prev_var_pos = prev_var.var_pos;
+			if (prev_var_pos != next_var_pos) {
+				copy_var(&prev_var, var);
+			} else {
+				copy_var(&next_var, var);
+			}
+		} else {
+			uint64_t cur_pos = pos - 1;
+			while (!next_variant_in_ref(vg, idx, cur_pos, next_var)) {
+				if (cur_pos == 1) { return false;}
+				cur_pos--;
+			}
+			copy_var(&next_var, var);
+		}
+
+		return true;
 	}
 
 
@@ -320,7 +388,7 @@ namespace variantdb {
 	std::vector <Variant> get_sample_var_in_sample ( VariantGraph *vg, Index *idx,
 																									 const uint64_t pos_x,
 																									 const uint64_t pos_y,
-																									 const string sample_id) {
+																									 const std::string sample_id) {
 		// traverse in sample's coordinate from pos_x to pos_y
 		// report if the sample's node is a variant node
 		std::vector <Variant> vars;
@@ -432,10 +500,29 @@ namespace variantdb {
 	std::vector <Variant> get_sample_var_in_ref ( VariantGraph *vg, Index *idx,
 																								const uint64_t pos_x,
 																								const uint64_t pos_y,
-																								const string sample_id) {
+																								const std::string sample_id) {
 		// traverse in sample's coordinate from pos_x to pos_y
 		// report if the sample's node is a variant node
-	} // mut_in_ref()
+		// use next_variant_in_ref()
+		std::vector <Variant> vars;
+		uint64_t cur_pos = pos_x;
+		while (cur_pos < pos_y)
+		{
+			Variant var;
+			if (next_variant_in_ref (vg, idx, cur_pos, var))
+			{
+				cur_pos = std::max(var.var_pos + 1, cur_pos + 1);
+				if (cur_pos < pos_y) {
+					vars.push_back(var);
+				}
+			} else {
+				break;
+			}
+		}
+
+		return vars;
+	} // get_sample_var_in_ref
+
 
 
 	/* ----------------------------------------------------------------------------
@@ -443,9 +530,28 @@ namespace variantdb {
 	// Return samples has such variant in the reference coordinate
 	*/
 	std::vector <std::string> samples_has_var ( VariantGraph *vg, Index *idx,
-																							const uint64_t pos, const string ref,
-																							const string alt) {
+																							const uint64_t pos, const
+																							std::string ref, const
+																							std::string alt) {
+		Variant var;
+		std::vector <std::string> samples;
 
+		next_variant_in_ref(vg, idx, pos, var);
+		if (var.ref != ref) {
+			console->error("There is no such variant!");
+		}
+
+		for (auto i=0; i<var.alts.size(); i++)
+		{
+			if (var.alts[i] == alt)
+			{
+				samples.assign(var.alt_sample_map[alt].begin(),
+												var.alt_sample_map[alt].end());
+				break;
+			}
+		}
+
+		return samples;
 	} // samples_has_var()
 
 }
