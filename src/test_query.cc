@@ -45,7 +45,7 @@ int main ( int argc, char *argv[] ) {
 
 	PRINT("Creating Index");
 	Index idx(&vg);
-
+	createDotGraph(&vg, "test2");
 	/*
   PRINT("TEST get_prev_vertex_with_sample");
   int pos = 1;
@@ -202,10 +202,10 @@ int main ( int argc, char *argv[] ) {
 		std::cin.ignore();
     std::getline(std::cin, sample_id);
   }
-	*/
+
 
 	// test get_sample_var_in_sample
-	PRINT("TEST query_sample_from_sample");
+	PRINT("TEST get_sample_var_in_sample");
   int pos_x = 1;
   int pos_y = 1;
 
@@ -226,4 +226,80 @@ int main ( int argc, char *argv[] ) {
 			print_var(&(*it));
 		}
   }
+
+	// test next_variant_in_ref
+	int pos = 1;
+	while (pos != -1)
+	{
+		PRINT("TEST next_variant_in_ref");
+		PRINT("Please specify position: ");
+		std::cin >> pos;
+		PRINT("Query...");
+		Variant var;
+		next_variant_in_ref (&vg, &idx, pos, var);
+		print_var(&var);
+	}
+
+
+	pos = 1;
+	while (pos != -1)
+	{
+		PRINT("TEST closest_var");
+		PRINT("Please specify position: ");
+		std::cin >> pos;
+		PRINT("Query...");
+		Variant var;
+		closest_var (&vg, &idx, pos, var);
+		print_var(&var);
+	}
+
+	// test get_sample_var_in_sample
+	PRINT("TEST get_sample_var_in_ref");
+	int pos_x = 1;
+	int pos_y = 1;
+
+	while (pos_x != -1)
+	{
+		std::string sample_id;
+		PRINT("Please specify position_x: ");
+		std::cin >> pos_x;
+		PRINT("Please specify position_y: ");
+		std::cin >> pos_y;
+		PRINT("Please specify sample id: ");
+		std::cin.ignore();
+		std::getline(std::cin, sample_id);
+		PRINT("Query...");
+		std::vector <Variant> vars;
+		vars = get_sample_var_in_ref(&vg, &idx, pos_x, pos_y, sample_id);
+		for (auto it = vars.begin(); it != vars.end(); it++) {
+			print_var(&(*it));
+		}
+	}
+*/
+
+
+	PRINT("TEST samples_has_var");
+	int pos = 1;
+	while (pos != -1)
+	{
+		std::string ref;
+		std::string alt;
+		PRINT("Please specify position: ");
+		std::cin >> pos;
+		PRINT("Please specify ref: ");
+		std::cin.ignore();
+		std::getline(std::cin, ref);
+		PRINT("Please specify alt: ");
+		//std::cin.ignore();
+		std::getline(std::cin, alt);
+		PRINT("Query...");
+		std::vector <std::string> samples;
+		samples = samples_has_var (&vg, &idx,pos, ref, alt);
+		PRINT("Samples has var: ");
+		for (auto it = samples.begin(); it != samples.end(); it++) {
+			std::cout << (*it) << " ";
+		}
+		PRINT();
+	}
+
 }
