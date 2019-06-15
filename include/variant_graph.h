@@ -506,7 +506,7 @@ namespace variantdb {
 					}
 					if (sample_list.size() > 0) {
 						add_mutation(var.ref, alt, var.position, sample_list);
-						num_mutations_samples += sample_list;
+						num_mutations_samples += sample_list.size();
 					}
 				}
 			}
