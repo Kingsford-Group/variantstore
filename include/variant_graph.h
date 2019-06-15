@@ -418,6 +418,7 @@ namespace variantdb {
 			num_samples += sampleid_map.size();
 
 			long int num_mutations = 0;
+			long int num_mutations_samples = 0;
 			uint32_t num_samples_in_mutation = 0;
 			while (variantFile.getNextVariant(var)) {
 				// verify mutation.
@@ -503,11 +504,13 @@ namespace variantdb {
 													 //alt);
 						continue;
 					}
-					if (sample_list.size() > 0)
+					if (sample_list.size() > 0) {
 						add_mutation(var.ref, alt, var.position, sample_list);
+						num_mutations_samples += sample_list;
+					}
 				}
 			}
-			console->info("Num mutations: {}", num_mutations);
+			console->info("Num mutations: {}", num_mutations_samples);
 		}
 	}
 
