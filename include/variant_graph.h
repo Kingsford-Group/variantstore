@@ -36,7 +36,7 @@
 namespace variantdb {
 
 #define CACHE_SIZE 256
-#define NUM_VERTEXES_IN_BLOCK 1
+#define NUM_VERTEXES_IN_BLOCK 1000000
 
 	// to map a sample --> vertex ids.
 	using Cache = LRU::Cache<uint32_t, Graph::vertex>;
@@ -600,7 +600,7 @@ namespace variantdb {
 
 	void VariantGraph::split_vertex(uint64_t vertex_id, uint64_t pos,
 																	Graph::vertex* new_vertex) {
-		console->debug("Splitting vertex: {} {}", vertex_id, pos);
+		//console->debug("Splitting vertex: {} {}", vertex_id, pos);
 		const VariantGraphVertex cur_vertex = get_vertex(vertex_id);
 		if (pos > cur_vertex.length()) {
 			console->error("Split position is greater than vertex length. {} {} {}",
@@ -922,9 +922,9 @@ namespace variantdb {
 		else
 			mutation = INSERTION;
 
-		console->debug("Adding mutation: {} {} {} {} {}",
-									 mutation_string(mutation), ref, alt, pos,
-									 sample_list.size());
+		//console->debug("Adding mutation: {} {} {} {} {}",
+									 //mutation_string(mutation), ref, alt, pos,
+									 //sample_list.size());
 		// update pos and alt/ref if it's an insertion/deletion.
 		if (mutation == INSERTION) {
 			pos = pos + ref.size();
