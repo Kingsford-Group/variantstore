@@ -42,7 +42,7 @@ namespace variantdb {
 	// to map a sample --> vertex ids.
 	using Cache = LRU::Cache<uint32_t, Graph::vertex>;
 
-	static inline int word_rank(uint64_t val) {
+	static inline uint64_t word_rank(uint64_t val) {
 		asm("popcnt %[val], %[val]"
 				: [val] "+r" (val)
 				:
@@ -62,10 +62,6 @@ namespace variantdb {
 				: [bit] "g" (val)
 				: "cc");
 		return i;
-	}
-
-	uint64_t bit_vector_select(const sdsl::bit_vector vec, uint64_t index) {
-			
 	}
 
 	// Construction:
@@ -140,6 +136,8 @@ namespace variantdb {
 																						VariantGraphVertex::sample_info&
 																						sample) const;
 			uint32_t get_sample_id(uint32_t sampleclass_id, uint32_t index) const;
+			uint32_t get_sample_id_fast(uint32_t sampleclass_id, uint32_t index)
+				const;
 
 			// iterator for a breadth-first traversal in the variant graph
 			class VariantGraphIterator {
@@ -719,19 +717,32 @@ namespace variantdb {
 		return true;
 	}
 
-	//uint64_t VariantGraph::get_sample_id_fast(uint32_t sampleclass_id, uint32_t
-																						//index) {
-		//for (uint32_t i = 0; i < num_samples/64*64; i+=64) {
-			//sampleclass_vector.set_int(i, sample_vector.get_int(start_idx+i, 64),
-																 //64);
-		//}
+	uint32_t VariantGraph::get_sample_id_fast(uint32_t sampleclass_id, uint32_t
+																						index) const {
+		uint64_t start_idx = (sampleclass_id - 1) * num_samples;
+		uint32_t rank = index + 1;
+		for (uint32_t i = 0; i < num_samples/64*64; i+=64) {
+			uint64_t word = sample_vector.get_int(start_idx+i, 64);
+			if (word_rank(word) >= rank) {
+				return word_select(word, rank - 1);
+			} else {
+				rank -= word_rank(word);
+			}
+		}
 
-		//if (num_samples%64)
-			//sampleclass_vector.set_int(num_samples/64*64,
-																 //sample_vector.get_int(start_idx+num_samples/64*64,
-																											 //num_samples%64),
-
-	//}
+		if (num_samples%64) {
+			uint64_t word = sample_vector.get_int(start_idx+num_samples/64*64,
+																						num_samples%64);
+			if (word_rank(word) >= rank) {
+				return word_select(word, rank - 1);
+			} else {
+				console->error("Index {} passed is outside the bounds for sample class {} popcnt: {}.",
+											 index, sampleclass_id, get_popcnt(sampleclass_id));
+				abort();
+			}
+		}
+		return UINT32_MAX;
+	}
 
 	sdsl::bit_vector VariantGraph::get_bit_vector(uint32_t sampleclass_id) const
 	{
@@ -764,6 +775,12 @@ namespace variantdb {
 
 			// index 0 means the first 1 in the select vector.
 			uint32_t sample_id = select_vec(index + 1);
+			uint32_t sample_id_fast = get_sample_id_fast(sampleclass_id, index);
+			if (sample_id != sample_id_fast) {
+				console->error("Sample ids don't match old: {} new: {}", sample_id,
+											 sample_id_fast);
+				abort();
+			}
 			if (sample_id >= num_samples) {
 				console->error("Index {} passed is outside the bounds for sample class {} popcnt: {}.",
 											 index, sampleclass_id, get_popcnt(sampleclass_id));
