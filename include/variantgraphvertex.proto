@@ -7,16 +7,16 @@ message VariantGraphVertex {
 	uint32 vertex_id = 1;
 	uint32 offset = 2;
 	uint32 length = 3;
+	uint32 sampleclass_id = 4;
 
 	message sample_info {
 		uint32 index = 1;
-		uint32 sample_id = 2;
 		// two bits for genotype info.
-		bool gt_1 = 3;
-		bool gt_2 = 4;
+		bool gt_1 = 2;
+		bool gt_2 = 3;
 	}
 
-	repeated sample_info s_info = 4;
+	repeated sample_info s_info = 5;
 }
 
 message VariantGraphVertexList {

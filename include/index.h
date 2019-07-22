@@ -73,7 +73,7 @@ namespace variantdb {
 			}
 			uint64_t idx = 	sample.index();
 
-			console->debug("At index {} has node {}", idx, node_id);
+			//console->debug("At index {} has node {}", idx, node_id);
 
 			// extra check to determine loops in the ref path through the graph.
 			if (b[idx-1] == 1) {

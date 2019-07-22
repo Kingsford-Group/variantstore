@@ -40,13 +40,13 @@
 using namespace variantdb;
 
 namespace variantdb {
-  bool is_ref_node(const VariantGraphVertex* v) {
+  bool is_ref_node(const VariantGraph *vg, const VariantGraphVertex* v) {
     for (int i = 0; i < v->s_info_size(); i++) {
-			const VariantGraphVertex::sample_info& s = v->s_info(i);
-    //  DEBUG("Node " << v->vertex_id() << " contains sample " << s.sample_id());
-			if (s.sample_id() == 0) {
-        return true;
-      }
+			//const VariantGraphVertex::sample_info& s = v->s_info(i);
+			//  DEBUG("Node " << v->vertex_id() << " contains sample " << s.sample_id());
+			if (vg->get_sample_id(v->sampleclass_id(), i) == 0) {
+				return true;
+			}
 		}
     return false;
   }
@@ -58,7 +58,8 @@ namespace variantdb {
 			std::to_string(static_cast<int>(v->length())) + "\n(";
     for (int i = 0; i < v->s_info_size(); ++i) {
 			const VariantGraphVertex::sample_info& s = v->s_info(i);
-			samples += vg->get_sample_name(s.sample_id()) + " i:" +
+			uint32_t s_id = vg->get_sample_id(v->sampleclass_id(), i);
+			samples += vg->get_sample_name(s_id) + " i:" +
 				std::to_string(static_cast<int>(s.index()));
 			if (i < v->s_info_size() - 1)
 				samples += "\n";
@@ -106,7 +107,7 @@ namespace variantdb {
 
       while (!node.done()) {
         uint64_t neibor_id = (*node)->vertex_id();
-        if (is_ref_node(*node) && is_ref_node(*it)) {
+        if (is_ref_node(vg, *node) && is_ref_node(vg, *it)) {
           //DEBUG("Node " << node_id << " is on the reference path");
           ref += "\t\t" + std::to_string(node_id) + " -> " ;
           ref += std::to_string(neibor_id) + "\n";
