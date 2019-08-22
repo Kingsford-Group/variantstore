@@ -59,5 +59,12 @@ main ( int argc, char *argv[] )
 	console->info("Serializing index to disk");
 	idx.serialize(argv[3]);
 
+	console->info("Loading variant graph");
+	VariantGraph file_vg(argv[3]);
+	console->info("Graph stats:");
+	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
+								file_vg.get_chr(), file_vg.get_num_vertices() , file_vg.get_num_edges(),
+								file_vg.get_seq_length());
+
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

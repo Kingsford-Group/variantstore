@@ -22,7 +22,7 @@ namespace stream {
 // but if it is 0, it is not written
 // if not all objects are written, return false, otherwise true
 template <typename T>
-bool write(std::ostream& out, uint64_t count, std::function<T(uint64_t)>& lambda) {
+bool write(std::ostream& out, uint64_t id, std::function<T(uint64_t)>& lambda) {
 
     ::google::protobuf::io::ZeroCopyOutputStream *raw_out =
           new ::google::protobuf::io::OstreamOutputStream(&out);
@@ -31,13 +31,14 @@ bool write(std::ostream& out, uint64_t count, std::function<T(uint64_t)>& lambda
     ::google::protobuf::io::CodedOutputStream *coded_out =
           new ::google::protobuf::io::CodedOutputStream(gzip_out);
 
+		uint64_t count = 1;
     // prefix the chunk with the number of objects
     coded_out->WriteVarint64(count);
 
     std::string s;
     uint64_t written = 0;
     for (uint64_t n = 0; n < count; ++n, ++written) {
-        lambda(n).SerializeToString(&s);
+        lambda(id).SerializeToString(&s);
         // and prefix each object with its size
         coded_out->WriteVarint32(s.size());
         coded_out->WriteRaw(s.data(), s.size());

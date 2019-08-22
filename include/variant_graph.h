@@ -33,6 +33,7 @@
 #include "util.h"
 #include "variantgraphvertex.pb.h"
 #include "graph.h"
+#include "variantdb_fs.h"
 
 namespace variantdb {
 
@@ -346,9 +347,15 @@ namespace variantdb {
 		}
 
 	VariantGraph::VariantGraph(const std::string& prefix) : topology(prefix) {
-		// load vertex list
-		std::string vertex_list_name = prefix + "/vertex_list.proto";
-		fstream input(vertex_list_name, ios::in | ios::binary);
+
+		// Read all proto files and sort them based on ids.
+		std::vector<std::string> proto_files = fs::GetFilesExt(prefix.c_str(), ".proto");
+		std::map<int, std::string> sorted_proto_files;
+		for (auto file : proto_files) {
+			int id = std::stoi(file.substr(file.find_last_of('_') + 1,
+																		 file.find_first_of('.')));
+			sorted_proto_files[id] = file;
+		}
 
 		function<void(VariantGraphVertexList&)> lambda =
 			[this](VariantGraphVertexList& v)
@@ -358,9 +365,14 @@ namespace variantdb {
 				//*vertex = v;
 			};
 
-		if (!stream::for_each(input, lambda)) {
-			console->error("Failed to parse vertex list {}.", vertex_list_name);
-			abort();
+		for (auto file_obj : sorted_proto_files) {
+			// load vertex list
+			std::string vertex_list_name = prefix + "/" + file_obj.second;
+			fstream input(vertex_list_name, ios::in | ios::binary);
+			if (!stream::for_each(input, lambda)) {
+				console->error("Failed to parse vertex list {}.", vertex_list_name);
+				abort();
+			}
 		}
 
 		// load seq buffer
@@ -414,9 +426,6 @@ namespace variantdb {
 	}
 
 	void VariantGraph::serialize(const std::string& prefix) {
-		// serialize vertex list
-		std::string vertex_list_name = prefix + "/vertex_list.proto";
-		std::fstream output(vertex_list_name, ios::out | ios::trunc | ios::binary);
 
 		std::function<VariantGraphVertexList(uint64_t)> lambda =
 			[this](uint64_t n) {
@@ -424,9 +433,15 @@ namespace variantdb {
 				//return vertex_list.vertex(n);
 			};
 
-		if (!stream::write(output, vertex_block_list.size(), lambda)) {
-			console->error("Failed to write vertex list.", vertex_list_name);
-			abort();
+		for (uint64_t i = 0; i < vertex_block_list.size(); i++) {
+			// serialize vertex list
+			std::string vertex_list_name = prefix + "/vertex_list_" +
+				std::to_string(i) + ".proto";
+			std::fstream output(vertex_list_name, ios::out | ios::trunc | ios::binary);
+			if (!stream::write(output, i, lambda)) {
+				console->error("Failed to write vertex list.", vertex_list_name);
+				abort();
+			}
 		}
 
 		// serialize seq buffer
