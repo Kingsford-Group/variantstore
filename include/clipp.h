@@ -1,30 +1,10 @@
 /*****************************************************************************
- *  ___  _    _   ___ ___
- * |  _|| |  | | | _ \ _ \   CLIPP - command line interfaces for modern C++
- * | |_ | |_ | | |  _/  _/   version 1.2.3
- * |___||___||_| |_| |_|     https://github.com/muellan/clipp
  *
- * Licensed under the MIT License <http://opensource.org/licenses/MIT>.
- * Copyright (c) 2017-2018 André Müller <foss@andremueller-online.de>
+ * CLIPP - command line interfaces for modern C++
  *
- * ---------------------------------------------------------------------------
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
+ * released under MIT license
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
+ * (c) 2017 André Müller; foss@andremueller-online.de
  *
  *****************************************************************************/
 
@@ -36,6 +16,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
+#include <cmath>
 #include <memory>
 #include <vector>
 #include <limits>
@@ -114,12 +95,12 @@ public:
 
     /** @brief returns true, if query string is a prefix of the subject string */
     constexpr bool prefix() const noexcept {
-        return at_ == 0;
+        return at_ == 0 && length_ > 0;
     }
 
     /** @brief returns true, if query is a substring of the query string */
     constexpr explicit operator bool () const noexcept {
-        return at_ != arg_string::npos;
+        return at_ != arg_string::npos && length_ > 0;
     }
 
 private:
@@ -313,10 +294,10 @@ fwd_to_unsigned_int(const char*& s)
 template<class T, class V, bool = (sizeof(V) > sizeof(T))>
 struct limits_clamped {
     static T from(const V& v) {
-        if(v >= V(std::numeric_limits<T>::max())) {
+        if(v > V(std::numeric_limits<T>::max())) {
             return std::numeric_limits<T>::max();
         }
-        if(v <= V(std::numeric_limits<T>::lowest())) {
+        if(v < V(std::numeric_limits<T>::lowest())) {
             return std::numeric_limits<T>::lowest();
         }
         return T(v);
@@ -348,13 +329,7 @@ inline T clamped_on_limits(const V& v) {
  *
  *****************************************************************************/
 template<class T>
-struct make {
-    static inline T from(const char* s) {
-        if(!s) return false;
-        //a conversion from const char* to / must exist
-        return static_cast<T>(s);
-    }
-};
+struct make;
 
 template<>
 struct make<bool> {
@@ -605,7 +580,8 @@ public:
     map_arg_to(T& target) noexcept : t_{std::addressof(target)} {}
 
     void operator () (const char* s) const {
-        if(t_ && s) *t_ = detail::make<T>::from(s);
+        if(t_ && s && (std::strlen(s) > 0))
+            *t_ = detail::make<T>::from(s);
     }
 
 private:
@@ -913,7 +889,6 @@ inline subrange
 substring_match(const std::basic_string<C,T,A>& subject,
                 const std::basic_string<C,T,A>& query)
 {
-    if(subject.empty() && query.empty()) return subrange(0,0);
     if(subject.empty() || query.empty()) return subrange{};
     auto i = subject.find(query);
     if(i == std::basic_string<C,T,A>::npos) return subrange{};
@@ -1230,9 +1205,6 @@ public:
     template<class Target>
     Derived&
     set(Target& t) {
-        static_assert(!std::is_pointer<Target>::value,
-                      "parameter target type must not be a pointer");
-
         return call(clipp::set(t));
     }
 
@@ -1275,7 +1247,7 @@ public:
     }
     /** @brief adds an action that will be called if a required parameter
      *         is missing; the action will get called with the index of
-     *         the command line argument where the missing event occurred first
+     *         the command line argument where the missing event occured first
      */
     Derived&
     if_missing(index_action a) {
@@ -1296,7 +1268,7 @@ public:
     /** @brief adds an action that will be called if a parameter
      *         was matched, but was unreachable in the current scope;
      *         the action will be called with the index of
-     *         the command line argument where the problem occurred
+     *         the command line argument where the problem occured
      */
     Derived&
     if_blocked(index_action a) {
@@ -1315,9 +1287,9 @@ public:
         return *static_cast<Derived*>(this);
     }
     /** @brief adds an action that will be called if a parameter match
-     *         was in conflict with a different alternative parameter;
+     *         was in conflict with a different alternative paramete;
      *         the action will be called with the index of
-     *         the command line argument where the problem occurred
+     *         the command line argument where the problem occuredr
      */
     Derived&
     if_conflicted(index_action a) {
@@ -1641,40 +1613,6 @@ alphabetic(const arg_string& s) {
 
 /*************************************************************************//**
  *
- * @brief predicate that returns false if the argument string is
- *        equal to any string from the exclusion list
- *
- *****************************************************************************/
-class none_of
-{
-public:
-    none_of(arg_list strs):
-        excluded_{std::move(strs)}
-    {}
-
-    template<class... Strings>
-    none_of(arg_string str, Strings&&... strs):
-        excluded_{std::move(str), std::forward<Strings>(strs)...}
-    {}
-
-    template<class... Strings>
-    none_of(const char* str, Strings&&... strs):
-        excluded_{arg_string(str), std::forward<Strings>(strs)...}
-    {}
-
-    bool operator () (const arg_string& arg) const {
-        return (std::find(begin(excluded_), end(excluded_), arg)
-                == end(excluded_));
-    }
-
-private:
-    arg_list excluded_;
-};
-
-
-
-/*************************************************************************//**
- *
  * @brief predicate that returns the first substring match within the input
  *        string that rmeepresents a number
  *        (with at maximum one decimal point and digit separators)
@@ -1883,7 +1821,6 @@ class parameter :
     public detail::token<parameter>,
     public detail::action_provider<parameter>
 {
-    /** @brief adapts a 'match_predicate' to the 'match_function' interface */
     class predicate_adapter {
     public:
         explicit
@@ -1903,7 +1840,7 @@ public:
     parameter():
         flags_{},
         matcher_{predicate_adapter{match::none}},
-        label_{}, required_{false}, greedy_{false}
+        label_{}, required_{false}
     {}
 
     /** @brief makes "flag" parameter */
@@ -1912,7 +1849,7 @@ public:
     parameter(arg_string str, Strings&&... strs):
         flags_{},
         matcher_{predicate_adapter{match::none}},
-        label_{}, required_{false}, greedy_{false}
+        label_{}, required_{false}
     {
         add_flags(std::move(str), std::forward<Strings>(strs)...);
     }
@@ -1922,7 +1859,7 @@ public:
     parameter(const arg_list& flaglist):
         flags_{},
         matcher_{predicate_adapter{match::none}},
-        label_{}, required_{false}, greedy_{false}
+        label_{}, required_{false}
     {
         add_flags(flaglist);
     }
@@ -1935,7 +1872,7 @@ public:
     parameter(match_predicate filter):
         flags_{},
         matcher_{predicate_adapter{std::move(filter)}},
-        label_{}, required_{false}, greedy_{false}
+        label_{}, required_{false}
     {}
 
     /** @brief makes "value" parameter with custom match function
@@ -1945,7 +1882,7 @@ public:
     parameter(match_function filter):
         flags_{},
         matcher_{std::move(filter)},
-        label_{}, required_{false}, greedy_{false}
+        label_{}, required_{false}
     {}
 
 
@@ -1960,21 +1897,6 @@ public:
     parameter&
     required(bool yes) noexcept {
         required_ = yes;
-        return *this;
-    }
-
-
-    //---------------------------------------------------------------
-    /** @brief returns if a parameter should match greedily */
-    bool
-    greedy() const noexcept {
-        return greedy_;
-    }
-
-    /** @brief determines if a parameter should match greedily */
-    parameter&
-    greedy(bool yes) noexcept {
-        greedy_ = yes;
         return *this;
     }
 
@@ -2014,13 +1936,12 @@ public:
     subrange
     match(const arg_string& arg) const
     {
+        if(arg.empty()) return subrange{};
+
         if(flags_.empty()) {
             return matcher_(arg);
         }
         else {
-            //empty flags are not allowed
-            if(arg.empty()) return subrange{};
-
             if(std::find(flags_.begin(), flags_.end(), arg) != flags_.end()) {
                 return subrange{0,arg.size()};
             }
@@ -2077,47 +1998,6 @@ public:
         return p;
     }
 
-
-    //---------------------------------------------------------------
-    /** @brief prepend suffix to each flag */
-    inline friend parameter&
-    with_suffix(const arg_string& suffix, parameter& p)
-    {
-        if(suffix.empty() || p.flags().empty()) return p;
-
-        for(auto& f : p.flags_) {
-            if(f.find(suffix) + suffix.size() != f.size()) {
-                f.insert(f.end(), suffix.begin(), suffix.end());
-            }
-        }
-        return p;
-    }
-
-
-    /** @brief prepend suffix to each flag
-     */
-    inline friend parameter&
-    with_suffixes_short_long(
-        const arg_string& shortsfx, const arg_string& longsfx,
-        parameter& p)
-    {
-        if(shortsfx.empty() && longsfx.empty()) return p;
-        if(p.flags().empty()) return p;
-
-        for(auto& f : p.flags_) {
-            if(f.size() == 1) {
-                if(f.find(shortsfx) + shortsfx.size() != f.size()) {
-                    f.insert(f.end(), shortsfx.begin(), shortsfx.end());
-                }
-            } else {
-                if(f.find(longsfx) + longsfx.size() != f.size()) {
-                    f.insert(f.end(), longsfx.begin(), longsfx.end());
-                }
-            }
-        }
-        return p;
-    }
-
 private:
     //---------------------------------------------------------------
     void add_flags(arg_string str) {
@@ -2145,7 +2025,6 @@ private:
     match_function matcher_;
     doc_string label_;
     bool required_ = false;
-    bool greedy_ = false;
 };
 
 
@@ -2548,24 +2427,6 @@ any_other(Targets&&... tgts)
 
 
 
-/*************************************************************************//**
- *
- * @brief makes catch-all value parameter with custom filter
- *
- *****************************************************************************/
-template<class Filter, class... Targets, class = typename std::enable_if<
-    traits::is_callable<Filter,bool(const char*)>::value ||
-    traits::is_callable<Filter,subrange(const char*)>::value>::type>
-inline parameter
-any(Filter&& filter, Targets&&... tgts)
-{
-    return parameter{std::forward<Filter>(filter)}
-        .target(std::forward<Targets>(tgts)...)
-        .required(false).blocking(false).repeatable(true);
-}
-
-
-
 
 /*************************************************************************//**
  *
@@ -2829,12 +2690,12 @@ public:
             return int(stack_.size());
         }
 
-        bool is_first_in_parent() const noexcept {
+        bool is_first_in_group() const noexcept {
             if(stack_.empty()) return false;
             return (stack_.back().cur == stack_.back().parent->begin());
         }
 
-        bool is_last_in_parent() const noexcept {
+        bool is_last_in_group() const noexcept {
             if(stack_.empty()) return false;
             return (stack_.back().cur+1 == stack_.back().end);
         }
@@ -2868,14 +2729,6 @@ public:
             return std::any_of(stack_.begin() + minlevel, stack_.end(),
                 [](const context& c) { return c.parent->repeatable(); });
         }
-
-        /** @brief inside a particular group */
-        bool is_inside(const group* g) const noexcept {
-            if(!g) return false;
-            return std::any_of(stack_.begin(), stack_.end(),
-                [g](const context& c) { return c.parent == g; });
-        }
-
         /** @brief inside group with joinable flags */
         bool joinable() const noexcept {
             if(stack_.empty()) return false;
@@ -2890,47 +2743,16 @@ public:
 
         /** @brief innermost repeat group */
         const group*
-        innermost_repeat_group() const noexcept {
+        repeat_group() const noexcept {
             auto i = std::find_if(stack_.rbegin(), stack_.rend(),
                 [](const context& c) { return c.parent->repeatable(); });
+
             return i != stack_.rend() ? i->parent : nullptr;
-        }
-
-        /** @brief innermost exclusive (alternatives) group */
-        const group*
-        innermost_exclusive_group() const noexcept {
-            auto i = std::find_if(stack_.rbegin(), stack_.rend(),
-                [](const context& c) { return c.parent->exclusive(); });
-            return i != stack_.rend() ? i->parent : nullptr;
-        }
-
-        /** @brief innermost blocking group */
-        const group*
-        innermost_blocking_group() const noexcept {
-            auto i = std::find_if(stack_.rbegin(), stack_.rend(),
-                [](const context& c) { return c.parent->blocking(); });
-            return i != stack_.rend() ? i->parent : nullptr;
-        }
-
-        /** @brief returns the outermost group that will be left on next ++*/
-        const group*
-        outermost_blocking_group_fully_explored() const noexcept {
-            if(stack_.empty()) return nullptr;
-
-            const group* g = nullptr;
-            for(auto i = stack_.rbegin(); i != stack_.rend(); ++i) {
-                if(i->cur+1 == i->end) {
-                    if(i->parent->blocking()) g = i->parent;
-                } else {
-                    return g;
-                }
-            }
-            return g;
         }
 
         /** @brief outermost join group */
         const group*
-        outermost_join_group() const noexcept {
+        join_group() const noexcept {
             auto i = std::find_if(stack_.begin(), stack_.end(),
                 [](const context& c) { return c.parent->joinable(); });
             return i != stack_.end() ? i->parent : nullptr;
@@ -2943,7 +2765,7 @@ public:
         /** @brief common flag prefix of all flags in current group */
         arg_string common_flag_prefix() const noexcept {
             if(stack_.empty()) return "";
-            auto g = outermost_join_group();
+            auto g = join_group();
             return g ? g->common_flag_prefix() : arg_string("");
         }
 
@@ -3002,17 +2824,29 @@ public:
             return *this;
         }
 
+        /** @brief skips to next alternative in innermost group
+        */
+        depth_first_traverser&
+        next_alternative() {
+            if(stack_.empty()) return *this;
+
+            //find first exclusive group (from the top of the stack!)
+            auto i = std::find_if(stack_.rbegin(), stack_.rend(),
+                [](const context& c) { return c.parent->exclusive(); });
+            if(i == stack_.rend()) return *this;
+
+            stack_.erase(i.base(), stack_.end());
+            next_sibling();
+            return *this;
+        }
+
         /**
          * @brief
          */
         depth_first_traverser&
-        back_to_ancestor(const group* g) {
-            if(!g) return *this;
-            while(!stack_.empty()) {
-                const auto& top = stack_.back().cur;
-                if(top->is_group() && &(top->as_group()) == g) return *this;
-                stack_.pop_back();
-            }
+        back_to_parent() {
+            if(stack_.empty()) return *this;
+            stack_.pop_back();
             return *this;
         }
 
@@ -3408,7 +3242,7 @@ public:
 
     //---------------------------------------------------------------
     /** @brief returns augmented iterator for depth first searches
-     *  @details traverser knows end of iteration and can skip over children
+     *  @details taverser knows end of iteration and can skip over children
      */
     depth_first_traverser
     begin_dfs() const noexcept {
@@ -3520,39 +3354,6 @@ using pattern = group::child;
 
 /*************************************************************************//**
  *
- * @brief apply an action to all parameters in a group
- *
- *****************************************************************************/
-template<class Action>
-void for_all_params(group& g, Action&& action)
-{
-    for(auto& p : g) {
-        if(p.is_group()) {
-            for_all_params(p.as_group(), action);
-        }
-        else {
-            action(p.as_param());
-        }
-    }
-}
-
-template<class Action>
-void for_all_params(const group& g, Action&& action)
-{
-    for(auto& p : g) {
-        if(p.is_group()) {
-            for_all_params(p.as_group(), action);
-        }
-        else {
-            action(p.as_param());
-        }
-    }
-}
-
-
-
-/*************************************************************************//**
- *
  * @brief makes a group of parameters and/or groups
  *
  *****************************************************************************/
@@ -3652,12 +3453,6 @@ operator | (group a, group b)
 
 
 
-/*************************************************************************//**
- *
- * @brief helpers (NOT FOR DIRECT USE IN CLIENT CODE!)
- *        no interface guarantees; might be changed or removed in the future
- *
- *****************************************************************************/
 namespace detail {
 
 inline void set_blocking(bool) {}
@@ -3745,9 +3540,14 @@ operator & (group a, group b)
  *        where all single char flag params ("-a", "b", ...) are joinable
  *
  *****************************************************************************/
-inline group
-joinable(group g) {
-    return g.joinable(true);
+inline group&
+joinable(group& param) {
+    return param.joinable(true);
+}
+
+inline group&&
+joinable(group&& param) {
+    return std::move(param.joinable(true));
 }
 
 //-------------------------------------------------------------------
@@ -3826,23 +3626,6 @@ repeatable(group p1, P2 p2, Ps... ps)
 
 /*************************************************************************//**
  *
- * @brief makes a parameter greedy (match with top priority)
- *
- *****************************************************************************/
-inline parameter
-greedy(parameter p) {
-    return p.greedy(true);
-}
-
-inline parameter
-operator ! (parameter p) {
-    return greedy(p);
-}
-
-
-
-/*************************************************************************//**
- *
  * @brief recursively prepends a prefix to all flags
  *
  *****************************************************************************/
@@ -3854,16 +3637,16 @@ with_prefix(const arg_string& prefix, parameter&& p) {
 
 //-------------------------------------------------------------------
 inline group&
-with_prefix(const arg_string& prefix, group& g)
+with_prefix(const arg_string& prefix, group& params)
 {
-    for(auto& p : g) {
+    for(auto& p : params) {
         if(p.is_group()) {
             with_prefix(prefix, p.as_group());
         } else {
             with_prefix(prefix, p.as_param());
         }
     }
-    return g;
+    return params;
 }
 
 
@@ -3904,16 +3687,16 @@ with_prefixes_short_long(const arg_string& shortpfx, const arg_string& longpfx,
 inline group&
 with_prefixes_short_long(const arg_string& shortFlagPrefix,
                          const arg_string& longFlagPrefix,
-                         group& g)
+                         group& params)
 {
-    for(auto& p : g) {
+    for(auto& p : params) {
         if(p.is_group()) {
             with_prefixes_short_long(shortFlagPrefix, longFlagPrefix, p.as_group());
         } else {
             with_prefixes_short_long(shortFlagPrefix, longFlagPrefix, p.as_param());
         }
     }
-    return g;
+    return params;
 }
 
 
@@ -3940,105 +3723,6 @@ with_prefixes_short_long(const arg_string& shortFlagPrefix,
 
 
 
-/*************************************************************************//**
- *
- * @brief recursively prepends a suffix to all flags
- *
- *****************************************************************************/
-inline parameter&&
-with_suffix(const arg_string& suffix, parameter&& p) {
-    return std::move(with_suffix(suffix, p));
-}
-
-
-//-------------------------------------------------------------------
-inline group&
-with_suffix(const arg_string& suffix, group& g)
-{
-    for(auto& p : g) {
-        if(p.is_group()) {
-            with_suffix(suffix, p.as_group());
-        } else {
-            with_suffix(suffix, p.as_param());
-        }
-    }
-    return g;
-}
-
-
-inline group&&
-with_suffix(const arg_string& suffix, group&& params)
-{
-    return std::move(with_suffix(suffix, params));
-}
-
-
-template<class Param, class... Params>
-inline group
-with_suffix(arg_string suffix, Param&& param, Params&&... params)
-{
-    return with_suffix(suffix, group{std::forward<Param>(param),
-                                     std::forward<Params>(params)...});
-}
-
-
-
-/*************************************************************************//**
- *
- * @brief recursively prepends a suffix to all flags
- *
- * @param shortsfx : used for single-letter flags
- * @param longsfx  : used for flags with length > 1
- *
- *****************************************************************************/
-inline parameter&&
-with_suffixes_short_long(const arg_string& shortsfx, const arg_string& longsfx,
-                         parameter&& p)
-{
-    return std::move(with_suffixes_short_long(shortsfx, longsfx, p));
-}
-
-
-//-------------------------------------------------------------------
-inline group&
-with_suffixes_short_long(const arg_string& shortFlagSuffix,
-                         const arg_string& longFlagSuffix,
-                         group& g)
-{
-    for(auto& p : g) {
-        if(p.is_group()) {
-            with_suffixes_short_long(shortFlagSuffix, longFlagSuffix, p.as_group());
-        } else {
-            with_suffixes_short_long(shortFlagSuffix, longFlagSuffix, p.as_param());
-        }
-    }
-    return g;
-}
-
-
-inline group&&
-with_suffixes_short_long(const arg_string& shortFlagSuffix,
-                         const arg_string& longFlagSuffix,
-                         group&& params)
-{
-    return std::move(with_suffixes_short_long(shortFlagSuffix, longFlagSuffix,
-                                              params));
-}
-
-
-template<class Param, class... Params>
-inline group
-with_suffixes_short_long(const arg_string& shortFlagSuffix,
-                         const arg_string& longFlagSuffix,
-                         Param&& param, Params&&... params)
-{
-    return with_suffixes_short_long(shortFlagSuffix, longFlagSuffix,
-                                    group{std::forward<Param>(param),
-                                          std::forward<Params>(params)...});
-}
-
-
-
 
 
 
@@ -4049,7 +3733,6 @@ with_suffixes_short_long(const arg_string& shortFlagSuffix,
  * @brief parsing implementation details
  *
  *****************************************************************************/
-
 namespace detail {
 
 
@@ -4071,7 +3754,7 @@ public:
     explicit
     scoped_dfs_traverser(const group& g):
         pos_{g}, lastMatch_{}, posAfterLastMatch_{}, scopes_{},
-        ignoreBlocks_{false},
+        curMatched_{false}, ignoreBlocks_{false},
         repeatGroupStarted_{false}, repeatGroupContinues_{false}
     {}
 
@@ -4079,19 +3762,8 @@ public:
     const dfs_traverser& last_match() const noexcept { return lastMatch_; }
 
     const group& parent() const noexcept { return pos_.parent(); }
-
-    const group* innermost_repeat_group() const noexcept {
-        return pos_.innermost_repeat_group();
-    }
-    const group* outermost_join_group() const noexcept {
-        return pos_.outermost_join_group();
-    }
-    const group* innermost_blocking_group() const noexcept {
-        return pos_.innermost_blocking_group();
-    }
-    const group* innermost_exclusive_group() const noexcept {
-        return pos_.innermost_exclusive_group();
-    }
+    const group* repeat_group() const noexcept { return pos_.repeat_group(); }
+    const group* join_group() const noexcept { return pos_.join_group(); }
 
     const pattern* operator ->() const noexcept { return pos_.operator->(); }
     const pattern& operator *() const noexcept { return *pos_; }
@@ -4105,13 +3777,8 @@ public:
 
     void ignore_blocking(bool yes) { ignoreBlocks_ = yes; }
 
-    void invalidate() {
-        pos_.invalidate();
-    }
-
-    bool matched() const noexcept {
-        return (pos_ == lastMatch_);
-    }
+    void invalidate() { pos_.invalidate(); curMatched_ = false; }
+    bool matched() const noexcept { return curMatched_; }
 
     bool start_of_repeat_group() const noexcept { return repeatGroupStarted_; }
 
@@ -4120,8 +3787,10 @@ public:
     next_sibling() { pos_.next_sibling(); return *this; }
 
     scoped_dfs_traverser&
-    next_after_siblings() { pos_.next_after_siblings(); return *this; }
+    next_alternative() { pos_.next_alternative(); return *this; }
 
+    scoped_dfs_traverser&
+    next_after_siblings() { pos_.next_after_siblings(); return *this; }
 
     //-----------------------------------------------------
     scoped_dfs_traverser&
@@ -4135,20 +3804,20 @@ public:
         }
 
         //current pattern can block if it didn't match already
-        if(ignoreBlocks_ || matched()) {
-            ++pos_;
-        }
-        else if(!pos_->is_group()) {
+        if(!ignoreBlocks_ && !matched()) {
             //current group can block if we didn't have any match in it
-            const group* g = pos_.outermost_blocking_group_fully_explored();
-            //no match in 'g' before -> skip to after its siblings
-            if(g && !lastMatch_.is_inside(g)) {
-                pos_.back_to_ancestor(g).next_after_siblings();
+            if(pos_.is_last_in_group() && pos_.parent().blocking()
+                && (!posAfterLastMatch_ || &(posAfterLastMatch_.parent()) != &(pos_.parent())))
+            {
+                //ascend to parent's level
+                ++pos_;
+                //skip all siblings of parent group
+                pos_.next_after_siblings();
                 if(!pos_) return_to_outermost_scope();
             }
-            else if(pos_->blocking()) {
-                if(pos_.parent().exclusive()) {
-                    pos_.next_sibling();
+            else if(pos_->blocking() && !pos_->is_group()) {
+                if(pos_.parent().exclusive()) { //is_alternative(pos_.level())) {
+                    pos_.next_alternative();
                 } else {
                     //no match => skip siblings of blocking param
                     pos_.next_after_siblings();
@@ -4160,7 +3829,7 @@ public:
         } else {
             ++pos_;
         }
-        check_if_left_scope();
+        check_left_scope();
         return *this;
     }
 
@@ -4173,9 +3842,8 @@ public:
 
         lastMatch_ = match.base();
 
-        // if there is a blocking ancestor -> go back to it
-        if(!match->blocking()) {
-            match.pos_.back_to_ancestor(match.innermost_blocking_group());
+        if(!match->blocking() && match.base().parent().blocking()) {
+            match.pos_.back_to_parent();
         }
 
         //if match is not in current position & current position is blocking
@@ -4193,17 +3861,22 @@ public:
             if(is_last_in_current_scope(match.pos_)) {
                 //if current param is not repeatable -> back to previous scope
                 if(!match->repeatable() && !match->is_group()) {
+                    curMatched_ = false;
                     pos_ = std::move(match.pos_);
                     if(!scopes_.empty()) pos_.undo(scopes_.top());
                 }
                 else { //stay at match position
+                    curMatched_ = true;
                     pos_ = std::move(match.pos_);
                 }
             }
             else { //not last in current group
                 //if current param is not repeatable, go directly to next
                 if(!match->repeatable() && !match->is_group()) {
+                    curMatched_ = false;
                     ++match.pos_;
+                } else {
+                    curMatched_ = true;
                 }
 
                 if(match.pos_.level() > pos_.level()) {
@@ -4230,7 +3903,7 @@ public:
 
 private:
     //-----------------------------------------------------
-    bool is_last_in_current_scope(const dfs_traverser& pos) const
+    bool is_last_in_current_scope(const dfs_traverser& pos)
     {
         if(scopes_.empty()) return pos.is_last_in_path();
         //check if we would leave the current scope on ++
@@ -4242,11 +3915,11 @@ private:
     //-----------------------------------------------------
     void check_repeat_group_start(const scoped_dfs_traverser& newMatch)
     {
-        const auto newrg = newMatch.innermost_repeat_group();
+        const auto newrg = newMatch.repeat_group();
         if(!newrg) {
             repeatGroupStarted_ = false;
         }
-        else if(lastMatch_.innermost_repeat_group() != newrg) {
+        else if(lastMatch_.repeat_group() != newrg) {
             repeatGroupStarted_ = true;
         }
         else if(!repeatGroupContinues_ || !newMatch.repeatGroupContinues_) {
@@ -4265,18 +3938,18 @@ private:
     }
 
     //-----------------------------------------------------
-    bool repeat_group_continues() const
+    bool repeat_group_continues()
     {
         if(!repeatGroupContinues_) return false;
-        const auto curRepGroup = pos_.innermost_repeat_group();
+        const auto curRepGroup = pos_.repeat_group();
         if(!curRepGroup) return false;
-        if(curRepGroup != lastMatch_.innermost_repeat_group()) return false;
+        if(curRepGroup != lastMatch_.repeat_group()) return false;
         if(!posAfterLastMatch_) return false;
         return true;
     }
 
     //-----------------------------------------------------
-    void check_if_left_scope()
+    void check_left_scope()
     {
         if(posAfterLastMatch_) {
             if(pos_.level() < posAfterLastMatch_.level()) {
@@ -4328,6 +4001,7 @@ private:
     dfs_traverser lastMatch_;
     dfs_traverser posAfterLastMatch_;
     std::stack<dfs_traverser::memento> scopes_;
+    bool curMatched_ = false;
     bool ignoreBlocks_ = false;
     bool repeatGroupStarted_ = false;
     bool repeatGroupContinues_ = false;
@@ -4366,20 +4040,15 @@ struct select_values {
  *****************************************************************************/
 class match_t {
 public:
-    using size_type = arg_string::size_type;
-
     match_t() = default;
-
     match_t(arg_string s, scoped_dfs_traverser p):
         str_{std::move(s)}, pos_{std::move(p)}
     {}
 
-    size_type length() const noexcept { return str_.size(); }
-
     const arg_string& str() const noexcept { return str_; }
     const scoped_dfs_traverser& pos() const noexcept { return pos_; }
 
-    explicit operator bool() const noexcept { return bool(pos_); }
+    explicit operator bool() const noexcept { return !str_.empty(); }
 
 private:
     arg_string str_;
@@ -4390,15 +4059,17 @@ private:
 
 /*************************************************************************//**
  *
- * @brief finds the first parameter that matches a given string;
+ * @brief finds the first parameter that matches a given string
  *        candidate parameters are traversed using a scoped DFS traverser
  *
  *****************************************************************************/
-template<class ParamSelector>
+template<class Predicate>
 match_t
 full_match(scoped_dfs_traverser pos, const arg_string& arg,
-           const ParamSelector& select)
+           const Predicate& select)
 {
+    if(arg.empty()) return match_t{};
+
     while(pos) {
         if(pos->is_param()) {
             const auto& param = pos->as_param();
@@ -4423,32 +4094,32 @@ full_match(scoped_dfs_traverser pos, const arg_string& arg,
  *        candidate parameters are traversed using a scoped DFS traverser
  *
  *****************************************************************************/
-template<class ParamSelector>
+template<class Predicate>
 match_t
-longest_prefix_match(scoped_dfs_traverser pos, const arg_string& arg,
-                     const ParamSelector& select)
+prefix_match(scoped_dfs_traverser pos, const arg_string& arg,
+             const Predicate& select)
 {
-    match_t longest;
+    if(arg.empty()) return match_t{};
 
     while(pos) {
         if(pos->is_param()) {
             const auto& param = pos->as_param();
             if(select(param)) {
-                auto match = param.match(arg);
+                const auto match = param.match(arg);
                 if(match.prefix()) {
                     if(match.length() == arg.size()) {
                         return match_t{arg, std::move(pos)};
                     }
-                    else if(match.length() > longest.length()) {
-                        longest = match_t{arg.substr(match.at(), match.length()), 
-                                          pos};
+                    else {
+                        return match_t{arg.substr(match.at(), match.length()),
+                                       std::move(pos)};
                     }
                 }
             }
         }
         ++pos;
     }
-    return longest;
+    return match_t{};
 }
 
 
@@ -4459,11 +4130,13 @@ longest_prefix_match(scoped_dfs_traverser pos, const arg_string& arg,
  *        candidate parameters are traversed using a scoped DFS traverser
  *
  *****************************************************************************/
-template<class ParamSelector>
+template<class Predicate>
 match_t
 partial_match(scoped_dfs_traverser pos, const arg_string& arg,
-              const ParamSelector& select)
+              const Predicate& select)
 {
+    if(arg.empty()) return match_t{};
+
     while(pos) {
         if(pos->is_param()) {
             const auto& param = pos->as_param();
@@ -4538,7 +4211,7 @@ public:
         bool bad_repeat() const noexcept {
             if(!param()) return false;
             return repeat_ > 0 && !param()->repeatable()
-                && !match_.innermost_repeat_group();
+                && !match_.repeat_group();
         }
 
         bool any_error() const noexcept {
@@ -4619,7 +4292,7 @@ public:
         ++eaten_;
         ++index_;
 
-        if(!valid()) return false;
+        if(!valid() || arg.empty()) return false;
 
         if(!blocked_ && try_match(arg)) return true;
 
@@ -4628,6 +4301,7 @@ public:
         //skipping of blocking & required patterns is not allowed
         if(!blocked_ && !pos_.matched() && pos_->required() && pos_->blocking()) {
             blocked_ = true;
+            return false;
         }
 
         add_nomatch(arg);
@@ -4709,52 +4383,33 @@ private:
     /** @brief try to find a parameter/pattern that matches 'arg' */
     bool try_match(const arg_string& arg)
     {
-        //match greedy parameters before everything else
-        if(pos_->is_param() && pos_->blocking() && pos_->as_param().greedy()) {
-            const auto match = pos_->as_param().match(arg);
-            if(match && match.length() == arg.size()) {
-                add_match(detail::match_t{arg,pos_});
-                return true;
-            }
-        }
-
-        //try flags first (alone, joinable or strict sequence)
+        //Note: flag-params will always take precedence over value-params
         if(try_match_full(arg, detail::select_flags{})) return true;
         if(try_match_joined_flags(arg)) return true;
         if(try_match_joined_sequence(arg, detail::select_flags{})) return true;
-        //try value params (alone or strict sequence)
         if(try_match_full(arg, detail::select_values{})) return true;
         if(try_match_joined_sequence(arg, detail::select_all{})) return true;
-        //try joinable params + values in any order
         if(try_match_joined_params(arg)) return true;
         return false;
     }
 
     //---------------------------------------------------------------
-    /**
-     * @brief try to match full argument
-     * @param select : predicate that candidate parameters must satisfy
-     */
-    template<class ParamSelector>
-    bool try_match_full(const arg_string& arg, const ParamSelector& select)
+    template<class Predicate>
+    bool try_match_full(const arg_string& arg, const Predicate& select)
     {
         auto match = detail::full_match(pos_, arg, select);
+
         if(!match) return false;
+
         add_match(match);
         return true;
     }
 
     //---------------------------------------------------------------
-    /**
-     * @brief try to match argument as blocking sequence of parameters
-     * @param select : predicate that a parameter matching the prefix of
-     *                 'arg' must satisfy
-     */
-    template<class ParamSelector>
-    bool try_match_joined_sequence(arg_string arg,
-                                   const ParamSelector& acceptFirst)
+    template<class Predicate>
+    bool try_match_joined_sequence(arg_string arg, const Predicate& acceptFirst)
     {
-        auto fstMatch = detail::longest_prefix_match(pos_, arg, acceptFirst);
+        auto fstMatch = detail::prefix_match(pos_, arg, acceptFirst);
 
         if(!fstMatch) return false;
 
@@ -4790,7 +4445,7 @@ private:
             }
 
         }
-        //if arg not fully covered => discard temporary matches
+
         if(!arg.empty() || matches.empty()) return false;
 
         for(const auto& m : matches) add_match(m);
@@ -4798,46 +4453,46 @@ private:
     }
 
     //-----------------------------------------------------
-    /** @brief try to match 'arg' as a concatenation of joinable flags */
     bool try_match_joined_flags(const arg_string& arg)
     {
-        return find_join_group(pos_, [&](const group& g) {
-            return try_match_joined(g, arg, detail::select_flags{},
-                                    g.common_flag_prefix());
+        return try_match_joined([&](const group& g) {
+            if(try_match_joined(g, arg, detail::select_flags{},
+                                g.common_flag_prefix()) )
+            {
+                return true;
+            }
+            return false;
         });
     }
 
     //---------------------------------------------------------------
-    /** @brief try to match 'arg' as a concatenation of joinable parameters */
     bool try_match_joined_params(const arg_string& arg)
     {
-        return find_join_group(pos_, [&](const group& g) {
-            return try_match_joined(g, arg, detail::select_all{});
+        return try_match_joined([&](const group& g) {
+            if(try_match_joined(g, arg, detail::select_all{}) ) {
+                return true;
+            }
+            return false;
         });
     }
 
     //-----------------------------------------------------
-    /** @brief try to match 'arg' as concatenation of joinable parameters
-     *         that are all contained within one group
-     */
-    template<class ParamSelector>
+    template<class Predicate>
     bool try_match_joined(const group& joinGroup, arg_string arg,
-                          const ParamSelector& select,
+                          const Predicate& pred,
                           const arg_string& prefix = "")
     {
-        //temporary parser with 'joinGroup' as top-level group
         parser parse {joinGroup};
-        //records temporary matches
         std::vector<match_t> matches;
 
         while(!arg.empty()) {
-            auto match = detail::longest_prefix_match(parse.pos_, arg, select);
+            auto match = detail::prefix_match(parse.pos_, arg, pred);
 
             if(!match) return false;
 
             arg.erase(0, match.str().size());
             //make sure prefix is always present after the first match
-            //so that, e.g., flags "-a" and "-b" will be found in "-ab"
+            //ensures that, e.g., flags "-a" and "-b" will be found in "-ab"
             if(!arg.empty() && !prefix.empty() && arg.find(prefix) != 0 &&
                 prefix != match.str())
             {
@@ -4859,21 +4514,20 @@ private:
     }
 
     //-----------------------------------------------------
-    template<class GroupSelector>
-    bool find_join_group(const scoped_dfs_traverser& start,
-                         const GroupSelector& accept) const
+    template<class Predicate>
+    bool try_match_joined(const Predicate& pred)
     {
-        if(start && start.parent().joinable()) {
-            const auto& g = start.parent();
-            if(accept(g)) return true;
+        if(pos_ && pos_.parent().joinable()) {
+            const auto& g = pos_.parent();
+            if(pred(g)) return true;
             return false;
         }
 
-        auto pos = start;
+        auto pos = pos_;
         while(pos) {
             if(pos->is_group() && pos->as_group().joinable()) {
                 const auto& g = pos->as_group();
-                if(accept(g)) return true;
+                if(pred(g)) return true;
                 pos.next_sibling();
             }
             else {
@@ -4894,7 +4548,7 @@ private:
     void add_match(const match_t& match)
     {
         const auto& pos = match.pos();
-        if(!pos || !pos->is_param()) return;
+        if(!pos || !pos->is_param() || match.str().empty()) return;
 
         pos_.next_after_match(pos);
 
@@ -4989,13 +4643,13 @@ private:
         ++npos;
         //need to add potential misses if:
         //either new repeat group was started
-        const auto newRepGroup = match.innermost_repeat_group();
+        const auto newRepGroup = match.repeat_group();
         if(newRepGroup) {
             if(pos_.start_of_repeat_group()) {
                 for_each_potential_miss(std::move(npos),
                     [&,this](const dfs_traverser& pos) {
                         //only add candidates within repeat group
-                        if(newRepGroup == pos.innermost_repeat_group()) {
+                        if(newRepGroup == pos.repeat_group()) {
                             missCand_.emplace_back(pos, index_, true);
                         }
                     });
@@ -5051,8 +4705,6 @@ private:
     //---------------------------------------------------------------
     std::size_t occurrences_of(const parameter* p) const
     {
-        if(!p) return 0;
-
         auto i = std::find_if(args_.rbegin(), args_.rend(),
             [p](const arg_mapping& a){ return a.param() == p; });
 
@@ -5090,7 +4742,7 @@ public:
     using iterator       = arg_mappings::const_iterator;
 
     //-----------------------------------------------------
-    /** @brief default: empty result */
+    /** @brief default: empty redult */
     parsing_result() = default;
 
     parsing_result(arg_mappings arg2param, missing_events misses):
@@ -5130,14 +4782,14 @@ public:
     }
 
     /** @brief returns true if any parsing error / violation of the
-     *         command line interface definition occurred */
+     *         command line interface definition occured */
     bool any_error() const noexcept {
         return unmapped_args_count() > 0 || !missing().empty() ||
                any_blocked() || any_conflict() || any_bad_repeat();
     }
 
     /** @brief returns true if no parsing error / violation of the
-     *         command line interface definition occurred */
+     *         command line interface definition occured */
     explicit operator bool() const noexcept { return !any_error(); }
 
     /** @brief access to range of missing parameter match events */
@@ -5166,7 +4818,7 @@ namespace {
  *
  * @brief correct some common problems
  *        does not - and MUST NOT - change the number of arguments
- *        (no insertions or deletions allowed)
+ *        (no insertion, no deletion)
  *
  *****************************************************************************/
 void sanitize_args(arg_list& args)
@@ -5296,7 +4948,7 @@ parse(std::initializer_list<const char*> arglist, const group& cli)
     arg_list args;
     args.reserve(arglist.size());
     for(auto a : arglist) {
-        args.push_back(a);
+        if(std::strlen(a) > 0) args.push_back(a);
     }
 
     return parse(std::move(args), cli);
@@ -5391,6 +5043,7 @@ private:
     tri required_   = tri::either;
     tri blocking_   = tri::either;
     tri repeatable_ = tri::either;
+    tri exclusive_  = tri::either;
     tri hasDoc_     = tri::yes;
 };
 
@@ -5409,59 +5062,13 @@ class doc_formatting
 public:
     using string = doc_string;
 
-    /** @brief same as 'first_column' */
-#if __cplusplus >= 201402L
-    [[deprecated]]
-#endif
-    doc_formatting& start_column(int col) { return first_column(col); }
-#if __cplusplus >= 201402L
-    [[deprecated]]
-#endif
-    int start_column() const noexcept { return first_column(); }
-
     /** @brief determines column where documentation printing starts */
-    doc_formatting&
-    first_column(int col) {
-        //limit to [0,last_column] but push doc_column to the right if necessary
-        if(col < 0) col = 0;
-        else if(col > last_column()) col = last_column();
-        if(col > doc_column()) doc_column(first_column());
-        firstCol_ = col;
-        return *this;
-    }
-    int first_column() const noexcept {
-        return firstCol_;
-    }
+    doc_formatting& start_column(int col) { startCol_ = col; return *this; }
+    int             start_column() const noexcept { return startCol_; }
 
     /** @brief determines column where docstrings start */
-    doc_formatting&
-    doc_column(int col) {
-        //limit to [first_column,last_column]
-        if(col < 0) col = 0;
-        else if(col < first_column()) col = first_column();
-        else if(col > last_column()) col = last_column();
-        docCol_ = col;
-        return *this;
-    }
-    int doc_column() const noexcept {
-        return docCol_;
-    }
-
-    /** @brief determines column that no documentation text must exceed;
-     *         (text should be wrapped appropriately after this column)
-     */
-    doc_formatting&
-    last_column(int col) {
-        //limit to [first_column,oo] but push doc_column to the left if necessary
-        if(col < first_column()) col = first_column();
-        if(col < doc_column()) doc_column(col);
-        lastCol_ = col;
-        return *this;
-    }
-
-    int last_column() const noexcept {
-        return lastCol_;
-    }
+    doc_formatting& doc_column(int col) { docCol_ = col; return *this; }
+    int             doc_column() const noexcept  { return docCol_; }
 
     /** @brief determines indent of documentation lines
      *         for children of a documented group */
@@ -5511,7 +5118,7 @@ public:
     }
     const string& flag_separator() const noexcept { return flagSep_; }
 
-    /** @brief determines strings surrounding parameter labels */
+    /** @brief determnines strings surrounding parameter labels */
     doc_formatting&
     surround_labels(const string& prefix, const string& postfix) {
         labelPre_ = prefix;
@@ -5521,7 +5128,7 @@ public:
     const string& label_prefix()  const noexcept { return labelPre_; }
     const string& label_postfix() const noexcept { return labelPst_; }
 
-    /** @brief determines strings surrounding optional parameters/groups */
+    /** @brief determnines strings surrounding optional parameters/groups */
     doc_formatting&
     surround_optional(const string& prefix, const string& postfix) {
         optionPre_ = prefix;
@@ -5531,7 +5138,7 @@ public:
     const string& optional_prefix()  const noexcept { return optionPre_; }
     const string& optional_postfix() const noexcept { return optionPst_; }
 
-    /** @brief determines strings surrounding repeatable parameters/groups */
+    /** @brief determnines strings surrounding repeatable parameters/groups */
     doc_formatting&
     surround_repeat(const string& prefix, const string& postfix) {
         repeatPre_ = prefix;
@@ -5541,7 +5148,7 @@ public:
     const string& repeat_prefix()  const noexcept { return repeatPre_; }
     const string& repeat_postfix() const noexcept { return repeatPst_; }
 
-    /** @brief determines strings surrounding exclusive groups */
+    /** @brief determnines strings surrounding exclusive groups */
     doc_formatting&
     surround_alternatives(const string& prefix, const string& postfix) {
         alternPre_ = prefix;
@@ -5551,7 +5158,7 @@ public:
     const string& alternatives_prefix()  const noexcept { return alternPre_; }
     const string& alternatives_postfix() const noexcept { return alternPst_; }
 
-    /** @brief determines strings surrounding alternative flags */
+    /** @brief determnines strings surrounding alternative flags */
     doc_formatting&
     surround_alternative_flags(const string& prefix, const string& postfix) {
         alternFlagPre_ = prefix;
@@ -5561,7 +5168,7 @@ public:
     const string& alternative_flags_prefix()  const noexcept { return alternFlagPre_; }
     const string& alternative_flags_postfix() const noexcept { return alternFlagPst_; }
 
-    /** @brief determines strings surrounding non-exclusive groups */
+    /** @brief determnines strings surrounding non-exclusive groups */
     doc_formatting&
     surround_group(const string& prefix, const string& postfix) {
         groupPre_ = prefix;
@@ -5571,7 +5178,7 @@ public:
     const string& group_prefix()  const noexcept { return groupPre_; }
     const string& group_postfix() const noexcept { return groupPst_; }
 
-    /** @brief determines strings surrounding joinable groups */
+    /** @brief determnines strings surrounding joinable groups */
     doc_formatting&
     surround_joinable(const string& prefix, const string& postfix) {
         joinablePre_ = prefix;
@@ -5653,16 +5260,6 @@ public:
     }
     int alternatives_min_split_size() const noexcept { return groupSplitSize_; }
 
-    /** @brief determines whether to ignore new line characters in docstrings
-     */
-    doc_formatting& ignore_newline_chars(bool yes = true) {
-        ignoreNewlines_ = yes;
-        return *this;
-    }
-    bool ignore_newline_chars() const noexcept {
-        return ignoreNewlines_;
-    }
-
 private:
     string paramSep_      = string(" ");
     string groupSep_      = string(" ");
@@ -5684,9 +5281,8 @@ private:
     string joinablePre_   = string("(");
     string joinablePst_   = string(")");
     string emptyLabel_    = string("");
-    int firstCol_ = 8;
+    int startCol_ = 8;
     int docCol_ = 20;
-    int lastCol_ = 100;
     int indentSize_ = 4;
     int maxAltInUsage_ = 1;
     int maxAltInDocs_ = 32;
@@ -5696,335 +5292,7 @@ private:
     bool splitTopAlt_ = true;
     bool mergeAltCommonPfx_ = false;
     bool mergeJoinableCommonPfx_ = true;
-    bool ignoreNewlines_ = false;
 };
-
-
-
-namespace detail {
-
-/*************************************************************************//**
- *
- * @brief stream decorator
- *        that applies formatting like line wrapping
- *
- *****************************************************************************/
-template<class OStream = std::ostream, class StringT = doc_string>
-class formatting_ostream
-{
-public:
-    using string_type = StringT;
-    using size_type   = typename string_type::size_type;
-    using char_type   = typename string_type::value_type;
-
-    formatting_ostream(OStream& os):
-        os_(os),
-        curCol_{0}, firstCol_{0}, lastCol_{100},
-        hangingIndent_{0}, paragraphSpacing_{0}, paragraphSpacingThreshold_{2},
-        curBlankLines_{0}, curParagraphLines_{1},
-        totalNonBlankLines_{0},
-        ignoreInputNls_{false}
-    {}
-
-
-    //---------------------------------------------------------------
-    const OStream& base() const noexcept { return os_; }
-          OStream& base()       noexcept { return os_; }
-
-    bool good() const { return os_.good(); }
-
-
-    //---------------------------------------------------------------
-    /** @brief determines the leftmost border of the text body */
-    formatting_ostream& first_column(int c) {
-        firstCol_ = c < 0 ? 0 : c;
-        return *this;
-    }
-    int first_column() const noexcept { return firstCol_; }
-
-    /** @brief determines the rightmost border of the text body */
-    formatting_ostream& last_column(int c) {
-        lastCol_ = c < 0 ? 0 : c;
-        return *this;
-    }
-
-    int last_column() const noexcept { return lastCol_; }
-
-    int text_width() const noexcept {
-        return lastCol_ - firstCol_;
-    }
-
-    /** @brief additional indentation for the 2nd, 3rd, ... line of
-               a paragraph (sequence of soft-wrapped lines) */
-    formatting_ostream& hanging_indent(int amount) {
-        hangingIndent_ = amount;
-        return *this;
-    }
-    int hanging_indent() const noexcept {
-        return hangingIndent_;
-    }
-
-    /** @brief amount of blank lines between paragraphs */
-    formatting_ostream& paragraph_spacing(int lines) {
-        paragraphSpacing_ = lines;
-        return *this;
-    }
-    int paragraph_spacing() const noexcept {
-        return paragraphSpacing_;
-    }
-
-    /** @brief insert paragraph spacing
-               if paragraph is at least 'lines' lines long */
-    formatting_ostream& min_paragraph_lines_for_spacing(int lines) {
-        paragraphSpacingThreshold_ = lines;
-        return *this;
-    }
-    int min_paragraph_lines_for_spacing() const noexcept {
-        return paragraphSpacingThreshold_;
-    }
-
-    /** @brief if set to true, newline characters will be ignored */
-    formatting_ostream& ignore_newline_chars(bool yes) {
-        ignoreInputNls_ = yes;
-        return *this;
-    }
-
-    bool ignore_newline_chars() const noexcept {
-        return ignoreInputNls_;
-    }
-
-
-    //---------------------------------------------------------------
-    /* @brief insert 'n' spaces */
-    void write_spaces(int n) {
-        if(n < 1) return;
-        os_ << string_type(size_type(n), ' ');
-        curCol_ += n;
-    }
-
-    /* @brief go to new line, but continue current paragraph */
-    void wrap_soft(int times = 1) {
-        if(times < 1) return;
-        if(times > 1) {
-            os_ << string_type(size_type(times), '\n');
-        } else {
-            os_ << '\n';
-        }
-        curCol_ = 0;
-        ++curParagraphLines_;
-    }
-
-    /* @brief go to new line, and start a new paragraph */
-    void wrap_hard(int times = 1) {
-        if(times < 1) return;
-
-        if(paragraph_spacing() > 0 &&
-           paragraph_lines() >= min_paragraph_lines_for_spacing())
-        {
-            times = paragraph_spacing() + 1;
-        }
-
-        if(times > 1) {
-            os_ << string_type(size_type(times), '\n');
-            curBlankLines_ += times - 1;
-        } else {
-            os_ << '\n';
-        }
-        if(at_begin_of_line()) {
-            ++curBlankLines_;
-        }
-        curCol_ = 0;
-        curParagraphLines_ = 1;
-    }
-
-
-    //---------------------------------------------------------------
-    bool at_begin_of_line() const noexcept {
-        return curCol_ <= current_line_begin();
-    }
-    int current_line_begin() const noexcept {
-        return in_hanging_part_of_paragraph()
-            ? firstCol_ + hangingIndent_
-            : firstCol_;
-    }
-
-    int current_column() const noexcept {
-        return curCol_;
-    }
-
-    int total_non_blank_lines() const noexcept {
-        return totalNonBlankLines_;
-    }
-    int paragraph_lines() const noexcept {
-        return curParagraphLines_;
-    }
-    int blank_lines_before_paragraph() const noexcept {
-        return curBlankLines_;
-    }
-
-
-    //---------------------------------------------------------------
-    template<class T>
-    friend formatting_ostream&
-    operator << (formatting_ostream& os, const T& x) {
-        os.write(x);
-        return os;
-    }
-
-    void flush() {
-        os_.flush();
-    }
-
-
-private:
-    bool in_hanging_part_of_paragraph() const noexcept {
-        return hanging_indent() > 0 && paragraph_lines() > 1;
-    }
-    bool current_line_empty() const noexcept {
-        return curCol_ < 1;
-    }
-    bool left_of_text_area() const noexcept {
-        return curCol_ < current_line_begin();
-    }
-    bool right_of_text_area() const noexcept {
-        return curCol_ > lastCol_;
-    }
-    int columns_left_in_line() const noexcept {
-        return lastCol_ - std::max(current_line_begin(), curCol_);
-    }
-
-    void fix_indent() {
-        if(left_of_text_area()) {
-            const auto fst = current_line_begin();
-            write_spaces(fst - curCol_);
-            curCol_ = fst;
-        }
-    }
-
-    template<class Iter>
-    bool only_whitespace(Iter first, Iter last) const {
-        return last == std::find_if_not(first, last,
-                [](char_type c) { return std::isspace(c); });
-    }
-
-    /** @brief write any object */
-    template<class T>
-    void write(const T& x) {
-        std::ostringstream ss;
-        ss << x;
-        write(std::move(ss).str());
-    }
-
-    /** @brief write a stringstream */
-    void write(const std::ostringstream& s) {
-        write(s.str());
-    }
-
-    /** @brief write a string */
-    void write(const string_type& s) {
-        write(s.begin(), s.end());
-    }
-
-    /** @brief partition output into lines */
-    template<class Iter>
-    void write(Iter first, Iter last)
-    {
-        if(first == last) return;
-        if(*first == '\n') {
-            if(!ignore_newline_chars()) wrap_hard();
-            ++first;
-            if(first == last) return;
-        }
-        auto i = std::find(first, last, '\n');
-        if(i != last) {
-            if(ignore_newline_chars()) ++i;
-            if(i != last) {
-                write_line(first, i);
-                write(i, last);
-            }
-        }
-        else {
-            write_line(first, last);
-        }
-    }
-
-    /** @brief handle line wrapping due to column constraints */
-    template<class Iter>
-    void write_line(Iter first, Iter last)
-    {
-        if(first == last) return;
-        if(only_whitespace(first, last)) return;
-
-        if(right_of_text_area()) wrap_soft();
-
-        if(at_begin_of_line()) {
-            //discard whitespace, it we start a new line
-            first = std::find_if(first, last,
-                        [](char_type c) { return !std::isspace(c); });
-            if(first == last) return;
-        }
-
-        const auto n = int(std::distance(first,last));
-        const auto m = columns_left_in_line();
-        //if text to be printed is too long for one line -> wrap
-        if(n > m) {
-            //break before word, if break is mid-word
-            auto breakat = first + m;
-            while(breakat > first && !std::isspace(*breakat)) --breakat;
-            //could not find whitespace before word -> try after the word
-            if(!std::isspace(*breakat) && breakat == first) {
-                breakat = std::find_if(first+m, last,
-                          [](char_type c) { return std::isspace(c); });
-            }
-            if(breakat > first) {
-                if(curCol_ < 1) ++totalNonBlankLines_;
-                fix_indent();
-                std::copy(first, breakat, std::ostream_iterator<char_type>(os_));
-                curBlankLines_ = 0;
-            }
-            if(breakat < last) {
-                wrap_soft();
-                write_line(breakat, last);
-            }
-        }
-        else {
-            if(curCol_ < 1) ++totalNonBlankLines_;
-            fix_indent();
-            std::copy(first, last, std::ostream_iterator<char_type>(os_));
-            curCol_ += n;
-            curBlankLines_ = 0;
-        }
-    }
-
-    /** @brief write a single character */
-    void write(char_type c)
-    {
-        if(c == '\n') {
-            if(!ignore_newline_chars()) wrap_hard();
-        }
-        else {
-            if(at_begin_of_line()) ++totalNonBlankLines_;
-            fix_indent();
-            os_ << c;
-            ++curCol_;
-        }
-    }
-
-    OStream& os_;
-    int curCol_;
-    int firstCol_;
-    int lastCol_;
-    int hangingIndent_;
-    int paragraphSpacing_;
-    int paragraphSpacingThreshold_;
-    int curBlankLines_;
-    int curParagraphLines_;
-    int totalNonBlankLines_;
-    bool ignoreInputNls_;
-};
-
-
-}
 
 
 
@@ -6041,16 +5309,17 @@ class usage_lines
 public:
     using string = doc_string;
 
-    usage_lines(const group& cli, string prefix = "",
+    usage_lines(const group& params, string prefix = "",
                 const doc_formatting& fmt = doc_formatting{})
     :
-        cli_(cli), fmt_(fmt), prefix_(std::move(prefix))
+        params_(params), fmt_(fmt), prefix_(std::move(prefix))
     {
         if(!prefix_.empty()) prefix_ += ' ';
+        if(fmt_.start_column() > 0) prefix_.insert(0, fmt.start_column(), ' ');
     }
 
-    usage_lines(const group& cli, const doc_formatting& fmt):
-        usage_lines(cli, "", fmt)
+    usage_lines(const group& params, const doc_formatting& fmt):
+        usage_lines(params, "", fmt)
     {}
 
     usage_lines& ommit_outermost_group_surrounders(bool yes) {
@@ -6063,7 +5332,7 @@ public:
 
     template<class OStream>
     inline friend OStream& operator << (OStream& os, const usage_lines& p) {
-        p.write(os);
+        p.print_usage(os);
         return os;
     }
 
@@ -6073,8 +5342,7 @@ public:
 
 
 private:
-    using stream_t = detail::formatting_ostream<>;
-    const group& cli_;
+    const group& params_;
     doc_formatting fmt_;
     string prefix_;
     bool ommitOutermostSurrounders_ = false;
@@ -6106,29 +5374,15 @@ private:
      *
      *******************************************************************/
     template<class OStream>
-    void write(OStream& os) const
+    void print_usage(OStream& os) const
     {
-        detail::formatting_ostream<OStream> fos(os);
-        fos.first_column(fmt_.first_column());
-        fos.last_column(fmt_.last_column());
-
-        auto hindent = int(prefix_.size());
-        if(fos.first_column() + hindent >= int(0.4 * fos.text_width())) {
-            hindent = fmt_.indent_size();
-        }
-        fos.hanging_indent(hindent);
-
-        fos.paragraph_spacing(fmt_.paragraph_spacing());
-        fos.min_paragraph_lines_for_spacing(2);
-        fos.ignore_newline_chars(fmt_.ignore_newline_chars());
-
         context cur;
-        cur.pos = cli_.begin_dfs();
+        cur.pos = params_.begin_dfs();
         cur.linestart = true;
         cur.level = cur.pos.level();
-        cur.outermost = &cli_;
+        cur.outermost = &params_;
 
-        write(fos, cur, prefix_);
+        print_usage(os, cur, prefix_);
     }
 
 
@@ -6140,7 +5394,7 @@ private:
      *
      *******************************************************************/
     template<class OStream>
-    void write(OStream& os, context cur, string prefix) const
+    void print_usage(OStream& os, context cur, string prefix) const
     {
         if(!cur.pos) return;
 
@@ -6167,7 +5421,7 @@ private:
 
         do {
             if(buf.tellp() > initPos) cur.linestart = false;
-            if(!cur.linestart && !cur.pos.is_first_in_parent()) {
+            if(!cur.linestart && !cur.pos.is_first_in_group()) {
                 buf << cur.separators.top();
             }
             if(cur.pos->is_group()) {
@@ -6234,7 +5488,7 @@ private:
                 for(std::size_t i = 0; i < group.size(); ++i) {
                     std::stringstream buf;
                     cur.outermost = cur.pos->is_group() ? &(cur.pos->as_group()) : nullptr;
-                    write(buf, cur, pfx);
+                    print_usage(buf, cur, pfx);
                     if(buf.tellp() > int(pfx.size())) {
                         os << buf.str();
                         if(i < group.size()-1) {
@@ -6245,7 +5499,7 @@ private:
                             os << '\n';
                         }
                     }
-                    cur.pos.next_sibling(); //do not descend into members
+                    cur.pos.next_sibling(); //do not descend into memebers
                 }
                 cur.pos.invalidate(); //signal end-of-path
                 return;
@@ -6288,7 +5542,7 @@ private:
         const auto& parent = cur.pos.parent();
 
         const bool startsOptionalSequence =
-            parent.size() > 1 && p.blocking() && cur.pos.is_first_in_parent();
+            parent.size() > 1 && p.blocking() && cur.pos.is_first_in_group();
 
         const bool outermost =
             ommitOutermostSurrounders_ && cur.outermost == &parent;
@@ -6350,33 +5604,33 @@ private:
      * @brief prints flags in one group in a merged fashion
      *
      *******************************************************************/
-    string joined_label(const group& g, const context& cur) const
+    string joined_label(const group& params, const context& cur) const
     {
         if(!fmt_.merge_alternative_flags_with_common_prefix() &&
            !fmt_.merge_joinable_with_common_prefix()) return "";
 
-        const bool flagsonly = std::all_of(g.begin(), g.end(),
+        const bool flagsonly = std::all_of(params.begin(), params.end(),
             [](const pattern& p){
                 return p.is_param() && !p.as_param().flags().empty();
             });
 
         if(!flagsonly) return "";
 
-        const bool showOpt = g.all_optional() &&
-            !(ommitOutermostSurrounders_ && cur.outermost == &g);
+        const bool showOpt = params.all_optional() &&
+            !(ommitOutermostSurrounders_ && cur.outermost == &params);
 
-        auto pfx = g.common_flag_prefix();
+        auto pfx = params.common_flag_prefix();
         if(pfx.empty()) return "";
 
         const auto n = pfx.size();
-        if(g.exclusive() &&
+        if(params.exclusive() &&
            fmt_.merge_alternative_flags_with_common_prefix())
         {
             string lbl;
             if(showOpt) lbl += fmt_.optional_prefix();
             lbl += pfx + fmt_.alternatives_prefix();
             bool first = true;
-            for(const auto& p : g) {
+            for(const auto& p : params) {
                 if(p.is_param()) {
                     if(first)
                         first = false;
@@ -6390,10 +5644,10 @@ private:
             return lbl;
         }
         //no alternatives, but joinable flags
-        else if(g.joinable() &&
+        else if(params.joinable() &&
             fmt_.merge_joinable_with_common_prefix())
         {
-            const bool allSingleChar = std::all_of(g.begin(), g.end(),
+            const bool allSingleChar = std::all_of(params.begin(), params.end(),
                 [&](const pattern& p){
                     return p.is_param() &&
                         p.as_param().flags().front().substr(n).size() == 1;
@@ -6403,7 +5657,7 @@ private:
                 string lbl;
                 if(showOpt) lbl += fmt_.optional_prefix();
                 lbl += pfx;
-                for(const auto& p : g) {
+                for(const auto& p : params) {
                     if(p.is_param())
                         lbl += p.as_param().flags().front().substr(n);
                 }
@@ -6518,14 +5772,13 @@ private:
 class documentation
 {
 public:
-    using string          = doc_string;
-    using filter_function = std::function<bool(const parameter&)>;
+    using string = doc_string;
 
     documentation(const group& cli,
                   const doc_formatting& fmt = doc_formatting{},
-                  filter_function filter = param_filter{})
+                  const param_filter& filter = param_filter{})
     :
-        cli_(cli), fmt_{fmt}, usgFmt_{fmt}, filter_{std::move(filter)}
+        cli_(cli), fmt_{fmt}, usgFmt_{fmt}, filter_{filter}
     {
         //necessary, because we re-use "usage_lines" to generate
         //labels for documented groups
@@ -6533,53 +5786,33 @@ public:
             usgFmt_.max_flags_per_param_in_doc());
     }
 
-    documentation(const group& cli, filter_function filter) :
-        documentation{cli, doc_formatting{}, std::move(filter)}
-    {}
-
-    documentation(const group& cli, const param_filter& filter) :
-        documentation{cli, doc_formatting{},
-                      [filter](const parameter& p) { return filter(p); }}
+    documentation(const group& params,
+                  const param_filter& filter,
+                  const doc_formatting& fmt = doc_formatting{})
+    :
+        documentation(params, fmt, filter)
     {}
 
     template<class OStream>
     inline friend OStream& operator << (OStream& os, const documentation& p) {
-        p.write(os);
+        printed prn = printed::nothing;
+        p.print_doc(os, p.cli_, prn);
         return os;
     }
 
     string str() const {
-        std::ostringstream os;
-        write(os);
-        return os.str();
+        std::ostringstream os; os << *this; return os.str();
     }
 
 
 private:
     using dfs_traverser = group::depth_first_traverser;
+    enum class printed { nothing, line, paragraph };
 
     const group& cli_;
     doc_formatting fmt_;
     doc_formatting usgFmt_;
-    filter_function filter_;
-    enum class paragraph { param, group };
-
-
-    /***************************************************************//**
-     *
-     * @brief writes documentation to output stream
-     *
-     *******************************************************************/
-     template<class OStream>
-     void write(OStream& os) const {
-        detail::formatting_ostream<OStream> fos(os);
-        fos.first_column(fmt_.first_column());
-        fos.last_column(fmt_.last_column());
-        fos.hanging_indent(0);
-        fos.paragraph_spacing(0);
-        fos.ignore_newline_chars(fmt_.ignore_newline_chars());
-        print_doc(fos, cli_);
-     }
+    param_filter filter_;
 
 
     /***************************************************************//**
@@ -6588,35 +5821,41 @@ private:
      *
      *******************************************************************/
     template<class OStream>
-    void print_doc(detail::formatting_ostream<OStream>& os,
-                   const group& cli, int indentLvl = 0) const
+    void print_doc(OStream& os, const group& params,
+                   printed& sofar,
+                   int indentLvl = 0) const
     {
-        if(cli.empty()) return;
+        if(params.empty()) return;
 
         //if group itself doesn't have docstring
-        if(cli.doc().empty()) {
-            for(const auto& p : cli) {
-                print_doc(os, p, indentLvl);
+        if(params.doc().empty()) {
+            for(const auto& p : params) {
+                print_doc(os, p, sofar, indentLvl);
             }
         }
         else { //group itself does have docstring
-            bool anyDocInside = std::any_of(cli.begin(), cli.end(),
+            bool anyDocInside = std::any_of(params.begin(), params.end(),
                 [](const pattern& p){ return !p.doc().empty(); });
 
             if(anyDocInside) { //group docstring as title, then child entries
-                handle_spacing(os, paragraph::group, indentLvl);
-                os << cli.doc();
-                for(const auto& p : cli) {
-                    print_doc(os, p, indentLvl + 1);
+                if(sofar != printed::nothing) {
+                    os << string(fmt_.paragraph_spacing() + 1, '\n');
                 }
+                auto indent = string(fmt_.start_column(), ' ');
+                if(indentLvl > 0) indent += string(fmt_.indent_size() * indentLvl, ' ');
+                os << indent << params.doc() << '\n';
+                sofar = printed::nothing;
+                for(const auto& p : params) {
+                    print_doc(os, p, sofar, indentLvl + 1);
+                }
+                sofar = printed::paragraph;
             }
             else { //group label first then group docstring
-                auto lbl = usage_lines(cli, usgFmt_)
+                auto lbl = usage_lines(params, usgFmt_)
                            .ommit_outermost_group_surrounders(true).str();
 
                 str::trim(lbl);
-                handle_spacing(os, paragraph::param, indentLvl);
-                print_entry(os, lbl, cli.doc());
+                print_entry(os, lbl, params.doc(), fmt_, sofar, indentLvl);
             }
         }
     }
@@ -6628,54 +5867,19 @@ private:
      *
      *******************************************************************/
     template<class OStream>
-    void print_doc(detail::formatting_ostream<OStream>& os,
-                   const pattern& ptrn, int indentLvl) const
+    void print_doc(OStream& os, const pattern& ptrn,
+                   printed& sofar, int indentLvl) const
     {
         if(ptrn.is_group()) {
-            print_doc(os, ptrn.as_group(), indentLvl);
+            print_doc(os, ptrn.as_group(), sofar, indentLvl);
         }
         else {
             const auto& p = ptrn.as_param();
             if(!filter_(p)) return;
-
-            handle_spacing(os, paragraph::param, indentLvl);
-            print_entry(os, param_label(p, fmt_), p.doc());
+            print_entry(os, param_label(p, fmt_), p.doc(), fmt_, sofar, indentLvl);
         }
     }
 
-    /***************************************************************//**
-     *
-     * @brief handles line and paragraph spacings
-     *
-     *******************************************************************/
-    template<class OStream>
-    void handle_spacing(detail::formatting_ostream<OStream>& os,
-                        paragraph p, int indentLvl) const
-    {
-        const auto oldIndent = os.first_column();
-        const auto indent = fmt_.first_column() + indentLvl * fmt_.indent_size();
-
-        if(os.total_non_blank_lines() < 1) {
-            os.first_column(indent);
-            return;
-        }
-
-        if(os.paragraph_lines() > 1 || indent < oldIndent) {
-            os.wrap_hard(fmt_.paragraph_spacing() + 1);
-        } else {
-            os.wrap_hard();
-        }
-
-        if(p == paragraph::group) {
-            if(os.blank_lines_before_paragraph() < fmt_.paragraph_spacing()) {
-                os.wrap_hard(fmt_.paragraph_spacing() - os.blank_lines_before_paragraph());
-            }
-        }
-        else if(os.blank_lines_before_paragraph() < fmt_.line_spacing()) {
-            os.wrap_hard(fmt_.line_spacing() - os.blank_lines_before_paragraph());
-        }
-        os.first_column(indent);
-    }
 
     /*********************************************************************//**
      *
@@ -6683,19 +5887,40 @@ private:
      *
      ************************************************************************/
     template<class OStream>
-    void print_entry(detail::formatting_ostream<OStream>& os,
-                     const string& label, const string& docstr) const
+    static void
+    print_entry(OStream& os,
+                const string& label, const string& docstr,
+                const doc_formatting& fmt, printed& sofar, int indentLvl)
     {
         if(label.empty()) return;
 
-        os << label;
+        auto indent = string(fmt.start_column(), ' ');
+        if(indentLvl > 0) indent += string(fmt.indent_size() * indentLvl, ' ');
+
+        const auto len = int(indent.size() + label.size());
+        const bool oneline = len < fmt.doc_column();
+
+        if(oneline) {
+            if(sofar == printed::line)
+                os << string(fmt.line_spacing() + 1, '\n');
+            else if(sofar == printed::paragraph)
+                os << string(fmt.paragraph_spacing() + 1, '\n');
+        }
+        else if(sofar != printed::nothing) {
+            os << string(fmt.paragraph_spacing() + 1, '\n');
+        }
+
+        sofar = oneline ? printed::line : printed::paragraph;
+
+        os << indent << label;
 
         if(!docstr.empty()) {
-            if(os.current_column() >= fmt_.doc_column()) os.wrap_soft();
-            const auto oldcol = os.first_column();
-            os.first_column(fmt_.doc_column());
+            if(oneline) {
+                os << string(fmt.doc_column() - len, ' ');
+            } else {
+                os << '\n' << string(fmt.doc_column(), ' ');
+            }
             os << docstr;
-            os.first_column(oldcol);
         }
     }
 
@@ -6850,13 +6075,13 @@ private:
  *
  *****************************************************************************/
 inline man_page
-make_man_page(const group& cli,
+make_man_page(const group& params,
               doc_string progname = "",
               const doc_formatting& fmt = doc_formatting{})
 {
     man_page man;
-    man.append_section("SYNOPSIS", usage_lines(cli,progname,fmt).str());
-    man.append_section("OPTIONS", documentation(cli,fmt).str());
+    man.append_section("SYNOPSIS", usage_lines(params,progname,fmt).str());
+    man.append_section("OPTIONS", documentation(params,fmt).str());
     return man;
 }
 
@@ -6963,8 +6188,7 @@ void print(OStream& os, const parsing_result& result)
 template<class OStream>
 void print(OStream& os, const parameter& p)
 {
-    if(p.greedy()) os << '!';
-    if(p.blocking()) os << '~';
+    if(p.blocking()) os << '!';
     if(!p.required()) os << '[';
     os << doc_label(p);
     if(p.repeatable()) os << "...";
@@ -7005,7 +6229,7 @@ void print(OStream& os, const group& g, int level)
 {
     auto indent = doc_string(4*level, ' ');
     os << indent;
-    if(g.blocking()) os << '~';
+    if(g.blocking()) os << '!';
     if(g.joinable()) os << 'J';
     os << (g.exclusive() ? "(|\n" : "(\n");
     for(const auto& p : g) {

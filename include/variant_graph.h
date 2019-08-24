@@ -106,8 +106,7 @@ namespace variantdb {
 			VariantGraph() = delete; 
 			// construct variant graph using a reference genome and zero or more vcf
 			// files.
-			VariantGraph(const std::string& ref_file, const std::vector<std::string>&
-									 vcfs);
+			VariantGraph(const std::string& ref_file, const std::string& vcf_file);
 
 			// read variant graph from disk
 			VariantGraph(const std::string& prefix);
@@ -115,7 +114,7 @@ namespace variantdb {
 			~VariantGraph();
 
 			// add one or more vcf files to the variant graph
-			void add_vcfs(const std::vector<std::string>& vcfs);
+			void add_vcfs(const std::string& vcf_file);
 
 			// persist variant graph to disk
 			void serialize(const std::string& prefix);
@@ -311,7 +310,7 @@ namespace variantdb {
 	};
 
 	VariantGraph::VariantGraph(const std::string& ref_file, const
-														 std::vector<std::string>& vcfs) :
+														 std::string& vcf_file) :
 		cache(CACHE_SIZE) {
 			// Verify that the version of the library that we linked against is
 			// compatible with the version of the headers we compiled against.
@@ -340,7 +339,7 @@ namespace variantdb {
 			update_idx_vertex_id_map(*v);
 
 			// Add vcf files
-			add_vcfs(vcfs);
+			add_vcfs(vcf_file);
 
 			// fix sample indexes
 			fix_sample_indexes();
@@ -484,116 +483,115 @@ namespace variantdb {
 		sampleid_file.close();
 	}
 
-	void VariantGraph::add_vcfs(const std::vector<std::string>& vcfs) {
-		for (auto vcf : vcfs) {
-			vcflib::VariantCallFile variantFile;
-			variantFile.open(vcf);
-			vcflib::Variant var(variantFile);
+	void VariantGraph::add_vcfs(const std::string& vcf_file) {
+		std::string m_vcf_file = vcf_file;
+		vcflib::VariantCallFile variantFile;
+		variantFile.open(m_vcf_file);
+		vcflib::Variant var(variantFile);
 
-			console->info("Adding mutations from: {} #Samples: {}", vcf,
-										variantFile.sampleNames.size());
-			// insert samples into sampleid_map
-			for (const auto sample : variantFile.sampleNames) {
-				sampleid_map.insert(std::make_pair(sample, sampleid_map.size()));
-				idsample_map.insert(std::make_pair(sampleid_map.size() - 1, sample));
+		console->info("Adding mutations from: {} #Samples: {}", vcf,
+									variantFile.sampleNames.size());
+		// insert samples into sampleid_map
+		for (const auto sample : variantFile.sampleNames) {
+			sampleid_map.insert(std::make_pair(sample, sampleid_map.size()));
+			idsample_map.insert(std::make_pair(sampleid_map.size() - 1, sample));
+		}
+		num_samples += sampleid_map.size();
+
+		long int num_mutations = 0;
+		long int num_mutations_samples = 0;
+		uint32_t num_samples_in_mutation = 0;
+		while (variantFile.getNextVariant(var)) {
+			// verify mutation.
+			if (var.sequenceName != chr || var.position < 1 ||
+					(uint64_t)var.position > ref_length || var.ref !=
+					get_sequence(var.position - 1, var.ref.size())) {
+				console->error("Unsupported mutation: {} {} {}", var.sequenceName,
+											 var.position, var.ref);
+				continue;
 			}
-			num_samples += sampleid_map.size();
+			num_mutations += 1;
+			if (num_mutations % 100000 == 0) {
+				console->debug("Mutations added: {} #Vertices: {} #Edges: ",
+											 num_mutations, get_num_vertices(), get_num_edges());
+				console->debug("Average num samples in mutations: {}",
+											 num_samples_in_mutation / (double)100000);
+				num_samples_in_mutation = 0;
+			}
+			for (const auto alt : var.alt) {
+				std::vector<sample_struct> sample_list;
+				if (std::regex_match(alt, std::regex("^[ACTG]+$"))) {
+					for (const auto sample : var.samples) {
+						auto gt = sample.second.find("GT");
+						auto gt_vec = *gt;
+						std::string gt_info = gt_vec.second[0];
+						//assert(gt_info.size() == 3);
 
-			long int num_mutations = 0;
-			long int num_mutations_samples = 0;
-			uint32_t num_samples_in_mutation = 0;
-			while (variantFile.getNextVariant(var)) {
-				// verify mutation.
-				if (var.sequenceName != chr || var.position < 1 ||
-						(uint64_t)var.position > ref_length || var.ref !=
-						get_sequence(var.position - 1, var.ref.size())) {
-					console->error("Unsupported mutation: {} {} {}", var.sequenceName,
-												 var.position, var.ref);
-					continue;
-				}
-				num_mutations += 1;
-				if (num_mutations % 100000 == 0) {
-					console->debug("Mutations added: {} #Vertices: {} #Edges: ",
-												 num_mutations, get_num_vertices(), get_num_edges());
-					console->debug("Average num samples in mutations: {}",
-												 num_samples_in_mutation / (double)100000);
-					num_samples_in_mutation = 0;
-				}
-				for (const auto alt : var.alt) {
-					std::vector<sample_struct> sample_list;
-					if (std::regex_match(alt, std::regex("^[ACTG]+$"))) {
-						for (const auto sample : var.samples) {
-							auto gt = sample.second.find("GT");
-							auto gt_vec = *gt;
-							std::string gt_info = gt_vec.second[0];
-							//assert(gt_info.size() == 3);
+						bool gt1, gt2;
+						bool add = false;
+						if (gt_info.size() == 3) {
+							// extract gt info
+							const char *str = gt_info.c_str();
+							int first = str[0] - '0';
+							char phase = str[1];
+							int second = str[2] - '0';
+							if (phase == '|') {
+								if (first > 0 || second > 0) {
+									if (first > 0)
+										gt1 = true;
+									else 
+										gt1 = false;
+									if (second > 0)
+										gt2 = true;
+									else 
+										gt2 = false;
 
-							bool gt1, gt2;
-							bool add = false;
-							if (gt_info.size() == 3) {
-								// extract gt info
-								const char *str = gt_info.c_str();
-								int first = str[0] - '0';
-								char phase = str[1];
-								int second = str[2] - '0';
-								if (phase == '|') {
-									if (first > 0 || second > 0) {
-										if (first > 0)
-											gt1 = true;
-										else 
-											gt1 = false;
-										if (second > 0)
-											gt2 = true;
-										else 
-											gt2 = false;
-
-										add = true;
-									}	
-								} else if (phase == '/') {
-									if (first > 0 && second > 0) {
-										gt1 = true; gt2 = true;
-										add = true;
-									} else if (first == '1' || second == '1') {
-										gt1 = false; gt2 = false;
-										add = true;
-									}
-								}
-							} else if (gt_info.size() == 1) {
-								int present = 0;
-								try {
-									present = stoi(gt_info);
-								} catch (const std::invalid_argument& ia) {}
-								if (present) {
 									add = true;
-									gt1 = true;
-									gt2 = false;
+								}	
+							} else if (phase == '/') {
+								if (first > 0 && second > 0) {
+									gt1 = true; gt2 = true;
+									add = true;
+								} else if (first == '1' || second == '1') {
+									gt1 = false; gt2 = false;
+									add = true;
 								}
 							}
-							if (add) {
-								auto it = sampleid_map.find(sample.first);
-								if (it == sampleid_map.end()) {
-									console->error("Unkown sample: {}", sample.first);
-									abort();
-								} else {
-									sample_struct s = {it->second, gt1, gt2};
-									sample_list.emplace_back(s);
-									num_samples_in_mutation++;
-								}
+						} else if (gt_info.size() == 1) {
+							int present = 0;
+							try {
+								present = stoi(gt_info);
+							} catch (const std::invalid_argument& ia) {}
+							if (present) {
+								add = true;
+								gt1 = true;
+								gt2 = false;
 							}
 						}
-					} else {
-						//console->error("Unsupported variant allele: {} {}", var.position,
-						//alt);
-						continue;
+						if (add) {
+							auto it = sampleid_map.find(sample.first);
+							if (it == sampleid_map.end()) {
+								console->error("Unkown sample: {}", sample.first);
+								abort();
+							} else {
+								sample_struct s = {it->second, gt1, gt2};
+								sample_list.emplace_back(s);
+								num_samples_in_mutation++;
+							}
+						}
 					}
-					if (sample_list.size() > 0) {
-						add_mutation(var.ref, alt, var.position, sample_list);
-						num_mutations_samples += sample_list.size();
-					}
+				} else {
+					//console->error("Unsupported variant allele: {} {}", var.position,
+					//alt);
+					continue;
+				}
+				if (sample_list.size() > 0) {
+					add_mutation(var.ref, alt, var.position, sample_list);
+					num_mutations_samples += sample_list.size();
 				}
 			}
-			console->info("Num mutations: {}", num_mutations_samples);
 		}
+		console->info("Num mutations: {}", num_mutations_samples);
 	}
 
 	VariantGraphVertex* VariantGraph::add_vertex(uint64_t offset, uint64_t length,

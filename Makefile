@@ -47,6 +47,11 @@ tests:	test_graphcontainer test_variantgraph test_index
 graph:	$(SER)/graph.png
 
 # dependencies between programs and .o files
+variantdb:							$(OBJDIR)/variantdb.o $(OBJDIR)/variantdb_fs.o \
+												$(OBJDIR)/construct.o \
+												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
+												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 test_graphcontainer:		$(OBJDIR)/test_graphcontainer.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
@@ -58,15 +63,19 @@ test_index:							$(OBJDIR)/test_index.o  $(OBJDIR)/variantdb_fs.o\
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
-variantdb:							$(OBJDIR)/variantdb.o $(OBJDIR)/variantdb_fs.o \
-												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
-												$(OBJDIR)/gqf_file.o \
-												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 test_query:							$(OBJDIR)/test_query.o  $(OBJDIR)/variantdb_fs.o\
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 # dependencies between .o files and .cc (or .c) files
+$(OBJDIR)/variantdb.o: 						$(LOC_SRC)/variantdb.cc 
+$(OBJDIR)/construct.o: 						$(LOC_SRC)/construct.cc \
+																	$(LOC_INCLUDE)/variant_graph.h \
+																	$(LOC_INCLUDE)/index.h \
+																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
+																	$(LOC_INCLUDE)/variantdb_fs.h \
+																	$(LOC_INCLUDE)/graph.h \
+																	$(LOC_INCLUDE)/stream.hpp
 $(OBJDIR)/test_graphcontainer.o: 	$(LOC_SRC)/test_graphcontainer.cc \
 																	$(LOC_INCLUDE)/gqf_cpp.h \
 																	$(LOC_INCLUDE)/graph.h
@@ -83,13 +92,6 @@ $(OBJDIR)/test_index.o: 					$(LOC_SRC)/test_index.cc \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
 																	$(LOC_INCLUDE)/variantdb_fs.h \
 																	$(LOC_INCLUDE)/graph.h
-$(OBJDIR)/variantdb.o: 						$(LOC_SRC)/variantdb.cc \
-																	$(LOC_INCLUDE)/variant_graph.h \
-																	$(LOC_INCLUDE)/index.h \
-																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
-																	$(LOC_INCLUDE)/variantdb_fs.h \
-																	$(LOC_INCLUDE)/graph.h \
-																	$(LOC_INCLUDE)/stream.hpp
 $(OBJDIR)/test_query.o: 					$(LOC_SRC)/test_query.cc \
 																	$(LOC_INCLUDE)/index.h \
 																	$(LOC_INCLUDE)/variant_graph.h \

@@ -9,15 +9,40 @@
  * ============================================================================
  */
 
+#include <iostream>
+#include <string>
 #include <stdlib.h>
 
 #include "spdlog/spdlog.h"
 
-#include "dot_graph.h"
-#include "index.h"
-#include "variant_graph.h"
+#include "progopts.h"
+#include "clipp.h"
 
-using namespace variantdb;
+template <typename T>
+void explore_options_verbose(T& res) {
+  if(res.any_error()) { std::cerr << "error\n"; }
+
+  //aggregated errors
+  if(res.unmapped_args_count()) { std::cerr << "error unmapped args count\n"; /* ... */ }
+  if(res.any_bad_repeat()) { std::cerr << "error bad repeat \n"; /* ... */ }
+  if(res.any_blocked())    { std::cerr << "error blocked \n"; /* ... */ }
+  if(res.any_conflict())   { std::cerr << "error conflict\n"; /* ... */ }
+
+  for(const auto& m : res.missing()) { 
+    std::cerr << "missing " << m.param() << " after index " << m.after_index() << '\n';
+  }
+
+  //per-argument mapping
+  for(const auto& m : res) {
+    std::cerr << m.index() << ": " << m.arg() << " -> " << m.param();
+    std::cerr << " repeat #" << m.repeat();
+    if(m.blocked()) std::cerr << " blocked";
+    if(m.conflict()) std::cerr << " conflict";
+    std::cerr<< '\n';
+  }
+}
+
+int construct_main(ConstructOpts& construct_opt);
 
 std::shared_ptr<spdlog::logger> console;
 
@@ -28,43 +53,67 @@ std::shared_ptr<spdlog::logger> console;
  * ============================================================================
  */
 	int
-main ( int argc, char *argv[] )
-{
-	if (argc < 2) {
-		fprintf(stderr, "Please specify the log of the number of slots in the CQF.\n");
-		exit(1);
-	}
+main ( int argc, char *argv[] ) {
+  using namespace clipp;
+	enum class mode {construct, help};
+  mode selected = mode::help;
+
+	ConstructOpts construct_opt;
 
 	console = spdlog::default_logger();
 #ifdef DEBUG_MODE
 	console->set_level(spdlog::level::debug);
 #endif
 
-	std::string ref_file(argv[1]);
-	std::string vcf_file(argv[2]);
-	
-	console->info("Creating variant graph");
-	std::vector<std::string> vcfs = {vcf_file};
-	VariantGraph vg(ref_file, vcfs);
+	auto construct_mode = (
+									command("construct").set(selected, mode::construct),
+									required("-r","--reference") & value("reference-file", construct_opt.ref) %
+									"reference file",
+									required("-v","--vcf") & value("vcf-file", construct_opt.vcf) %
+									"variant call format file",
+									required("-p","--output-prefix") & value(
+																												 "output-prefix",
+												construct_opt.prefix) %
+									"output directory"
+						 );
 
-	console->info("Graph stats:");
-	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
-								vg.get_chr(), vg.get_num_vertices() , vg.get_num_edges(),
-								vg.get_seq_length());
-	console->info("Serializing variant graph to disk");
-	vg.serialize(argv[3]);
+	auto cli = ((construct_mode |
+							 command("help").set(selected, mode::help)), 
+							option("-v", "--version").call([]{std::cout <<
+																						 "version 0.1\n\n";}).doc("show version"));
 
-	console->info("Creating Index");
-	Index idx(&vg);
-	console->info("Serializing index to disk");
-	idx.serialize(argv[3]);
+  assert(construct_mode.flags_are_prefix_free());
 
-	console->info("Loading variant graph");
-	VariantGraph file_vg(argv[3]);
-	console->info("Graph stats:");
-	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
-								file_vg.get_chr(), file_vg.get_num_vertices() , file_vg.get_num_edges(),
-								file_vg.get_seq_length());
+  decltype(parse(argc, argv, cli)) res;
+  try {
+    res = parse(argc, argv, cli);
+  } catch (std::exception& e) {
+		std::cout << "\n\nParsing command line failed with exception: " <<
+			e.what() << "\n";
+    std::cout << "\n\n";
+    std::cout << make_man_page(cli, "variantdb");
+    return 1;
+  }
+
+  if(res) {
+		switch(selected) {
+			case mode::construct: construct_main(construct_opt); break;
+			case mode::help:  break;
+		}
+  } else {
+    auto b = res.begin();
+    auto e = res.end();
+    if (std::distance(b,e) > 0) {
+      if (b->arg() == "construct") {
+        std::cout << make_man_page(construct_mode, "variantdb");
+      } else {
+        std::cout << "There is no command \"" << b->arg() << "\"\n";
+        std::cout << usage_lines(cli, "variantdb") << '\n';
+      }
+    } else {
+      std::cout << usage_lines(cli, "variantdb") << '\n';
+    }
+  }
 
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

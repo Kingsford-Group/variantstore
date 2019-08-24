@@ -18,6 +18,7 @@
 #include <sdsl/util.hpp>
 #include <vector>
 
+#include "dot_graph.h"
 #include "util.h"
 #include "variant_graph.h"
 
