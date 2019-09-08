@@ -489,7 +489,7 @@ namespace variantdb {
 		variantFile.open(m_vcf_file);
 		vcflib::Variant var(variantFile);
 
-		console->info("Adding mutations from: {} #Samples: {}", vcf,
+		console->info("Adding mutations from: {} #Samples: {}", vcf_file,
 									variantFile.sampleNames.size());
 		// insert samples into sampleid_map
 		for (const auto sample : variantFile.sampleNames) {
