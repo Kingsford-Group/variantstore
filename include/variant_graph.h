@@ -99,6 +99,11 @@ namespace variantdb {
 		bool gt2;
 	} sample_struct;
 
+	enum READ_TYPE {
+		READ_COMPLETE_GRAPH,
+		READ_INDEX_ONLY
+	};
+
 	class VariantGraph {
 		public:
 			// can't create a VariantGraph without a reference genome and zero or
@@ -109,7 +114,7 @@ namespace variantdb {
 			VariantGraph(const std::string& ref_file, const std::string& vcf_file);
 
 			// read variant graph from disk
-			VariantGraph(const std::string& prefix);
+			VariantGraph(const std::string& prefix, enum READ_TYPE type);
 
 			~VariantGraph();
 
@@ -345,7 +350,8 @@ namespace variantdb {
 			fix_sample_indexes();
 		}
 
-	VariantGraph::VariantGraph(const std::string& prefix) : topology(prefix) {
+	VariantGraph::VariantGraph(const std::string& prefix, enum READ_TYPE type) :
+		topology(prefix) {
 
 		// Read all proto files and sort them based on ids.
 		std::vector<std::string> proto_files = fs::GetFilesExt(prefix.c_str(), ".proto");
@@ -356,21 +362,23 @@ namespace variantdb {
 			sorted_proto_files[id] = file;
 		}
 
-		function<void(VariantGraphVertexList&)> lambda =
-			[this](VariantGraphVertexList& v)
-			{
-				vertex_block_list.emplace_back(v);
-				//VariantGraphVertex* vertex = vertex_list.add_vertex();
-				//*vertex = v;
-			};
+		if (type == READ_COMPLETE_GRAPH) {
+			function<void(VariantGraphVertexList&)> lambda =
+				[this](VariantGraphVertexList& v)
+				{
+					vertex_block_list.emplace_back(v);
+					//VariantGraphVertex* vertex = vertex_list.add_vertex();
+					//*vertex = v;
+				};
 
-		for (auto file_obj : sorted_proto_files) {
-			// load vertex list
-			std::string vertex_list_name = prefix + "/" + file_obj.second;
-			fstream input(vertex_list_name, ios::in | ios::binary);
-			if (!stream::for_each(input, lambda)) {
-				console->error("Failed to parse vertex list {}.", vertex_list_name);
-				abort();
+			for (auto file_obj : sorted_proto_files) {
+				// load vertex list
+				std::string vertex_list_name = prefix + "/" + file_obj.second;
+				fstream input(vertex_list_name, ios::in | ios::binary);
+				if (!stream::for_each(input, lambda)) {
+					console->error("Failed to parse vertex list {}.", vertex_list_name);
+					abort();
+				}
 			}
 		}
 
@@ -836,9 +844,9 @@ namespace variantdb {
 																									const std::vector<VariantGraphVertex::sample_info>&
 																									samples) {
 		//if (samples.size() != get_popcnt(sampleclass_id)) {
-		//console->error("Num of samples {} is not equal to num of 1s in the sample class {}.",
-		//samples.size(), get_popcnt(sampleclass_id));
-		//abort();
+			//console->error("Num of samples: {} is not equal to num of 1s {} in the sample class.",
+										 //samples.size(), get_popcnt(sampleclass_id));
+			//abort();
 		//}
 		// check if we need to create a new partition
 		if (id == 0 || (id + 1) % NUM_VERTEXES_IN_BLOCK == 0) {	// id+1 is the number of vertices including the new vertex.
@@ -1197,8 +1205,8 @@ namespace variantdb {
 			mutation = INSERTION;
 
 		//console->debug("Adding mutation: {} {} {} {} {}",
-		//mutation_string(mutation), ref, alt, pos,
-		//sample_list.size());
+									 //mutation_string(mutation), ref, alt, pos,
+									 //sample_list.size());
 		// update pos and alt/ref if it's an insertion/deletion.
 		if (mutation == INSERTION) {
 			pos = pos + ref.size();
@@ -1221,9 +1229,6 @@ namespace variantdb {
 		uint64_t ref_vertex_idx = ref_idx_itr->first;
 		Graph::vertex ref_vertex_id = ref_idx_itr->second;
 		VariantGraphVertex ref_vertex = get_vertex(ref_vertex_id);
-		// check if the mapping is consistant with the vertex structure.
-		//assert(ref_vertex_idx == get_sample_from_vertex(ref_vertex_id,
-		//"ref").index());
 
 		if (mutation == SUBSTITUTION) {
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
@@ -1349,7 +1354,7 @@ namespace variantdb {
 			// validate popcnt and s_info size.
 			if ((uint32_t)sample_vertex->s_info_size() !=
 					get_popcnt(sample_vertex->sampleclass_id())) {
-				console->error("Num of samples {} is not equal to num of 1s in the sample class {}.",
+				console->error("Num of samples: {} is not equal to num of 1s: {} in the sample class.",
 											 sample_vertex->s_info_size(),
 											 get_popcnt(sampleclass_id));
 				abort();
@@ -1411,7 +1416,7 @@ namespace variantdb {
 			// validate popcnt and s_info size.
 			if ((uint32_t)sample_vertex->s_info_size() !=
 					get_popcnt(sample_vertex->sampleclass_id())) {
-				console->error("Num of samples {} is not equal to num of 1s in the sample class {}.",
+				console->error("Num of samples: {} is not equal to num of 1s: {} in the sample class.",
 											 sample_vertex->s_info_size(),
 											 get_popcnt(sampleclass_id));
 				abort();
@@ -1517,7 +1522,7 @@ namespace variantdb {
 				get_vertex(next_ref_vertex_id);
 			if ((uint32_t)next_ref_vertex.s_info_size() !=
 					get_popcnt(next_ref_vertex.sampleclass_id())) {
-				console->error("Num of samples {} is not equal to num of 1s in the sample class {}.",
+				console->error("Num of samples: {} is not equal to num of 1s: {} in the sample class.",
 											 next_ref_vertex.s_info_size(),
 											 get_popcnt(next_ref_vertex.sampleclass_id()));
 				abort();
@@ -1588,7 +1593,7 @@ namespace variantdb {
 							int32_t delta = map_it->second;
 							int32_t sample_index = ref_index + cur_vertex->length() + delta;
 							if (sample_index < 0) {
-								console->error("Sample index is less the 0: {} {}",
+								console->error("Sample index is less than 0: {} {}",
 															 get_sample_name(s_id),
 															 cur_vertex->vertex_id());
 								abort();
@@ -1624,7 +1629,14 @@ namespace variantdb {
 														 cur_neighbor->vertex_id());
 							abort();
 						}
-						sampleid_delta[s_id] = cur_index + cur_length - ref_sample.index();
+						int32_t sample_index = cur_index + cur_length - ref_sample.index();
+						if (sample_index < 0) {
+							console->error("Sample index is less than 0: {} {}",
+														 get_sample_name(s_id),
+														 cur_vertex->vertex_id());
+							abort();
+						}
+						sampleid_delta[s_id] = sample_index;
 					}
 				}
 			}

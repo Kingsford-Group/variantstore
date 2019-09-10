@@ -45,7 +45,7 @@ construct_main (ConstructOpts &opts)
 	idx.serialize(opts.prefix);
 
 	console->info("Loading variant graph");
-	VariantGraph file_vg(opts.prefix);
+	VariantGraph file_vg(opts.prefix, READ_COMPLETE_GRAPH);
 	console->info("Graph stats:");
 	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
 								file_vg.get_chr(), file_vg.get_num_vertices() , file_vg.get_num_edges(),
