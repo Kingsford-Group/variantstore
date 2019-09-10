@@ -1,0 +1,434 @@
+[2019-06-15 11:00:33.765] [info] Creating variant graph
+[2019-06-15 11:00:34.775] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrY.phase3_integrated_v2a.20130502.ge
+notypes.vcf.gz #Samples: 1233
+[2019-06-15 11:01:20.320] [info] Num mutations: 921497
+[2019-06-15 11:01:20.321] [info] Fixing indexes
+[2019-06-15 11:01:20.743] [info] Graph stats:
+[2019-06-15 11:01:20.743] [info] Chromosome: Y #Vertices: 183508 #Edges: 245396 Seq length: 59435107
+[2019-06-15 11:01:20.743] [info] Serializing variant graph to disk
+[2019-06-15 11:01:22.176] [info] Creating Index
+[2019-06-15 11:01:22.376] [info] Serializing index to disk
+48.44user 0.21system 0:48.74elapsed 99%CPU (0avgtext+0avgdata 201208maxresident)k
+0inputs+106184outputs (0major+71401minor)pagefaults 0swaps
+
+[2019-06-15 11:04:34.006] [info] Creating variant graph
+[2019-06-15 11:04:35.179] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 11:35:29.182] [info] Num mutations: 151610167
+[2019-06-15 11:35:29.183] [info] Fixing indexes
+[2019-06-15 11:37:37.703] [info] Graph stats:
+[2019-06-15 11:37:37.703] [info] Chromosome: 22 #Vertices: 3187783 #Edges: 4301541 Seq length: 52420579
+[2019-06-15 11:37:37.703] [info] Serializing variant graph to disk
+[2019-06-15 11:41:00.725] [info] Creating Index
+[2019-06-15 11:41:17.821] [info] Serializing index to disk
+2195.41user 15.15system 36:50.75elapsed 99%CPU (0avgtext+0avgdata 9970380maxresident)k
+8inputs+1698576outputs (0major+2663796minor)pagefaults 0swaps
+
+[2019-06-15 11:04:34.002] [info] Creating variant graph
+[2019-06-15 11:04:35.149] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr21.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 11:52:12.344] [info] Num mutations: 168510974
+[2019-06-15 11:52:12.345] [info] Fixing indexes
+[2019-06-15 11:54:59.851] [info] Graph stats:
+[2019-06-15 11:54:59.852] [info] Chromosome: 21 #Vertices: 3198634 #Edges: 4314576 Seq length: 49241580
+[2019-06-15 11:54:59.852] [info] Serializing variant graph to disk
+[2019-06-15 11:58:45.260] [info] Creating Index
+[2019-06-15 11:59:02.894] [info] Serializing index to disk
+3242.17user 33.23system 54:35.74elapsed 99%CPU (0avgtext+0avgdata 10973248maxresident)k
+0inputs+1825280outputs (0major+2788514minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.996] [info] Creating variant graph
+[2019-06-15 11:04:35.358] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr19.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 12:06:18.884] [info] Num mutations: 255407683
+[2019-06-15 12:06:18.884] [info] Fixing indexes
+[2019-06-15 12:10:42.085] [info] Graph stats:
+[2019-06-15 12:10:42.085] [info] Chromosome: 19 #Vertices: 5293279 #Edges: 7143699 Seq length: 60977529
+[2019-06-15 12:10:42.085] [info] Serializing variant graph to disk
+[2019-06-15 12:18:05.234] [info] Creating Index
+[2019-06-15 12:18:50.080] [info] Serializing index to disk
+4414.68user 56.27system 1:14:31elapsed 99%CPU (0avgtext+0avgdata 16680388maxresident)k
+0inputs+2736576outputs (0major+4320949minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.999] [info] Creating variant graph
+[2019-06-15 11:04:35.501] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr20.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 12:20:55.041] [info] Num mutations: 235111646
+[2019-06-15 12:20:55.043] [info] Fixing indexes
+[2019-06-15 12:25:25.807] [info] Graph stats:
+[2019-06-15 12:25:25.807] [info] Chromosome: 20 #Vertices: 5252491 #Edges: 7078874 Seq length: 64849724
+[2019-06-15 12:25:25.807] [info] Serializing variant graph to disk
+[2019-06-15 12:32:24.463] [info] Creating Index
+[2019-06-15 12:33:01.251] [info] Serializing index to disk
+5238.90user 78.62system 1:28:38elapsed 99%CPU (0avgtext+0avgdata 15479368maxresident)k
+97712inputs+2559184outputs (0major+10355868minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.991] [info] Creating variant graph
+[2019-06-15 11:04:35.834] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 12:30:56.888] [info] Num mutations: 302962987
+[2019-06-15 12:30:56.890] [info] Fixing indexes
+[2019-06-15 12:37:40.466] [info] Graph stats:
+[2019-06-15 12:37:40.466] [info] Chromosome: 17 #Vertices: 6739254 #Edges: 9088092 Seq length: 83539584
+[2019-06-15 12:37:40.467] [info] Serializing variant graph to disk
+[2019-06-15 12:46:45.683] [info] Creating Index
+[2019-06-15 12:47:34.819] [info] Serializing index to disk
+6058.57user 137.24system 1:43:16elapsed 99%CPU (0avgtext+0avgdata 19963508maxresident)k
+202888inputs+3398800outputs (0major+20277950minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.994] [info] Creating variant graph
+[2019-06-15 11:04:35.817] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr18.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 12:31:04.388] [info] Num mutations: 318951391
+[2019-06-15 12:31:04.390] [info] Fixing indexes
+[2019-06-15 12:38:58.040] [info] Graph stats:
+[2019-06-15 12:38:58.040] [info] Chromosome: 18 #Vertices: 6573752 #Edges: 8857877 Seq length: 80352466
+[2019-06-15 12:38:58.040] [info] Serializing variant graph to disk
+[2019-06-15 12:47:50.034] [info] Creating Index
+[2019-06-15 12:48:24.387] [info] Serializing index to disk
+6150.79user 93.70system 1:44:05elapsed 99%CPU (0avgtext+0avgdata 20871232maxresident)k
+192544inputs+3526272outputs (0major+9198571minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.985] [info] Creating variant graph
+[2019-06-15 11:04:36.485] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr15.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 12:31:38.778] [info] Num mutations: 326877701
+[2019-06-15 12:31:38.779] [info] Fixing indexes
+[2019-06-15 12:38:30.401] [info] Graph stats:
+[2019-06-15 12:38:30.401] [info] Chromosome: 15 #Vertices: 7026255 #Edges: 9469703 Seq length: 104962626
+[2019-06-15 12:38:30.401] [info] Serializing variant graph to disk
+[2019-06-15 12:48:22.090] [info] Creating Index
+[2019-06-15 12:49:13.842] [info] Serializing index to disk
+6167.83user 126.40system 1:44:55elapsed 99%CPU (0avgtext+0avgdata 21489308maxresident)k
+190320inputs+3657544outputs (0major+18233402minor)pagefaults 0swaps
+
+[2019-06-15 11:04:27.136] [info] Creating variant graph
+[2019-06-15 11:04:29.876] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrX.phase3_shapeit2_mvncall_integrated_v1b.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 13:09:10.623] [info] Num mutations: 346903338
+[2019-06-15 13:09:10.625] [info] Fixing indexes
+[2019-06-15 13:20:21.004] [info] Graph stats:
+[2019-06-15 13:20:21.004] [info] Chromosome: X #Vertices: 9988017 #Edges: 13514415 Seq length: 158749026
+[2019-06-15 13:20:21.004] [info] Serializing variant graph to disk
+[2019-06-15 13:28:56.919] [info] Creating Index
+[2019-06-15 13:30:01.760] [info] Serializing index to disk
+8619.22user 138.66system 2:25:58elapsed 99%CPU (0avgtext+0avgdata 23560368maxresident)k
+3757496inputs+3988160outputs (0major+10393464minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.983] [info] Creating variant graph
+[2019-06-15 11:04:36.511] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502
+/ALL.chr14.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 12:35:09.932] [info] Num mutations: 363274668
+[2019-06-15 12:35:09.933] [info] Fixing indexes
+[2019-06-15 12:41:20.230] [info] Graph stats:
+[2019-06-15 12:41:20.230] [info] Chromosome: 14 #Vertices: 7693081 #Edges: 10368813 Seq length: 110013590
+[2019-06-15 12:41:20.230] [info] Serializing variant graph to disk
+[2019-06-15 12:51:45.941] [info] Creating Index
+[2019-06-15 12:52:46.366] [info] Serializing index to disk
+6376.87user 135.38system 1:48:33elapsed 99%CPU (0avgtext+0avgdata 23945904maxresident)k
+34312inputs+4013528outputs (0major+20859781minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.981] [info] Creating variant graph
+[2019-06-15 11:04:36.658] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502
+/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 12:46:58.853] [info] Num mutations: 422066692
+[2019-06-15 12:46:58.854] [info] Fixing indexes
+[2019-06-15 12:55:49.149] [info] Graph stats:
+[2019-06-15 12:55:49.149] [info] Chromosome: 13 #Vertices: 8280057 #Edges: 11159691 Seq length: 118033962
+[2019-06-15 12:55:49.149] [info] Serializing variant graph to disk
+[2019-06-15 13:06:11.432] [info] Creating Index
+[2019-06-15 13:07:28.196] [info] Serializing index to disk
+7252.80user 145.79system 2:03:19elapsed 99%CPU (0avgtext+0avgdata 27553448maxresident)k
+351016inputs+4588720outputs (0major+14711562minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.988] [info] Creating variant graph
+[2019-06-15 11:04:36.091] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr16.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 12:52:31.175] [info] Num mutations: 341422989
+[2019-06-15 12:52:31.176] [info] Fixing indexes
+[2019-06-15 13:00:06.849] [info] Graph stats:
+[2019-06-15 13:00:06.849] [info] Chromosome: 16 #Vertices: 7815785 #Edges: 10536661 Seq length: 93067554
+[2019-06-15 13:00:06.849] [info] Serializing variant graph to disk
+[2019-06-15 13:09:43.811] [info] Creating Index
+[2019-06-15 13:10:42.430] [info] Serializing index to disk
+7429.75user 158.56system 2:06:30elapsed 99%CPU (0avgtext+0avgdata 22649816maxresident)k
+370184inputs+3788920outputs (0major+15394202minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.969] [info] Creating variant graph
+[2019-06-15 11:04:37.396] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr9.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 13:11:21.556] [info] Num mutations: 470041497
+[2019-06-15 13:11:21.558] [info] Fixing indexes
+[2019-06-15 13:20:31.372] [info] Graph stats:
+[2019-06-15 13:20:31.372] [info] Chromosome: 9 #Vertices: 10328850 #Edges: 13917006 Seq length: 144786533
+[2019-06-15 13:20:31.372] [info] Serializing variant graph to disk
+[2019-06-15 13:32:31.774] [info] Creating Index
+[2019-06-15 13:33:27.619] [info] Serializing index to disk
+8784.38user 169.34system 2:29:14elapsed 99%CPU (0avgtext+0avgdata 30926708maxresident)k
+14336inputs+5145192outputs (0major+13887883minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.972] [info] Creating variant graph
+[2019-06-15 11:04:37.396] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr10.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 13:10:01.142] [info] Num mutations: 559785626
+[2019-06-15 13:10:01.143] [info] Fixing indexes
+[2019-06-15 13:18:35.075] [info] Graph stats:
+[2019-06-15 13:18:35.075] [info] Chromosome: 10 #Vertices: 11565978 #Edges: 15590396 Seq length: 139544519
+[2019-06-15 13:18:35.075] [info] Serializing variant graph to disk
+[2019-06-15 13:33:19.386] [info] Creating Index
+[2019-06-15 13:34:56.186] [info] Serializing index to disk
+8873.05user 181.03system 2:30:55elapsed 99%CPU (0avgtext+0avgdata 36511108maxresident)k
+633984inputs+6015352outputs (0major+15878595minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.977] [info] Creating variant graph
+[2019-06-15 11:04:37.153] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr12.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 13:20:19.210] [info] Num mutations: 532771957
+[2019-06-15 13:20:19.212] [info] Fixing indexes
+[2019-06-15 13:29:15.732] [info] Graph stats:
+[2019-06-15 13:29:15.732] [info] Chromosome: 12 #Vertices: 11206447 #Edges: 15105277 Seq length: 137736042
+[2019-06-15 13:29:15.732] [info] Serializing variant graph to disk
+[2019-06-15 13:44:21.671] [info] Creating Index
+[2019-06-15 13:45:43.759] [info] Serializing index to disk
+9489.43user 213.57system 2:41:43elapsed 99%CPU (0avgtext+0avgdata 34861500maxresident)k
+97000inputs+5748936outputs (0major+16821398minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.967] [info] Creating variant graph
+[2019-06-15 11:04:36.835] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr8.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 13:24:16.624] [info] Num mutations: 597063636
+[2019-06-15 13:24:16.625] [info] Fixing indexes
+[2019-06-15 13:33:39.190] [info] Graph stats:
+[2019-06-15 13:33:39.190] [info] Chromosome: 8 #Vertices: 13335622 #Edges: 17968424 Seq length: 150976714
+[2019-06-15 13:33:39.190] [info] Serializing variant graph to disk
+[2019-06-15 13:49:12.366] [info] Creating Index
+[2019-06-15 13:50:30.424] [info] Serializing index to disk
+9750.43user 230.64system 2:46:22elapsed 99%CPU (0avgtext+0avgdata 39340052maxresident)k
+779096inputs+6666288outputs (0major+32853224minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.975] [info] Creating variant graph
+[2019-06-15 11:04:37.187] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr11.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 13:31:24.492] [info] Num mutations: 562330606
+[2019-06-15 13:31:24.494] [info] Fixing indexes
+[2019-06-15 13:39:29.726] [info] Graph stats:
+[2019-06-15 13:39:29.726] [info] Chromosome: 11 #Vertices: 11729576 #Edges: 15806059 Seq length: 139067412
+[2019-06-15 13:39:29.726] [info] Serializing variant graph to disk
+[2019-06-15 13:55:36.572] [info] Creating Index
+[2019-06-15 13:56:34.787] [info] Serializing index to disk
+10125.57user 219.69system 2:52:26elapsed 99%CPU (0avgtext+0avgdata 36728820maxresident)k
+833584inputs+6038208outputs (0major+17597475minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.965] [info] Creating variant graph
+[2019-06-15 11:04:37.289] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr7.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 13:36:14.053] [info] Num mutations: 645961429
+[2019-06-15 13:36:14.054] [info] Fixing indexes
+[2019-06-15 13:46:48.971] [info] Graph stats:
+[2019-06-15 13:46:48.971] [info] Chromosome: 7 #Vertices: 13670182 #Edges: 18422805 Seq length: 163869418
+[2019-06-15 13:46:48.971] [info] Serializing variant graph to disk
+[2019-06-15 14:02:49.844] [info] Creating Index
+[2019-06-15 14:04:31.720] [info] Serializing index to disk
+10603.29user 248.43system 3:00:52elapsed 99%CPU (0avgtext+0avgdata 42321956maxresident)k
+600416inputs+7192896outputs (0major+24634208minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.961] [info] Creating variant graph
+[2019-06-15 11:04:38.179] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr5.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 13:55:43.007] [info] Num mutations: 679779344
+[2019-06-15 13:55:43.008] [info] Fixing indexes
+[2019-06-15 14:07:15.203] [info] Graph stats:
+[2019-06-15 14:07:15.203] [info] Chromosome: 5 #Vertices: 15270142 #Edges: 20576458 Seq length: 186192204
+[2019-06-15 14:07:15.203] [info] Serializing variant graph to disk
+[2019-06-15 14:25:47.522] [info] Creating Index
+[2019-06-15 14:27:10.008] [info] Serializing index to disk
+11915.12user 277.32system 3:23:14elapsed 99%CPU (0avgtext+0avgdata 44762124maxresident)k
+196416inputs+7586904outputs (0major+23628198minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.962] [info] Creating variant graph
+[2019-06-15 11:04:37.976] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502
+/ALL.chr6.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 14:09:25.036] [info] Num mutations: 729561052
+[2019-06-15 14:09:25.038] [info] Fixing indexes
+[2019-06-15 14:23:08.593] [info] Graph stats:
+[2019-06-15 14:23:08.593] [info] Chromosome: 6 #Vertices: 14553882 #Edges: 19617762 Seq length: 176157141
+[2019-06-15 14:23:08.593] [info] Serializing variant graph to disk
+[2019-06-15 14:41:37.021] [info] Creating Index
+[2019-06-15 14:42:54.955] [info] Serializing index to disk
+12838.93user 293.06system 3:38:52elapsed 99%CPU (0avgtext+0avgdata 47487792maxresident)k
+1170920inputs+8001584outputs (0major+29249866minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.958] [info] Creating variant graph
+[2019-06-15 11:04:37.437] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr3.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 14:15:14.742] [info] Num mutations: 782090835
+[2019-06-15 14:15:14.745] [info] Fixing indexes
+[2019-06-15 14:28:35.515] [info] Graph stats:
+[2019-06-15 14:28:35.515] [info] Chromosome: 3 #Vertices: 16919075 #Edges: 22794692 Seq length: 203869820
+[2019-06-15 14:28:35.515] [info] Serializing variant graph to disk
+[2019-06-15 14:48:51.927] [info] Creating Index
+[2019-06-15 14:50:27.139] [info] Serializing index to disk
+13264.10user 321.58system 3:46:27elapsed 99%CPU (0avgtext+0avgdata 51470924maxresident)k
+865056inputs+8641696outputs (0major+25255685minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.958] [info] Creating variant graph
+[2019-06-15 11:04:38.550] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr4.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 14:24:46.294] [info] Num mutations: 827529061
+[2019-06-15 14:24:46.295] [info] Fixing indexes
+[2019-06-15 14:38:28.877] [info] Graph stats:
+[2019-06-15 14:38:28.877] [info] Chromosome: 4 #Vertices: 16612193 #Edges: 22387756 Seq length: 196897589
+[2019-06-15 14:38:28.877] [info] Serializing variant graph to disk
+[2019-06-15 14:59:11.852] [info] Creating Index
+[2019-06-15 15:00:29.534] [info] Serializing index to disk
+13847.06user 343.61system 3:56:31elapsed 99%CPU (0avgtext+0avgdata 54065936maxresident)k
+1475048inputs+9026912outputs (0major+26112267minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.947] [info] Creating variant graph
+[2019-06-15 11:04:39.757] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 14:45:51.538] [info] Num mutations: 868289786
+[2019-06-15 14:45:51.539] [info] Fixing indexes
+[2019-06-15 14:59:03.865] [info] Graph stats:
+[2019-06-15 14:59:03.865] [info] Chromosome: 1 #Vertices: 18755751 #Edges: 25270723 Seq length: 255738585
+[2019-06-15 14:59:03.865] [info] Serializing variant graph to disk
+[2019-06-15 15:18:34.380] [info] Creating Index
+[2019-06-15 15:19:53.100] [info] Serializing index to disk
+14990.25user 364.67system 4:15:57elapsed 99%CPU (0avgtext+0avgdata 57057596maxresident)k
+798512inputs+9619928outputs (0major+28934544minor)pagefaults 0swaps
+
+[2019-06-15 11:04:33.954] [info] Creating variant graph
+[2019-06-15 11:04:38.123] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr2.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+Resizing the CQF.
+[2019-06-15 14:48:42.502] [info] Num mutations: 917107778
+[2019-06-15 14:48:42.504] [info] Fixing indexes
+[2019-06-15 15:02:15.801] [info] Graph stats:
+[2019-06-15 15:02:15.801] [info] Chromosome: 2 #Vertices: 20537503 #Edges: 27669958 Seq length: 250294423
+[2019-06-15 15:02:15.801] [info] Serializing variant graph to disk
+[2019-06-15 15:23:24.511] [info] Creating Index
+[2019-06-15 15:24:59.479] [info] Serializing index to disk
+15324.83user 339.25system 4:21:06elapsed 99%CPU (0avgtext+0avgdata 60408392maxresident)k
+1051712inputs+10150376outputs (0major+25685320minor)pagefaults 0swaps
+
