@@ -30,14 +30,14 @@ using namespace variantdb;
 construct_main (ConstructOpts &opts)
 {
 	console->info("Creating variant graph");
-	VariantGraph vg(opts.ref, opts.vcf);
+	VariantGraph vg(opts.ref, opts.vcf, opts.prefix);
 
 	console->info("Graph stats:");
 	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
 								vg.get_chr(), vg.get_num_vertices() , vg.get_num_edges(),
 								vg.get_seq_length());
 	console->info("Serializing variant graph to disk");
-	vg.serialize(opts.prefix);
+	vg.serialize();
 
 	console->info("Creating Index");
 	Index idx(&vg);

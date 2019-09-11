@@ -30,9 +30,8 @@ int main ( int argc, char *argv[] )
 
   std::string ref_file("/mnt/disk34/user/ppandey/vcfdata/ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna_sm.chromosome.22.fa");
 	std::string vcf_file("/mnt/disk34/user/ppandey/vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz");
-	std::vector<std::string> vcfs = {vcf_file};
 	PRINT("Creating variant graph");
-	VariantGraph vg(ref_file, vcfs);
+	VariantGraph vg(ref_file, vcf_file, "./ser");
 
 	PRINT("Creating Index");
 	Index idx(&vg);

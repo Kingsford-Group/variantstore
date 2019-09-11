@@ -1,4 +1,4 @@
-TARGETS=variantdb test_graphcontainer test_variantgraph test_index test_query
+TARGETS=variantdb test_graphcontainer test_variantgraph test_index test_query bm_query
 
 ifdef D
 	DEBUG=-g -DDEBUG_MODE
@@ -42,7 +42,8 @@ LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -L$(LOC_LIB) -lm -lvcflib -lhts -lz \
 #
 
 all: variantdb
-tests:	test_graphcontainer test_variantgraph test_index
+tests:	test_graphcontainer test_variantgraph test_index test_query
+bm: bm_query
 
 graph:	$(SER)/graph.png
 
@@ -67,6 +68,11 @@ test_query:							$(OBJDIR)/test_query.o  $(OBJDIR)/variantdb_fs.o\
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
+bm_query:								$(OBJDIR)/bm_query.o  $(OBJDIR)/variantdb_fs.o\
+												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
+												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
+
 # dependencies between .o files and .cc (or .c) files
 $(OBJDIR)/variantdb.o: 						$(LOC_SRC)/variantdb.cc 
 $(OBJDIR)/construct.o: 						$(LOC_SRC)/construct.cc \
@@ -93,6 +99,12 @@ $(OBJDIR)/test_index.o: 					$(LOC_SRC)/test_index.cc \
 																	$(LOC_INCLUDE)/variantdb_fs.h \
 																	$(LOC_INCLUDE)/graph.h
 $(OBJDIR)/test_query.o: 					$(LOC_SRC)/test_query.cc \
+																	$(LOC_INCLUDE)/index.h \
+																	$(LOC_INCLUDE)/variant_graph.h \
+																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
+																	$(LOC_INCLUDE)/variantdb_fs.h \
+																	$(LOC_INCLUDE)/graph.h
+$(OBJDIR)/bm_query.o: 						$(LOC_SRC)/bm_query.cc \
 																	$(LOC_INCLUDE)/index.h \
 																	$(LOC_INCLUDE)/variant_graph.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \

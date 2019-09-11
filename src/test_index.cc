@@ -91,8 +91,7 @@ main ( int argc, char *argv[] )
 	PRINT("Creating variant graph");
 	std::string ref_file(argv[1]);
 	std::string vcf_file(argv[2]);
-	std::vector<std::string> vcfs = {vcf_file};
-	VariantGraph vg(ref_file, vcfs);
+	VariantGraph vg(ref_file, vcf_file, "./ser");
 
 	print_vg_info(vg, vcf_file);
 
@@ -101,10 +100,10 @@ main ( int argc, char *argv[] )
 	print_index_info(idx, 50);
 
 	PRINT("Storing Index");
-	idx.serialize("test");
+	idx.serialize();
 
 	PRINT("Reading Index");
-	Index idx2("test");
+	Index idx2("./ser");
 	print_index_info(idx2, 50);
 
 	return EXIT_SUCCESS;

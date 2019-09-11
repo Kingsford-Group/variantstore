@@ -221,8 +221,9 @@ namespace variantdb {
 		bool is_var = false;
 		sample_ids = {};
 		for (int i = 0; i < v->s_info_size(); ++i) {
-			const VariantGraphVertex::sample_info& s = v->s_info(i);
-			std::string sample_id = vg->get_sample_name(s.sample_id());
+			//const VariantGraphVertex::sample_info& s = v->s_info(i);
+			std::string sample_id =
+				vg->get_sample_name(vg->get_sample_id(v->sampleclass_id(), i));
 			if (sample_id != REF) {
 				sample_ids.push_back(sample_id);
 				is_var = true;
@@ -414,7 +415,7 @@ namespace variantdb {
 		// start from the ref node right before the node contains sample
 		closest_v = idx->find(ref_pos);
 		VariantGraphVertex::sample_info sample;
-		uint64_t seq_len;
+		uint64_t seq_len = 0;
 
 		if (vg->get_sample_from_vertex_if_exists(closest_v, REF, sample)){
 			seq_len = ref_pos - sample.index();
@@ -635,7 +636,7 @@ namespace variantdb {
 			console->error("There is no such variant!");
 		}
 
-		for (auto i=0; i<var.alts.size(); i++)
+		for (uint32_t i=0; i<var.alts.size(); i++)
 		{
 			if (var.alts[i] == alt)
 			{

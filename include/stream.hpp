@@ -68,8 +68,8 @@ bool write_buffered(std::ostream& out, std::vector<T>& buffer, uint64_t buffer_l
 // takes a callback function to be called on the objects
 
 template <typename T>
-bool for_each(std::istream& in,
-              std::function<void(T&)>& lambda,
+bool for_each(std::istream& in, uint32_t index,
+              std::function<void(T&, uint32_t)>& lambda,
               std::function<void(uint64_t)>& handle_count) {
 
     ::google::protobuf::io::ZeroCopyInputStream *raw_in =
@@ -99,7 +99,7 @@ bool for_each(std::istream& in,
                 (coded_in->ReadString(&s, msgSize))) {
                 T object;
                 object.ParseFromString(s);
-                lambda(object);
+                lambda(object, index);
             }
         }
     } while (coded_in->ReadVarint64((::google::protobuf::uint64*) &count));
@@ -112,10 +112,10 @@ bool for_each(std::istream& in,
 }
 
 template <typename T>
-bool for_each(std::istream& in,
-              std::function<void(T&)>& lambda) {
+bool for_each(std::istream& in, uint32_t index,
+              std::function<void(T&, uint32_t)>& lambda) {
     std::function<void(uint64_t)> noop = [](uint64_t) { };
-    return for_each(in, lambda, noop);
+    return for_each(in, index, lambda, noop);
 }
 
 template <typename T>

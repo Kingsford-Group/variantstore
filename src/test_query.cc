@@ -38,14 +38,13 @@ int main ( int argc, char *argv[] ) {
 	PRINT("Creating variant graph");
 	std::string vcf_file(argv[2]);
 	PRINT("Creating variant graph");
-	std::vector<std::string> vcfs = {vcf_file};
 	PRINT("Creating variant graph");
-	VariantGraph vg(ref_file, vcfs);
+	VariantGraph vg(ref_file, vcf_file, "./ser");
 	PRINT("Creating variant graph");
 
 	PRINT("Creating Index");
 	Index idx(&vg);
-	createDotGraph(&vg, "test2");
+	createDotGraph(&vg, "./ser");
 	/*
   PRINT("TEST get_prev_vertex_with_sample");
   int pos = 1;

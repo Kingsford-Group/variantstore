@@ -88,8 +88,7 @@ main ( int argc, char *argv[] )
 	PRINT("Creating variant graph");
 	std::string ref_file(argv[1]);
 	std::string vcf_file(argv[2]);
-	std::vector<std::string> vcfs = {vcf_file};
-	VariantGraph vg(ref_file, vcfs);
+	VariantGraph vg(ref_file, vcf_file, "./ser");
 
 	vcflib::VariantCallFile variantFile;
 	variantFile.open(vcf_file);
@@ -98,10 +97,10 @@ main ( int argc, char *argv[] )
 	print_vg_info(vg, vcf_file, variantFile.sampleNames);
 
 	PRINT("Serialiing variant graph to disk");
-	vg.serialize("./ser");
+	vg.serialize();
 
 	PRINT("Loading variant graph from disk");
-	VariantGraph file_vg("./ser");
+	VariantGraph file_vg("./ser", READ_COMPLETE_GRAPH);
 
 	PRINT("Printing variant graph info from file vg");
 	print_vg_info(file_vg, vcf_file, variantFile.sampleNames);

@@ -67,8 +67,9 @@ namespace variantdb {
 				if(has_suffix(entry->d_name, ext))
 				{
 					std::string filename(entry->d_name);
-					std::string dirname(dir);
-					ret.push_back(std::string(dirname + filename));
+					//std::string dirname(dir);
+					//ret.push_back(std::string(dirname + filename));
+					ret.push_back(filename);
 				}
 			}
 
