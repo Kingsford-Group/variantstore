@@ -38,8 +38,7 @@
 namespace variantdb {
 
 #define CACHE_SIZE 256
-//#define NUM_VERTEXES_IN_BLOCK 1000000
-#define NUM_VERTEXES_IN_BLOCK 10000
+#define NUM_VERTEXES_IN_BLOCK 1000000
 
 	// to map a sample --> vertex ids.
 	using Cache = LRU::Cache<uint32_t, Graph::vertex>;
