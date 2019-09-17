@@ -38,7 +38,8 @@
 namespace variantdb {
 
 #define CACHE_SIZE 256
-#define NUM_VERTEXES_IN_BLOCK 1000000
+//#define NUM_VERTEXES_IN_BLOCK 1000000
+#define NUM_VERTEXES_IN_BLOCK 10000
 
 	// to map a sample --> vertex ids.
 	using Cache = LRU::Cache<uint32_t, Graph::vertex>;
@@ -137,7 +138,7 @@ namespace variantdb {
 			uint64_t get_ref_length(void) const;
 			uint64_t get_num_sample_classes(void) const;
 			std::string get_sample_name(uint32_t id) const;
-			double get_cache_hit_rate(void) const;
+			//double get_cache_hit_rate(void) const;
 
 			std::string print_vertex_info(const VariantGraphVertex& v) const;
 			const std::string get_sequence(const VariantGraphVertex& v) const;
@@ -202,11 +203,12 @@ namespace variantdb {
 
 			const VariantGraphVertex& get_vertex(Graph::vertex id) const;
 			VariantGraphVertex* get_mutable_vertex(Graph::vertex id);
-			void serialize_vertex_list(uint64_t index);
-			void load_vertex_list(uint64_t index);
+			void serialize_vertex_list(uint64_t index) const;
+			void load_vertex_list(uint64_t index) const;
 
+			void flush_in_memory_vertex_lists(void) const;
 			void add_or_replace_in_memory_vertex_list(uint32_t index,
-																								VariantGraphVertexList& v);
+																								VariantGraphVertexList* v) const;
 
 			bool get_sample_from_vertex_if_exists(Graph::vertex v, uint32_t sample_id,
 																						VariantGraphVertex::sample_info&
@@ -315,9 +317,8 @@ namespace variantdb {
 			std::map<uint64_t, uint64_t> idx_vertex_id;
 			std::unordered_map<uint32_t, std::string> idsample_map;
 			std::unordered_map<uint64_t, uint32_t> sampleclass_map;
-			Cache cache;
 			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE> rrr_sample_vector;
-			std::map<uint32_t, VariantGraphVertexList> in_memory_vertex_lists;
+			mutable std::map<uint32_t, VariantGraphVertexList*> in_memory_vertex_lists;
 
 			/* structures to persist when serializing variant graph. */
 			// a vector of VariantGraphVertexLists. Each list object is a block
@@ -331,15 +332,10 @@ namespace variantdb {
 
 	VariantGraph::VariantGraph(const std::string& ref_file, const
 														 std::string& vcf_file,const std::string& prefix) :
-		prefix(prefix), mode(READ_WRITE_MODE), load_type(READ_COMPLETE_GRAPH),
-		cache(CACHE_SIZE) {
+		prefix(prefix), mode(READ_WRITE_MODE), load_type(READ_INDEX_ONLY) {
 			// Verify that the version of the library that we linked against is
 			// compatible with the version of the headers we compiled against.
 			GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-#ifdef DEBUG_MODE
-			cache.monitor();
-#endif
 
 			std::string ref;
 			read_fasta(ref_file, chr, ref);
@@ -362,13 +358,15 @@ namespace variantdb {
 			// Add vcf files
 			add_vcfs(vcf_file);
 
+			// flush remaining vertex lists.
+			flush_in_memory_vertex_lists();
+
 			// fix sample indexes
 			fix_sample_indexes();
 		}
 
 	VariantGraph::VariantGraph(const std::string& prefix, enum READ_TYPE type) :
-		prefix(prefix), mode(READ_ONLY_MODE), load_type(type), cache(CACHE_SIZE),
-		topology(prefix) {
+		prefix(prefix), mode(READ_ONLY_MODE), load_type(type), topology(prefix) {
 
 		// Read all proto files and sort them based on ids.
 		std::vector<std::string> proto_files = fs::GetFilesExt(prefix.c_str(), ".proto");
@@ -383,11 +381,7 @@ namespace variantdb {
 			function<void(VariantGraphVertexList&, uint32_t)> lambda =
 				[this](VariantGraphVertexList& v, uint32_t index)
 				{
-					if (load_type == READ_COMPLETE_GRAPH) {
-						vertex_block_list.emplace_back(v);
-					} else {
-						in_memory_vertex_lists[index] = v;
-					}
+					vertex_block_list.emplace_back(v);
 					//VariantGraphVertex* vertex = vertex_list.add_vertex();
 					//*vertex = v;
 				};
@@ -453,7 +447,7 @@ namespace variantdb {
 		google::protobuf::ShutdownProtobufLibrary();
 	}
 
-	void VariantGraph::serialize_vertex_list(uint64_t index) {
+	void VariantGraph::serialize_vertex_list(uint64_t index) const {
 		std::function<VariantGraphVertexList(uint64_t)> lambda =
 			[this](uint64_t n) {
 				if (load_type == READ_COMPLETE_GRAPH) {
@@ -464,7 +458,7 @@ namespace variantdb {
 						console->error("Can't find the vertex list for id: {}", n);
 						abort();
 					}
-					return itr->second;
+					return *(itr->second);
 				}
 				//return vertex_list.vertex(n);
 			};
@@ -479,15 +473,13 @@ namespace variantdb {
 		}
 	}
 
-	void VariantGraph::load_vertex_list(uint64_t index) {
+	void VariantGraph::load_vertex_list(uint64_t index) const {
 		function<void(VariantGraphVertexList&, uint32_t)> lambda =
 			[this](VariantGraphVertexList& v, uint32_t index)
 			{
-				if (load_type == READ_COMPLETE_GRAPH) {
-					vertex_block_list.emplace_back(v);
-				} else {
-					add_or_replace_in_memory_vertex_list(index, v);
-				}
+				VariantGraphVertexList *list = new VariantGraphVertexList();
+				*list = v;
+				add_or_replace_in_memory_vertex_list(index, list);
 				//VariantGraphVertex* vertex = vertex_list.add_vertex();
 				//*vertex = v;
 			};
@@ -515,6 +507,8 @@ namespace variantdb {
 			for (auto itr : in_memory_vertex_lists)
 				serialize_vertex_list(itr.first);
 		}
+		// clear in-memory vertex lists
+		in_memory_vertex_lists.clear();
 
 		// serialize seq buffer
 		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
@@ -528,6 +522,7 @@ namespace variantdb {
 		// serialize topology
 		topology.serialize(prefix);
 
+		console->info("Number of sample vector classes: {}", sampleclass_map.size());
 		// serialize sample vector
 		sdsl::util::assign(rrr_sample_vector,
 											 sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>(sample_vector));
@@ -915,8 +910,8 @@ namespace variantdb {
 	}
 
 	void VariantGraph::add_or_replace_in_memory_vertex_list(uint32_t index,
-																													VariantGraphVertexList&
-																													v) {
+																													VariantGraphVertexList*
+																													v) const {
 		if (in_memory_vertex_lists.size() < 2) {
 			in_memory_vertex_lists[index] = v;
 		} else {
@@ -924,11 +919,18 @@ namespace variantdb {
 			uint32_t id1 = itr->first;
 			++itr;
 			uint32_t id2 = itr->first;
-			id1 < id2 ?
-				in_memory_vertex_lists.erase(in_memory_vertex_lists.find(id1)) :
-				in_memory_vertex_lists.erase(in_memory_vertex_lists.find(id2));
+			uint32_t remove_id = id1 < id2 ? id1 : id2;
+			serialize_vertex_list(remove_id);
+			delete in_memory_vertex_lists.find(remove_id)->second;
+			in_memory_vertex_lists.erase(in_memory_vertex_lists.find(remove_id));
 			in_memory_vertex_lists[index] = v;
 		}
+	}
+
+	void VariantGraph::flush_in_memory_vertex_lists(void) const {
+		for (auto it : in_memory_vertex_lists)
+			serialize_vertex_list(it.first);
+		in_memory_vertex_lists.clear();
 	}
 
 	VariantGraphVertex* VariantGraph::create_vertex(uint64_t id, uint64_t
@@ -942,13 +944,13 @@ namespace variantdb {
 			//abort();
 		//}
 		// check if we need to create a new partition
-		if (id == 0 || (id + 1) % NUM_VERTEXES_IN_BLOCK == 0) {	// id+1 is the number of vertices including the new vertex.
+		if (id == 0 || id % NUM_VERTEXES_IN_BLOCK == 0) {	// id is the number of vertices including the new vertex.
 			VariantGraphVertexList *list = new VariantGraphVertexList();
 			if (load_type == READ_COMPLETE_GRAPH) {
 				vertex_block_list.emplace_back(*list);
 			} else { // remove the vertex list with smaller id and add the new vertex list.
 				uint32_t block_index = id / NUM_VERTEXES_IN_BLOCK;
-				add_or_replace_in_memory_vertex_list(block_index, *list);
+				add_or_replace_in_memory_vertex_list(block_index, list);
 			}
 		}
 		uint32_t block_index = id / NUM_VERTEXES_IN_BLOCK;
@@ -957,7 +959,7 @@ namespace variantdb {
 		if (load_type == READ_COMPLETE_GRAPH) {
 			v = vertex_block_list[block_index].add_vertex();
 		} else {
-			v = in_memory_vertex_lists[block_index].add_vertex();
+			v = in_memory_vertex_lists[block_index]->add_vertex();
 		}
 		v->set_vertex_id(id);
 		v->set_offset(offset);
@@ -1028,31 +1030,31 @@ namespace variantdb {
 	const VariantGraphVertex& VariantGraph::get_vertex(Graph::vertex id) const {
 		uint64_t block_index = id / NUM_VERTEXES_IN_BLOCK;
 		uint64_t block_offset = id % NUM_VERTEXES_IN_BLOCK;
-		//if (load_type == READ_COMPLETE_GRAPH) {
+		if (load_type == READ_COMPLETE_GRAPH) {
 			return vertex_block_list[block_index].vertex(block_offset);
-		//} else {
-			//auto itr = in_memory_vertex_lists.find(block_index);
-			//if (itr == in_memory_vertex_lists.end()) {	// load the vertex list
-				//load_vertex_list(block_index);
-				//itr = in_memory_vertex_lists.find(block_index);
-			//}
-			//return itr->second.vertex(block_offset);
-		//}
+		} else {
+			auto itr = in_memory_vertex_lists.find(block_index);
+			if (itr == in_memory_vertex_lists.end()) {	// load the vertex list
+				load_vertex_list(block_index);
+				itr = in_memory_vertex_lists.find(block_index);
+			}
+			return itr->second->vertex(block_offset);
+		}
 	}
 
 	VariantGraphVertex* VariantGraph::get_mutable_vertex(Graph::vertex id) {
 		uint64_t block_index = id / NUM_VERTEXES_IN_BLOCK;
 		uint64_t block_offset = id % NUM_VERTEXES_IN_BLOCK;
-		//if (load_type == READ_COMPLETE_GRAPH) {
+		if (load_type == READ_COMPLETE_GRAPH) {
 			return vertex_block_list[block_index].mutable_vertex(block_offset);
-		//} else {
-			//auto itr = in_memory_vertex_lists.find(block_index);
-			//if (itr == in_memory_vertex_lists.end()) {	// load the vertex list
-				//load_vertex_list(block_index);
-				//itr = in_memory_vertex_lists.find(block_index);
-			//}
-			//return itr->second.mutable_vertex(block_offset);
-		//}
+		} else {
+			auto itr = in_memory_vertex_lists.find(block_index);
+			if (itr == in_memory_vertex_lists.end()) {	// load the vertex list
+				load_vertex_list(block_index);
+				itr = in_memory_vertex_lists.find(block_index);
+			}
+			return itr->second->mutable_vertex(block_offset);
+		}
 	}
 
 	uint64_t VariantGraph::get_num_vertices(void) const {
@@ -1079,12 +1081,12 @@ namespace variantdb {
 		return sampleclass_map.size();
 	}
 
-	double VariantGraph::get_cache_hit_rate(void) const {
-#ifdef DEBUG_MODE
-		return cache.stats().hit_rate();
-#endif
-		return 0;
-	}
+	//double VariantGraph::get_cache_hit_rate(void) const {
+//#ifdef DEBUG_MODE
+		//return cache.stats().hit_rate();
+//#endif
+		//return 0;
+	//}
 
 	std::string VariantGraph::get_sample_name(uint32_t id) const {
 		auto it = idsample_map.find(id);
@@ -1184,9 +1186,10 @@ namespace variantdb {
 			return sample.index() + cur_vertex.length();
 
 		// check in the cache
-		if (cache.contains(sample_id))
-			cur_vertex_id = cache.lookup(sample_id);
-		else {	// else traverse back in the graph to find a vertex with @sample_id
+		//if (cache.contains(sample_id))
+			//cur_vertex_id = cache.lookup(sample_id);
+		//else {
+			// else traverse back in the graph to find a vertex with @sample_id
 			// ref id is 0
 			get_sample_from_vertex_if_exists(ref_v_id, 0, sample);
 			uint64_t cur_index = sample.index();
@@ -1209,7 +1212,7 @@ namespace variantdb {
 				}
 				--temp_itr;
 			}
-		}
+		//}
 
 		// init cur distance
 		uint64_t cur_distance = 0;
