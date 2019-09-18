@@ -86,9 +86,10 @@ main ( int argc, char *argv[] ) {
 												construct_opt.prefix) %
 									"output directory",
 									required("-t","--type") & value("query-type", query_opt.type) %
-									"type of query. 1. Get variants in ref coordinate. \
-									2. Get Num variant in sample. \
-									3. Get sequence in sample. \
+									"type of query. \n \
+									1. Get variants in ref coordinate. \n \
+									2. Get Number of variants in sample. \n \
+									3. Get sequence in sample. \n \
 									4. Return closest mutation in sample",
 									required("-b","--begin") & value("begin", query_opt.begin) %
 									"starting position",
