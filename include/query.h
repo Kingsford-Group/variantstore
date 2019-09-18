@@ -4,11 +4,15 @@
  *       Filename:  query.h
  *
  *         Author:  Prashant Pandey <ppandey@cs.stonybrook.edu>
- Yinjie Gao <yinjieg@andrew.cmu.edu>
+ *									Yinjie Gao <yinjieg@andrew.cmu.edu>
  *   Organization:  Carnegie Mellon University
  *
  * ============================================================================
  */
+
+#ifndef __QUERY_H__
+#define __QUERY_H__
+
 #include <string>
 #include <vector>
 #include <map>
@@ -650,3 +654,5 @@ namespace variantdb {
 	} // samples_has_var()
 
 }
+
+#endif // __QUERY_H__

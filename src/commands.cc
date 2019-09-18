@@ -13,6 +13,7 @@
 
 #include "spdlog/spdlog.h"
 
+#include "query.h"
 #include "index.h"
 #include "variant_graph.h"
 #include "progopts.h"
@@ -52,6 +53,13 @@ construct_main (ConstructOpts &opts)
 								file_vg.get_chr(), file_vg.get_num_vertices() , file_vg.get_num_edges(),
 								file_vg.get_seq_length());
 #endif
+
+	return EXIT_SUCCESS;
+}				/* ----------  end of function main  ---------- */
+
+	int
+query_main ( QueryOpts& opts )
+{
 
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

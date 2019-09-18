@@ -19,5 +19,13 @@ class ConstructOpts {
 		std::string prefix;
 };
 
+class QueryOpts {
+	public:
+		std::string prefix;
+		uint32_t type;
+		uint64_t begin;
+		uint64_t end;
+		std::string sample_name;
+};
 
 #endif //__PROG_OPTS__

@@ -49,7 +49,7 @@ graph:	$(SER)/graph.png
 
 # dependencies between programs and .o files
 variantdb:							$(OBJDIR)/variantdb.o $(OBJDIR)/variantdb_fs.o \
-												$(OBJDIR)/construct.o \
+												$(OBJDIR)/commands.o \
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
@@ -75,7 +75,7 @@ bm_query:								$(OBJDIR)/bm_query.o  $(OBJDIR)/variantdb_fs.o\
 
 # dependencies between .o files and .cc (or .c) files
 $(OBJDIR)/variantdb.o: 						$(LOC_SRC)/variantdb.cc 
-$(OBJDIR)/construct.o: 						$(LOC_SRC)/construct.cc \
+$(OBJDIR)/commands.o: 						$(LOC_SRC)/commands.cc \
 																	$(LOC_INCLUDE)/variant_graph.h \
 																	$(LOC_INCLUDE)/index.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \

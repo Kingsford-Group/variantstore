@@ -4,14 +4,14 @@
  *       Filename:  index.h
  *
  *         Author:  Prashant Pandey <ppandey@cs.stonybrook.edu>
- 										Yinjie Gao <yinjieg@andrew.cmu.edu>
+ *									Yinjie Gao <yinjieg@andrew.cmu.edu>
  *   Organization:  Carnegie Mellon University
  *
  * ============================================================================
  */
 
 #ifndef __INDEX_H__
-#define __INDEX_H_
+#define __INDEX_H__
 
 #include <sdsl/bit_vectors.hpp>
 #include <sdsl/int_vector.hpp>

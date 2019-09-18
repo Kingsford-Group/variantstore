@@ -43,6 +43,7 @@ void explore_options_verbose(T& res) {
 }
 
 int construct_main(ConstructOpts& construct_opt);
+int query_main(QueryOpts& query_opt);
 
 std::shared_ptr<spdlog::logger> console;
 
@@ -55,10 +56,11 @@ std::shared_ptr<spdlog::logger> console;
 	int
 main ( int argc, char *argv[] ) {
   using namespace clipp;
-	enum class mode {construct, help};
+	enum class mode {construct, query, help};
   mode selected = mode::help;
 
 	ConstructOpts construct_opt;
+	QueryOpts query_opt;
 
 	console = spdlog::default_logger();
 #ifdef DEBUG_MODE
@@ -77,7 +79,26 @@ main ( int argc, char *argv[] ) {
 									"output directory"
 						 );
 
-	auto cli = ((construct_mode |
+	auto query_mode = (
+									command("query").set(selected, mode::query),
+									required("-p","--output-prefix") & value(
+																												 "output-prefix",
+												construct_opt.prefix) %
+									"output directory",
+									required("-t","--type") & value("query-type", query_opt.type) %
+									"type of query. 1. Get variants in ref coordinate. \
+									2. Get Num variant in sample. \
+									3. Get sequence in sample. \
+									4. Return closest mutation in sample",
+									required("-b","--begin") & value("begin", query_opt.begin) %
+									"starting position",
+									required("-e","--end") & value("end", query_opt.end) %
+									"ending position",
+									option("-s","--sample-name") & value("sample-name", query_opt.sample_name) %
+									"sample name"
+						 );
+
+	auto cli = ((construct_mode | query_mode |
 							 command("help").set(selected, mode::help)), 
 							option("-v", "--version").call([]{std::cout <<
 																						 "version 0.1\n\n";}).doc("show version"));
@@ -98,6 +119,7 @@ main ( int argc, char *argv[] ) {
   if(res) {
 		switch(selected) {
 			case mode::construct: construct_main(construct_opt); break;
+			case mode::query: query_main(query_opt); break;
 			case mode::help:  break;
 		}
   } else {
@@ -106,7 +128,9 @@ main ( int argc, char *argv[] ) {
     if (std::distance(b,e) > 0) {
       if (b->arg() == "construct") {
         std::cout << make_man_page(construct_mode, "variantdb");
-      } else {
+      } else if (b->arg() == "query") {
+        std::cout << make_man_page(query_mode, "variantdb");
+      }else {
         std::cout << "There is no command \"" << b->arg() << "\"\n";
         std::cout << usage_lines(cli, "variantdb") << '\n';
       }
