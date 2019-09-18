@@ -39,7 +39,7 @@ int main ( int argc, char *argv[] ) {
 	std::string vcf_file(argv[2]);
 	PRINT("Creating variant graph");
 	PRINT("Creating variant graph");
-	VariantGraph vg(ref_file, vcf_file, "./ser");
+	VariantGraph vg(ref_file, vcf_file, "./ser", READ_COMPLETE_GRAPH);
 	PRINT("Creating variant graph");
 
 	PRINT("Creating Index");

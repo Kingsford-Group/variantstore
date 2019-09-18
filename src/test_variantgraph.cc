@@ -88,7 +88,7 @@ main ( int argc, char *argv[] )
 	PRINT("Creating variant graph");
 	std::string ref_file(argv[1]);
 	std::string vcf_file(argv[2]);
-	VariantGraph vg(ref_file, vcf_file, "./ser");
+	VariantGraph vg(ref_file, vcf_file, "./ser", READ_COMPLETE_GRAPH);
 
 	vcflib::VariantCallFile variantFile;
 	variantFile.open(vcf_file);

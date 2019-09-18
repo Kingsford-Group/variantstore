@@ -21,16 +21,16 @@
 using namespace variantdb;
 
 /* 
- * ===  FUNCTION  ======================================================================
+ * ===  FUNCTION  =============================================================
  *         Name:  main
  *  Description:  
- * =====================================================================================
+ * ============================================================================
  */
 	int
 construct_main (ConstructOpts &opts)
 {
 	console->info("Creating variant graph");
-	VariantGraph vg(opts.ref, opts.vcf, opts.prefix);
+	VariantGraph vg(opts.ref, opts.vcf, opts.prefix, READ_INDEX_ONLY);
 
 	console->info("Graph stats:");
 	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
@@ -44,12 +44,14 @@ construct_main (ConstructOpts &opts)
 	console->info("Serializing index to disk");
 	idx.serialize(opts.prefix);
 
+#if 0
 	console->info("Loading variant graph");
 	VariantGraph file_vg(opts.prefix, READ_COMPLETE_GRAPH);
 	console->info("Graph stats:");
 	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
 								file_vg.get_chr(), file_vg.get_num_vertices() , file_vg.get_num_edges(),
 								file_vg.get_seq_length());
+#endif
 
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

@@ -93,7 +93,7 @@ main ( int argc, char *argv[] )
 	std::string ref_file(argv[1]);
 	std::string vcf_file(argv[2]);
 	std::vector<std::string> vcfs = {vcf_file};
-	VariantGraph vg(ref_file, vcfs);
+	VariantGraph vg(ref_file, vcfs, READ_COMPLETE_GRAPH);
 
 	print_vg_info(vg, vcf_file);
 	createDotGraph(&vg, "graph");

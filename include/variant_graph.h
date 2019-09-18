@@ -38,7 +38,8 @@
 namespace variantdb {
 
 #define CACHE_SIZE 256
-#define NUM_VERTEXES_IN_BLOCK 1000000
+//#define NUM_VERTEXES_IN_BLOCK 1000000
+#define NUM_VERTEXES_IN_BLOCK 200000
 
 	// to map a sample --> vertex ids.
 	using Cache = LRU::Cache<uint32_t, Graph::vertex>;
@@ -117,7 +118,7 @@ namespace variantdb {
 			// construct variant graph using a reference genome and zero or more vcf
 			// files.
 			VariantGraph(const std::string& ref_file, const std::string& vcf_file,
-									 const std::string& prefix);
+									 const std::string& prefix, enum READ_TYPE type);
 
 			// read variant graph from disk
 			VariantGraph(const std::string& prefix, enum READ_TYPE type);
@@ -313,6 +314,7 @@ namespace variantdb {
 			uint64_t num_samples{0};
 			enum MODE mode;
 			enum READ_TYPE load_type;
+			bool serialize_in_memory_vertex_list{true};
 			std::map<uint64_t, uint64_t> idx_vertex_id;
 			std::unordered_map<uint32_t, std::string> idsample_map;
 			std::unordered_map<uint64_t, uint32_t> sampleclass_map;
@@ -330,8 +332,9 @@ namespace variantdb {
 	};
 
 	VariantGraph::VariantGraph(const std::string& ref_file, const
-														 std::string& vcf_file,const std::string& prefix) :
-		prefix(prefix), mode(READ_WRITE_MODE), load_type(READ_INDEX_ONLY) {
+														 std::string& vcf_file,const std::string& prefix,
+														 enum READ_TYPE type) :
+		prefix(prefix), mode(READ_WRITE_MODE), load_type(type) {
 			// Verify that the version of the library that we linked against is
 			// compatible with the version of the headers we compiled against.
 			GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -365,7 +368,8 @@ namespace variantdb {
 		}
 
 	VariantGraph::VariantGraph(const std::string& prefix, enum READ_TYPE type) :
-		prefix(prefix), mode(READ_ONLY_MODE), load_type(type), topology(prefix) {
+		prefix(prefix), mode(READ_ONLY_MODE), load_type(type),
+		serialize_in_memory_vertex_list(false), topology(prefix) {
 
 		// Read all proto files and sort them based on ids.
 		std::vector<std::string> proto_files = fs::GetFilesExt(prefix.c_str(), ".proto");
@@ -478,6 +482,7 @@ namespace variantdb {
 			{
 				VariantGraphVertexList *list = new VariantGraphVertexList();
 				*list = v;
+				// no need to serialize the replaced vertex list
 				add_or_replace_in_memory_vertex_list(index, list);
 				//VariantGraphVertex* vertex = vertex_list.add_vertex();
 				//*vertex = v;
@@ -508,6 +513,7 @@ namespace variantdb {
 		}
 		// clear in-memory vertex lists
 		in_memory_vertex_lists.clear();
+		serialize_in_memory_vertex_list = false;
 
 		// serialize seq buffer
 		std::string seq_buffer_name = prefix + "/seq_buffer.sdsl";
@@ -919,7 +925,8 @@ namespace variantdb {
 			++itr;
 			uint32_t id2 = itr->first;
 			uint32_t remove_id = id1 < id2 ? id1 : id2;
-			serialize_vertex_list(remove_id);
+			if (serialize_in_memory_vertex_list)
+				serialize_vertex_list(remove_id);
 			delete in_memory_vertex_lists.find(remove_id)->second;
 			in_memory_vertex_lists.erase(in_memory_vertex_lists.find(remove_id));
 			in_memory_vertex_lists[index] = v;
@@ -949,6 +956,7 @@ namespace variantdb {
 				vertex_block_list.emplace_back(*list);
 			} else { // remove the vertex list with smaller id and add the new vertex list.
 				uint32_t block_index = id / NUM_VERTEXES_IN_BLOCK;
+				// serialize the replaced vertex list
 				add_or_replace_in_memory_vertex_list(block_index, list);
 			}
 		}
