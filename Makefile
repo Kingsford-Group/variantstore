@@ -51,26 +51,26 @@ graph:	$(SER)/graph.png
 variantdb:							$(OBJDIR)/variantdb.o $(OBJDIR)/variantdb_fs.o \
 												$(OBJDIR)/commands.o \
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
-												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/gqf_file.o $(OBJDIR)/rank_select.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 test_graphcontainer:		$(OBJDIR)/test_graphcontainer.o $(OBJDIR)/gqf.o \
-												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/gqf_file.o $(OBJDIR)/rank_select.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 test_variantgraph:			$(OBJDIR)/test_variantgraph.o  $(OBJDIR)/variantdb_fs.o\
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
-												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/gqf_file.o $(OBJDIR)/rank_select.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 test_index:							$(OBJDIR)/test_index.o  $(OBJDIR)/variantdb_fs.o\
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
-												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/gqf_file.o $(OBJDIR)/rank_select.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 test_query:							$(OBJDIR)/test_query.o  $(OBJDIR)/variantdb_fs.o\
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
-												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/gqf_file.o $(OBJDIR)/rank_select.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 bm_query:								$(OBJDIR)/bm_query.o  $(OBJDIR)/variantdb_fs.o\
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
-												$(OBJDIR)/gqf_file.o \
+												$(OBJDIR)/gqf_file.o $(OBJDIR)/rank_select.o \
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 
 # dependencies between .o files and .cc (or .c) files
@@ -115,6 +115,7 @@ $(OBJDIR)/variantgraphvertex.pb.o: 	$(LOC_SRC)/variantgraphvertex.pb.cc \
 $(OBJDIR)/gqf.o: 				$(LOC_SRC)/gqf/gqf.c $(LOC_INCLUDE)/gqf/gqf.h
 $(OBJDIR)/gqf_file.o: 	$(LOC_SRC)/gqf/gqf_file.c $(LOC_INCLUDE)/gqf/gqf_file.h
 $(OBJDIR)/hashutil.o: 	$(LOC_INCLUDE)/gqf/hashutil.h
+$(OBJDIR)/rank_select.o: 	$(LOC_INCLUDE)/gqf/rank_select.h
 
 
 # create dot graph

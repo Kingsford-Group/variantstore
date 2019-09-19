@@ -12,8 +12,9 @@ message VariantGraphVertex {
 	message sample_info {
 		uint32 index = 1;
 		// two bits for genotype info.
-		bool gt_1 = 2;
-		bool gt_2 = 3;
+		bool phase = 2;
+		bool gt_1 = 3;
+		bool gt_2 = 4;
 	}
 
 	repeated sample_info s_info = 5;

@@ -24,6 +24,7 @@
 #include <fcntl.h>
 
 #include "gqf/hashutil.h"
+#include "gqf/rank_select.h"
 #include "gqf/gqf.h"
 #include "gqf/gqf_int.h"
 
@@ -260,6 +261,7 @@ static void modify_metadata(QF *qf, uint64_t *metadata, int cnt)
 	return;
 }
 
+#if 0
 static inline int popcnt(uint64_t val)
 {
 	asm("popcnt %[val], %[val]"
@@ -268,6 +270,7 @@ static inline int popcnt(uint64_t val)
 			: "cc");
 	return val;
 }
+#endif
 
 static inline int64_t bitscanreverse(uint64_t val)
 {
@@ -301,6 +304,7 @@ static inline int bitrank(uint64_t val, int pos) {
 	return val;
 }
 
+#if 0
 /**
  * Returns the position of the k-th 1 in the 64-bit word x.
  * k is 0-based, so k=0 returns the position of the first 1.
@@ -437,6 +441,7 @@ static inline uint64_t bitselect(uint64_t val, int rank) {
 #endif
 	return _select64(val, rank);
 }
+#endif
 
 static inline uint64_t bitselectv(const uint64_t val, int ignore, int rank)
 {
