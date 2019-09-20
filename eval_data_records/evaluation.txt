@@ -1,0 +1,35 @@
+Data downloads:
+
+Human reference:
+wget -r ftp://ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/ [GRch38]
+wget -r ftp.ensembl.org/pub/release-97/fasta/homo_sapiens/dna/ [GRch38]
+
+1000Genomes:
+wget -r http://hgdownload.cse.ucsc.edu/gbdb/hg19/1000Genomes/phase3/ [from vg github issue]
+wget -r ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ [from Shawn]
+
+TCGA data:
+using the gdc manifests
+for file in $(ls gdc_manifests/); do
+./gdc-client download -t ../gdc-token.txt -m gdc_manifests/$file -n 8 gdc_acc.log -d tcga-data/$file;
+done
+
+VG commands:
+
+Graph construction:
+/usr/bin/time vg construct -r ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.Y.fa -v ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrY.phase3_integrated_v2a.20130502.genotypes.vcf.gz -a > vgdata_v2/Y.vg
+/usr/bin/time vg construct -r ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.X.fa -v ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrX.phase3_shapeit2_mvncall_integrated_v1b.20130502.genotypes.vcf.gz -a > vgdata_v2/X.vg
+(seq 1 22) | parallel -j 22 "/usr/bin/time vg construct -r ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.{}.fa -v ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz -a > vgdata_v2/{}.vg"
+
+Graph indexing:
+/usr/bin/time vg index -x vgdata_v2/Y.xg -G vgdata_v2/Y.gbwt -v ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrY.phase3_integrated_v2a.20130502.genotypes.vcf.gz vgdata_v2/Y.vg
+/usr/bin/time vg index -x vgdata_v2/X.xg -G vgdata_v2/X.gbwt -v ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrX.phase3_shapeit2_mvncall_integrated_v1b.20130502.genotypes.vcf.gz vgdata_v2/X.vg
+(seq 1 22) | parallel -j 22 "/usr/bin/time vg index -x vgdata_v2/{}.xg -G vgdata_v2/{}.gbwt -v ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz vgdata_v2/{}.vg"
+
+
+VariantDB commands:
+/usr/bin/time ./variantdb construct -r ../vcfdata/ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.X.fa -v ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrX.phase3_shapeit2_mvncall_integrated_v1b.20130502.genotypes.vcf.gz -p vdb_v2/chrX/
+/usr/bin/time ./variantdb construct -r ../vcfdata/ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.Y.fa -v ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrY.phase3_integrated_v2a.20130502.genotypes.vcf.gz -p vdb_v2/chrY/
+(seq 1 22;) | parallel -j 24 /usr/bin/time ./variantdb construct -r ../vcfdata/ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.{}.fa -v ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz -p vdb_v2/chr{}
+
+
