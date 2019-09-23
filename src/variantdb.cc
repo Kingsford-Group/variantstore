@@ -83,7 +83,7 @@ main ( int argc, char *argv[] ) {
 									command("query").set(selected, mode::query),
 									required("-p","--output-prefix") & value(
 																												 "output-prefix",
-												construct_opt.prefix) %
+												query_opt.prefix) %
 									"output directory",
 									required("-t","--type") & value("query-type", query_opt.type) %
 									"type of query. \n \
