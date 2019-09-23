@@ -1,20 +1,33 @@
 #!/bin/sh
+# Author: Yinjie Gao, yinjieg@andrew.cmu.edu
+# THis is the query benchmark using bcftools
+# equivalent to variantdb function -- get_sample_var_in_ref
 
-# vcfpath:
-vcf="ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
+# vcf file path:
+vcf="$1"
+sample_file="$2"
+len="$3"
+query_len=$(($len/10))
 
-# Generate 10 random positions
-a=$(echo $(shuf -i 0-50000000 -n 10))
-echo $a
+# Generate 10 random starting positions
+pos=$(echo $(shuf -i 0-$len -n 10))
+echo $pos
+
+samples=$(echo $(shuf -n 10 $sample_file))
+echo $samples
 
 start=`date +%s`
-for i in $a
+for i in $pos
 do
-  j=$(($i+5000000))
-  echo "$i, $j"
-  bcftools filter -r 22:$i-$j $vcf > temp.vcf
+  j=$(($i+$query_len))
+
+  for s in $samples
+  do
+    echo "$i, $j, $s"
+    bcftools filter -r 22:$i-$j $vcf -s $s > temp.vcf
+  done
 done
 
 end=`date +%s`
-runtime=$(((end-start)/10))
+runtime=$(((end-start)/100))
 echo "Average runtime: $runtime"
