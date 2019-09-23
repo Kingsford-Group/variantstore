@@ -4,6 +4,7 @@
  *       Filename:  construct.cc
  *
  *         Author:  Prashant Pandey (), ppandey2@cs.cmu.edu
+ 										Yinjie Gao, yinjieg@andrew.cmu.edu
  *   Organization:  Carnegie Mellon University
  *
  * ============================================================================
@@ -21,10 +22,10 @@
 
 using namespace variantdb;
 
-/* 
+/*
  * ===  FUNCTION  =============================================================
  *         Name:  main
- *  Description:  
+ *  Description:
  * ============================================================================
  */
 	int
@@ -60,6 +61,30 @@ construct_main (ConstructOpts &opts)
 	int
 query_main ( QueryOpts& opts )
 {
+	console->info("Loading Index");
+	Index idx(opts.prefix);
+	console->info("Loading variant graph");
+	VariantGraph vg(opts.prefix, READ_COMPLETE_GRAPH);
+
+	if (opts.type == 1) {
+		console->info("Get sample's variants in ref coordinate");
+		std::vector <Variant> vars = get_sample_var_in_ref(&vg, &idx, opts.begin, opts.end, opts.sample_name);
+	}
+
+	if (opts.type == 2) {
+		console->info("Get the number of variants in sample coordinate");
+		std::vector <Variant> vars = get_sample_var_in_sample(&vg, &idx, opts.begin, opts.end, opts.sample_name);
+	}
+	if (opts.type == 3) {
+		console->info("Get sample's sequence in sample coordinate");
+		std::string s= query_sample_from_sample(&vg, &idx, opts.begin, opts.end, opts.sample_name);
+	}
+	if (opts.type == 4) {
+		console->info("Return closest mutation in ref coordinate");
+		Variant var;
+		closest_var(&vg, &idx, opts.begin, var);
+	}
+
 
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
