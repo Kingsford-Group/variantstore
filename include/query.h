@@ -17,14 +17,35 @@
 #include <vector>
 #include <map>
 #include <cassert>
-
+#include <iostream>
 #include "index.h"
 #include "variant_graph.h"
 
 std::string REF = "ref";
 
 namespace variantdb {
-	// TODO: check validity of inputs
+
+	typedef std::map <std::string, std::vector <std::string>> AltSamplesMap;
+
+	struct Variant {
+		uint64_t var_pos;
+		std::string ref;
+		std::vector <std::string> alts;
+		AltSamplesMap alt_sample_map;
+	};
+
+	void print_var (Variant *var) {
+		for (auto a=var->alts.begin(); a!=var->alts.end(); a++) {
+			std::cout << var->var_pos << "\t"<< var->ref << "\t";
+			std::cout << *a << "\t";
+			for (auto s=var->alt_sample_map[*a].begin();
+								s != var-> alt_sample_map[*a].end(); s++) {
+				std::cout << (*s) << ",";
+			}
+			std::cout << std::endl;
+		}
+		return;
+	}
 
 	/* ----------------------------------------------------------------------------
 		 Support Func: traverse back until a node containg sample_id is found
@@ -237,14 +258,7 @@ namespace variantdb {
 	}
 
 
-	typedef std::map <std::string, std::vector <std::string>> AltSamplesMap;
 
-	struct Variant {
-		uint64_t var_pos;
-		std::string ref;
-		std::vector <std::string> alts;
-		AltSamplesMap alt_sample_map;
-	};
 
 
 	/* ----------------------------------------------------------------------------
@@ -260,7 +274,7 @@ namespace variantdb {
 		++next_it;
 
 		while (!it.done()) {
-			console->info("Check vertex: {}", (*it)->vertex_id());
+			// console->debug("Check vertex: {}", (*it)->vertex_id());
 			VariantGraph::VariantGraphIterator bfs_it=vg->find((*it)->vertex_id(), 1);
 			++bfs_it;
 			uint32_t num_out_nodes = 0;
@@ -271,7 +285,7 @@ namespace variantdb {
 					++bfs_it;
 					continue;
 				}
-				console->info("Check bfs vertex: {}", (*bfs_it)->vertex_id());
+				// console->debug("Check bfs vertex: {}", (*bfs_it)->vertex_id());
 				num_out_nodes++;
 				//Graph::vertex out_v = (*bfs_it)->vertex_id();
 				std::vector <std::string> sample_ids;
@@ -283,7 +297,7 @@ namespace variantdb {
 					// Deletion
 					if (vg->get_sample_from_vertex_if_exists((*bfs_it)-> vertex_id(),
 																																REF, sample)) {
-						console->info("Found a deletion");
+						// console->debug("Found a deletion");
 						std::string alt = vg->get_sequence(*(*it));
 						//alt = alt.substr(alt.length()-1, 1); // last character
 						alt = "";
@@ -314,7 +328,7 @@ namespace variantdb {
 
 						// Insertion
 						if (next_ref_idx == prev_ref_idx + prev_ref.length()) {
-							console->info("Found an insertion");
+							// console->debug("Found an insertion");
 							std::string ref = prev_ref.substr(prev_ref.length()-1, 1);
 							ref = "";
 							var.ref.assign(ref);
@@ -332,7 +346,7 @@ namespace variantdb {
 							if (vg->get_sample_from_vertex_if_exists((*it)-> vertex_id(),REF,
 																												sample)) {
 								var.var_pos = sample.index();
-								console->info("Found a substitution at {}", var.var_pos);
+								// console->debug("Found a substitution at {}", var.var_pos);
 							} else {
 								console->error("{} is not in the reference path", (*it)->
 																																	vertex_id());
@@ -598,8 +612,9 @@ namespace variantdb {
 	Return all variants  occuring in ref coordinate [pos_x, pos_y)
 	*/
 	std::vector <Variant> get_var_in_ref ( VariantGraph *vg, Index *idx,
-																								const uint64_t pos_x,
-																								const uint64_t pos_y) {
+																				 const uint64_t pos_x,
+																				 const uint64_t pos_y,
+																				 bool print=true) {
 		// traverse in sample's coordinate from pos_x to pos_y
 		// report if the sample's node is a variant node
 		// use next_variant_in_ref()
@@ -612,7 +627,12 @@ namespace variantdb {
 			{
 				cur_pos = std::max(var.var_pos + 1, cur_pos + 1);
 				if (cur_pos < pos_y) {
-					vars.push_back(var);
+					if (print==true) {
+						print_var(&var);
+					}
+					else {
+						vars.push_back(var);
+					}
 				}
 			} else {
 				break;
