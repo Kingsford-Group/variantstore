@@ -18,7 +18,7 @@
 #include "index.h"
 #include "variant_graph.h"
 #include "progopts.h"
-
+#include "sys/time.h"
 
 using namespace variantdb;
 
@@ -68,8 +68,17 @@ std::vector<std::tuple<uint64_t, uint64_t>> read_regions (std::string region)
 	while (true) {
     std::string token = region.substr(0, pos);
 		auto pos2 = token.find(':');
-    uint64_t beg = std::stoi(token.substr(0, pos2));
-		uint64_t end = std::stoi(token.substr(pos2+1));
+    uint64_t beg = 0;
+		uint64_t end = 0;
+
+		if (pos2 == std::string::npos) {
+			beg = std::stoi(token);
+		}
+		else {
+			end = std::stoi(token.substr(pos2+1));
+			beg = std::stoi(token.substr(0, pos2));
+		}
+
 		regions.push_back (std::make_tuple(beg, end));
 
 		if (pos == std::string::npos)
@@ -87,7 +96,19 @@ query_main ( QueryOpts& opts )
 	console->info("Loading Index ...");
 	Index idx(opts.prefix);
 	console->info("Loading variant graph ...");
-	VariantGraph vg(opts.prefix, READ_INDEX_ONLY);
+	enum READ_TYPE mode;
+	if (opts.mode == 0)
+	{
+		mode = READ_INDEX_ONLY;
+		console->info("Read index only ..");
+	}
+	else
+	{
+		mode = READ_COMPLETE_GRAPH;
+		console->info("Read complete graph ..");
+	}
+
+	VariantGraph vg(opts.prefix, mode);
 	console->info("Graph stats:");
 	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
 								vg.get_chr(), vg.get_num_vertices() , vg.get_num_edges(),
@@ -95,45 +116,67 @@ query_main ( QueryOpts& opts )
 
 
 	if (opts.type == 1) {
-		console->info("Get variants in ref coordinate ...");
-		std::vector<std::tuple<uint64_t, uint64_t>> regions = read_regions(opts.region);
-
-		for (auto it = regions.begin(); it != regions.end(); it++) {
-			console->info("Query region {}:{}", std::get<0>(*it), std::get<1>(*it));
-			get_var_in_ref(&vg, &idx, std::get<0>(*it), std::get<1>(*it), true);
-		}
-
-
+		console->info("1. Get sample's sequence in ref coordinate ...");
+	}
+	if (opts.type == 2) {
+		console->info("2. Get sample's sequence in sample's coordinate ...");
+	}
+	if (opts.type == 3) {
+		console->info("3. Return closest mutation in ref coordinate. ...");
+	}
+	if (opts.type == 4) {
+		console->info("4. Get sample's variants in ref coordinate ...");
+	}
+	if (opts.type == 5) {
+		console->info("5. Get sample's variants in sample coordinate ...");
+	}
+	if (opts.type == 6) {
+		console->info("6. Get variants in ref coordinate. ...");
 	}
 
-	// if (opts.type == 2) {
-	// 	console->info("Get sample's variants in ref coordinate ...");
-	// 	std::vector <Variant> vars = get_sample_var_in_ref(&vg, &idx, opts.begin, opts.end, opts.sample_name);
-	// 	for (auto it = vars.begin(); it != vars.end(); it++) {
-	// 		print_var(&(*it));
-	// 	}
-	// }
-	//
-	// if (opts.type == 3) {
-	// 	console->info("Get the number of variants in sample coordinate ...");
-	// 	std::vector <Variant> vars = get_sample_var_in_sample(&vg, &idx, opts.begin, opts.end, opts.sample_name);
-	// 	// for (auto it = vars.begin(); it != vars.end(); it++) {
-	// 	// 	print_var(&(*it));
-	// 	// }
-	// 	std::cout << vars.size();
-	// }
-	// if (opts.type == 4) {
-	// 	console->info("Get sample's sequence in sample coordinate ...");
-	// 	std::string s= query_sample_from_sample(&vg, &idx, opts.begin, opts.end, opts.sample_name);
-	// 	std::cout << s;
-	// }
-	// if (opts.type == 5) {
-	// 	console->info("Return closest mutation in ref coordinate ...");
-	// 	Variant var;
-	// 	closest_var(&vg, &idx, opts.begin, var);
-	// 	print_var(&var);
-	// }
+	std::vector<std::tuple<uint64_t, uint64_t>> regions = read_regions(opts.region);
+
+	uint32_t query_num=0;
+	struct timeval start, end;
+	struct timezone tzp;                                                    gettimeofday(&start, &tzp);
 
 
+	for (auto it = regions.begin(); it != regions.end(); it++) {
+		uint32_t max = 600;
+		uint32_t id = rand() % max + 1;
+		std::string sample_id = vg.get_sample_name(id);
+		opts.sample_name = sample_id;
+
+		console->info("Query region {}:{}", std::get<0>(*it), std::get<1>(*it));
+		if (opts.type == 1) {
+			query_sample_from_ref(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.sample_name, opts.verbose, opts.outfile);
+		}
+		if (opts.type == 2) {
+			query_sample_from_sample(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.sample_name, opts.verbose, opts.outfile);
+		}
+		if (opts.type == 3) {
+			Variant var;
+			closest_var(&vg, &idx, std::get<0>(*it), var, opts.verbose, opts.outfile);
+		}
+		if (opts.type == 4) {
+			get_sample_var_in_sample(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.sample_name, opts.verbose, opts.outfile);
+		}
+		if (opts.type == 5) {
+			get_sample_var_in_ref(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.sample_name, opts.verbose, opts.outfile);
+		}
+		if (opts.type == 6) {
+			get_var_in_ref(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.verbose, opts.outfile);
+		}
+
+		query_num += 1;
+		if ((query_num == 10) || (query_num == 100) || (query_num == 100))
+		{
+			gettimeofday(&end, &tzp);
+			std::string dsc = "Query" ;
+			dsc.append(std::to_string(query_num));
+			dsc.append(": ");
+			print_time_elapsed(dsc, &start, &end);
+		}
+	}
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

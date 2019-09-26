@@ -18,6 +18,7 @@
 #include <map>
 #include <cassert>
 #include <iostream>
+#include <fstream>
 #include "index.h"
 #include "variant_graph.h"
 
@@ -34,18 +35,23 @@ namespace variantdb {
 		AltSamplesMap alt_sample_map;
 	};
 
-	void print_var (Variant *var) {
+	void print_var (Variant *var, std::string outfile) {
+		ofstream out;
+		out.open(outfile, ios::app);
+
 		for (auto a=var->alts.begin(); a!=var->alts.end(); a++) {
-			std::cout << var->var_pos << "\t"<< var->ref << "\t";
-			std::cout << *a << "\t";
+			out << var->var_pos << "\t"<< var->ref << "\t";
+			out << *a << "\t";
 			for (auto s=var->alt_sample_map[*a].begin();
 								s != var-> alt_sample_map[*a].end(); s++) {
-				std::cout << (*s) << ",";
+				out << (*s) << ",";
 			}
-			std::cout << std::endl;
+			out << std::endl;
 		}
+		out.close();
 		return;
 	}
+
 
 	/* ----------------------------------------------------------------------------
 		 Support Func: traverse back until a node containg sample_id is found
@@ -55,7 +61,8 @@ namespace variantdb {
 																							const uint64_t pos,
 																							const string sample_id,
 																							uint64_t &ref_pos,
-																							uint64_t &sample_pos) {
+																							uint64_t &sample_pos)
+	{
 		// the node right before cur_pos
 		uint64_t cur_pos = pos;
 		uint64_t cur_ref_node_idx;
@@ -115,7 +122,9 @@ namespace variantdb {
 		 */
 	std::string query_sample_from_ref ( VariantGraph *vg, Index *idx,
 																			const uint64_t pos_x, const uint64_t pos_y,
-																			const string sample_id) {
+																			const string sample_id,
+																			bool print=false, std::string outfile="")
+	{
 		std::string seq = "";
 		uint64_t ref_pos;
 		uint64_t sample_pos;
@@ -175,6 +184,14 @@ namespace variantdb {
 			ref_pos = next_ref_pos; // update ref_pos
 		}
 
+		if (print == true)
+		{
+			ofstream out;
+			out.open(outfile);
+			out << seq << std::endl;
+			out.close();
+		}
+
 		return seq;
 	} // query_sample_from_ref()
 
@@ -185,7 +202,9 @@ namespace variantdb {
 	std::string query_sample_from_sample ( VariantGraph *vg, Index *idx,
 																				 const uint64_t pos_x,
 																				 const uint64_t pos_y,
-																				 const string sample_id ) {
+																				 const string sample_id,
+																			 	 bool print=false, std::string outfile="")
+	{
 		std::string seq = "";
 		uint64_t ref_pos;
 		uint64_t sample_pos;
@@ -232,6 +251,15 @@ namespace variantdb {
 			++it;
 			sample_pos = next_sample_pos;
 		}
+
+		if (print == true)
+		{
+			ofstream out;
+			out.open(outfile);
+			out << seq << std::endl;
+			out.close();
+		}
+
 		return seq;
 	} // query_sample_from_sample()
 
@@ -266,7 +294,8 @@ namespace variantdb {
 		 */
 
 	bool next_variant_in_ref ( VariantGraph *vg, Index *idx, const uint64_t pos,
-														 Variant &var) {
+														 Variant &var)
+	{
 		bool found_var = false;
 		Graph::vertex v = idx->find(pos); // the node before pos
 		VariantGraph::VariantGraphPathIterator it = vg->find(v, REF);
@@ -373,7 +402,8 @@ namespace variantdb {
 		 Find a variant near given position
 		 */
 	bool closest_var ( VariantGraph *vg, Index *idx, const uint64_t pos,
-										 Variant &var) {
+										 Variant &var, bool print=false, std::string outfile="")
+	{
 		Variant next_var;
 
 		if (next_variant_in_ref(vg, idx, pos, next_var)) {
@@ -400,6 +430,9 @@ namespace variantdb {
 			var = next_var;
 		}
 
+		if (print==true)
+			print_var(&var, outfile);
+
 		return true;
 	}
 
@@ -411,7 +444,8 @@ namespace variantdb {
 	std::vector <Variant> get_sample_var_in_sample ( VariantGraph *vg, Index *idx,
 																									 const uint64_t pos_x,
 																									 const uint64_t pos_y,
-																									 const std::string sample_id)
+																									 const std::string sample_id,
+																								 	 bool print=false, std::string outfile="")
 	{
 		// traverse in sample's coordinate from pos_x to pos_y
 		// report if the sample's node is a variant node
@@ -505,7 +539,11 @@ namespace variantdb {
 				var.ref = cur_ref;
 				var.var_pos = ref_pos;
 				get_samples((*it), vg, var.alt_sample_map[alt]);
-				vars.push_back(var);
+
+				if (print==true)
+					print_var(&var, outfile);
+				else
+					vars.push_back(var);
 			}
 
 			cur_ref = next_ref;
@@ -523,9 +561,10 @@ namespace variantdb {
 		 Return all variants in sample_id occuring in ref coordinate [pos_x, pos_y)
 		 */
 	std::vector <Variant> get_sample_var_in_ref ( VariantGraph *vg, Index *idx,
-	 																									 const uint64_t pos_x,
-	 																									 const uint64_t pos_y,
-	 																									 const std::string sample_id)
+	 																							const uint64_t pos_x,
+	 																							const uint64_t pos_y,
+	 																							const std::string sample_id,
+																							  bool print=false, std::string outfile="")
 	{
 		// traverse in sample's coordinate from pos_x to pos_y
 		// report if the sample's node is a variant node
@@ -594,7 +633,10 @@ namespace variantdb {
 				var.ref = cur_ref;
 				var.var_pos = ref_pos;
 				get_samples((*it), vg, var.alt_sample_map[alt]);
-				vars.push_back(var);
+				if (print==true)
+					print_var(&var, outfile);
+				else
+					vars.push_back(var);
 			}
 
 			cur_ref = next_ref;
@@ -614,7 +656,7 @@ namespace variantdb {
 	std::vector <Variant> get_var_in_ref ( VariantGraph *vg, Index *idx,
 																				 const uint64_t pos_x,
 																				 const uint64_t pos_y,
-																				 bool print=true) {
+																				 bool print=false, std::string outfile="") {
 		// traverse in sample's coordinate from pos_x to pos_y
 		// report if the sample's node is a variant node
 		// use next_variant_in_ref()
@@ -627,12 +669,10 @@ namespace variantdb {
 			{
 				cur_pos = std::max(var.var_pos + 1, cur_pos + 1);
 				if (cur_pos < pos_y) {
-					if (print==true) {
-						print_var(&var);
-					}
-					else {
+					if (print==true)
+						print_var(&var, outfile);
+					else
 						vars.push_back(var);
-					}
 				}
 			} else {
 				break;
@@ -651,7 +691,9 @@ namespace variantdb {
 	std::vector <std::string> samples_has_var ( VariantGraph *vg, Index *idx,
 																							const uint64_t pos, const
 																							std::string ref, const
-																							std::string alt) {
+																							std::string alt,
+																						  bool print=false, std::string outfile="")
+	{
 		Variant var;
 		std::vector <std::string> samples;
 
@@ -668,6 +710,12 @@ namespace variantdb {
 											 var.alt_sample_map[alt].end());
 				break;
 			}
+		}
+
+		if (print==true) {
+			for (auto i = samples.begin(); i != samples.end(); ++i)
+	    	std::cout << *i << ' ';
+			std::cout << std::endl;
 		}
 
 		return samples;

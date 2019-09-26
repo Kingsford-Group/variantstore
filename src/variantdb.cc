@@ -87,16 +87,27 @@ main ( int argc, char *argv[] ) {
 									"output directory",
 									required("-t","--type") & value("query-type", query_opt.type) %
 									"types of query. \n \
-									1. Get variants in ref coordinate. \n \
-									2. Get the number of variants in sample coordinate. \n \
-									3. Get sample's sequence in sample coordinate \n \
-									4. Return closest mutation in ref coordinate.",
-									required("-b","--begin") & value("begin", query_opt.begin) %
-									"starting position",
-									required("-e","--end") & value("end", query_opt.end) %
-									"ending position",
+                  1. Get sample's sequence in ref coordinate. \n \
+                  2. Get sample's sequence in sample's coordinate. \n \
+                  3. Return closest mutation in ref coordinate. \n \
+									4. Get sample's variants in ref coordinate. \n \
+                  5. Get sample's variants in sample coordinate. \n \
+                  6. Get variants in ref coordinate. \n \
+									7. (TBD)Return samples with a given mutation.",
+									// required("-b","--begin") & value("begin", query_opt.begin) %
+									// "starting position",
+									// required("-e","--end") & value("end", query_opt.end) %
+									// "ending position",
+                  required("-r","--region") & value("region", query_opt.region) %
+                  "region in format <start>:<end>, regions separated by ','",
+                  required("-o","--output_file") & value("outfile", query_opt.outfile) %
+                  "output_file",
+                  required("-m","--mode") & value("mode", query_opt.mode) %
+                  "READ_INDEX_ONLY: 0, READ_COMPLETE_GRAPH:1",
 									option("-s","--sample-name") & value("sample-name", query_opt.sample_name) %
-									"sample name"
+									"sample name",
+                  option("-v","--verbose") & value("verbose", query_opt.verbose) %
+									"print vcf"
 						 );
 
 	auto cli = ((construct_mode | query_mode |
