@@ -87,6 +87,7 @@ std::vector<std::tuple<uint64_t, uint64_t>> read_regions (std::string region)
 		region = region.substr(pos + 1);
 		pos = region.find(',');
 	}
+	std::sort(regions.begin(), regions.end());
 	return regions;
 }
 
