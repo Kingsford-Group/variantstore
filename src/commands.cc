@@ -170,7 +170,7 @@ query_main ( QueryOpts& opts )
 		}
 
 		query_num += 1;
-		if ((query_num == 10) || (query_num == 100) || (query_num == 100))
+		if ((query_num == 10) || (query_num == 100) || (query_num == 1000))
 		{
 			gettimeofday(&end, &tzp);
 			std::string dsc = "Query" ;
