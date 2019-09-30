@@ -106,7 +106,7 @@ main ( int argc, char *argv[] ) {
                   "READ_INDEX_ONLY: 0, READ_COMPLETE_GRAPH:1",
 									option("-s","--sample-name") & value("sample-name", query_opt.sample_name) %
 									"sample name",
-                  option("-v","--verbose") & value("verbose", query_opt.verbose) %
+                  option("-v","--verbose").set(query_opt.verbose, true) %
 									"print vcf"
 						 );
 
