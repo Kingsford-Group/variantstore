@@ -100,10 +100,10 @@ main ( int argc, char *argv[] ) {
 									// "ending position",
                   required("-r","--region") & value("region", query_opt.region) %
                   "region in format <start>:<end>, regions separated by ','",
-                  required("-o","--output_file") & value("outfile", query_opt.outfile) %
-                  "output_file",
                   required("-m","--mode") & value("mode", query_opt.mode) %
                   "READ_INDEX_ONLY: 0, READ_COMPLETE_GRAPH:1",
+                  option("-o","--output_file") & value("outfile", query_opt.outfile) %
+                  "output_file",
 									option("-s","--sample-name") & value("sample-name", query_opt.sample_name) %
 									"sample name",
                   option("-v","--verbose") & value("verbose", query_opt.verbose) %

@@ -33,8 +33,8 @@ r2=${r2::-1}
 if (($type == 3))
 then
   echo "Benchmarking query type $type"
-  ./variantdb query -t $type -p $vdb_file -r $r2 -v 1 -m $mode -o temp.txt
+  ./variantdb query -t $type -p $vdb_file -r $r2 -m $mode
 else
   echo "Benchmarking query type $type"
-  ./variantdb query -t $type -p $vdb_file -r $r1 -v 1 -m $mode -o temp.txt
+  ./variantdb query -t $type -p $vdb_file -r $r1 -m $mode
 fi

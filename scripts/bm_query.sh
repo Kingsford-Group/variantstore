@@ -4,7 +4,7 @@ pct="$2"
 mode="0" #READ_INDEX_ONLY
 # mode="1" #READ_COMPLETE_GRAPH
 len="52420579"
-file="../../ppandey/variantdb/vdb_v4/chr22/"
+file="../../ppandey/variantdb/vdb_v4/chr22"
 echo "Benchmark for $num queries of query length 1/$pct"
 # cd /mnt/disk34/user/yinjieg/bcftools
 # echo "[bcftools]"

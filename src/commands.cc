@@ -108,6 +108,7 @@ query_main ( QueryOpts& opts )
 		console->info("Read complete graph ..");
 	}
 
+
 	VariantGraph vg(opts.prefix, mode);
 	console->info("Graph stats:");
 	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
@@ -141,7 +142,8 @@ query_main ( QueryOpts& opts )
 	struct timezone tzp;                                                    gettimeofday(&start, &tzp);
 
 
-	for (auto it = regions.begin(); it != regions.end(); it++) {
+	for (auto it = regions.begin(); it != regions.end(); it++)
+	{
 		uint32_t max = 600;
 		uint32_t id = rand() % max + 1;
 		std::string sample_id = vg.get_sample_name(id);
@@ -169,7 +171,7 @@ query_main ( QueryOpts& opts )
 		}
 
 		query_num += 1;
-		if ((query_num == 10) || (query_num == 100) || (query_num == 100))
+		if ((query_num == 10) || (query_num == 100) || (query_num == 1000))
 		{
 			gettimeofday(&end, &tzp);
 			std::string dsc = "Query" ;

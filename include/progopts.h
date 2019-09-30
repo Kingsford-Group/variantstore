@@ -24,12 +24,10 @@ class QueryOpts {
 		std::string prefix;
 		uint32_t type;
 		uint32_t mode;
-		// uint64_t begin;
-		// uint64_t end;
 		std::string region;
-		bool verbose;
+		bool verbose = 0;
 		std::string sample_name;
-		std::string outfile;
+		std::string outfile="";
 };
 
 #endif //__PROG_OPTS__
