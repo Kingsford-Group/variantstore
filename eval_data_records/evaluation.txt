@@ -32,4 +32,6 @@ VariantDB commands:
 /usr/bin/time ./variantdb construct -r ../vcfdata/ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.Y.fa -v ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrY.phase3_integrated_v2a.20130502.genotypes.vcf.gz -p vdb_v2/chrY/
 (seq 1 22;) | parallel -j 24 /usr/bin/time ./variantdb construct -r ../vcfdata/ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.{}.fa -v ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz -p vdb_v2/chr{}
 
+VariantDB query:
+./scripts/bm_vdb_query.sh vdb_v4/chr22/ <10,100,1000> 10 855078 <1--6> 1 HG01872
 

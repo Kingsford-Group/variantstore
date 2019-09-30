@@ -79,6 +79,14 @@ main ( int argc, char *argv[] ) {
 									"output directory"
 						 );
 
+	auto ensure_sample_name = [](const QueryOpts& opts) -> bool {
+		if (opts.type == 3 || opts.type == 7)
+			return true;
+		else if (opts.sample_name == "")
+			return false;
+		return false;
+	};
+
 	auto query_mode = (
 									command("query").set(selected, mode::query),
 									required("-p","--output-prefix") & value(
@@ -104,7 +112,9 @@ main ( int argc, char *argv[] ) {
                   "READ_INDEX_ONLY: 0, READ_COMPLETE_GRAPH:1",
                   option("-o","--output_file") & value("outfile", query_opt.outfile) %
                   "output_file",
-									option("-s","--sample-name") & value("sample-name", query_opt.sample_name) %
+									option("-s","--sample-name") & value("sample-name",
+																											 query_opt.sample_name)
+										%
 									"sample name",
                   option("-v","--verbose").set(query_opt.verbose, true) %
 									"print vcf"
@@ -131,7 +141,17 @@ main ( int argc, char *argv[] ) {
   if(res) {
 		switch(selected) {
 			case mode::construct: construct_main(construct_opt); break;
-			case mode::query: query_main(query_opt); break;
+			case mode::query: 
+				try {
+					ensure_sample_name(query_opt);
+				} catch (std::exception& e) {
+					std::cout << "\n\nParsing command line failed with exception: " <<
+						e.what() << "\n";
+					std::cout << "\n\n";
+					std::cout << make_man_page(cli, "variantdb");
+					return 1;
+				}
+				query_main(query_opt); break;
 			case mode::help:  break;
 		}
   } else {
