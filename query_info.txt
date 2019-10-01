@@ -1,6 +1,6 @@
 Queries:
 -------------------------------------------------------------------------------
-Function: query_sample_from_ref
+1. Function: query_sample_from_ref
 Given: starting position (pos_x), ending position (pos_y), patient's id (sample_id),
 Return: the sequence of the patient's genome from pos_x to pos_y (exclusively) in the reference coordinate.
 Implementation: done.
@@ -8,7 +8,7 @@ Manual test: done.
 Correctness test: TBD.
 
 -------------------------------------------------------------------------------
-Function: query_sample_from_sample
+2. Function: query_sample_from_sample
 Given: starting position (pos_x), ending position (pos_y), patient's id (sample_id),
 Return: the sequence of patient's genome from pos_x to pos_y (exclusively) in the reference coordinate.
 Implementation: done.
@@ -16,7 +16,7 @@ Manual test: done.
 Correctness test: done on small sample without consecutive mutations.
 
 -------------------------------------------------------------------------------
-Function: closest_var
+3. Function: closest_var
 Given: a position (pos), 
 Return: the variant in the reference that is closest to the pos.
 Implementation: TBD.
@@ -24,33 +24,35 @@ Manual test: TBD.
 Correctness test: TBD.
 
 -------------------------------------------------------------------------------
-Function: get_sample_var_in_sample
+4. Function: get_sample_var_in_ref
+Given: starting position (pos_x), ending position (pos_y), patient's id (sample_id),
+Return: the variants in the patient's genome from pos_x to pos_y (exclusively) in the reference's coordinate.
+Implementation: done.
+Manual test: done.
+Correctness test: TBD.
+
+-------------------------------------------------------------------------------
+5. Function: get_sample_var_in_sample
 Given: starting position (pos_x), ending position (pos_y), patient's id (sample_id),
 Return: the variants in the patient's genome from pos_x to pos_y (exclusively) in the patient's coordinate.
 Implementation: done.
 Manual test: done.
 Correctness test: TBD.
 
--------------------------------------------------------------------------------
-Function: get_sample_var_in_ref
-Given: starting position (pos_x), ending position (pos_y), patient's id (sample_id),
-Return: the variants in the patient's genome from pos_x to pos_y (exclusively) in the reference's coordinate.
-Implementation: TBD.
-Manual test: TBD.
-Correctness test: TBD.
+
 
 -------------------------------------------------------------------------------
-Function: get_var_in_ref
+6. Function: get_var_in_ref
 Given: starting position (pos_x), ending position (pos_y), 
 Return: all the variants from pos_x to pos_y (exclusively) in the reference's coordinate.
-Implementation: TBD.
-Manual test: TBD.
+Implementation: done.
+Manual test: done.
 Correctness test: TBD.
 
 -------------------------------------------------------------------------------
-Function: samples_has_var
+7. Function: samples_has_var
 Given: a variant (pos in the reference coordinate, ref sequence, alt sequence), 
 Return: all the samples that have such variant.
-Implementation: TBD.
-Manual test: TBD.
+Implementation: done.
+Manual test: done.
 Correctness test: TBD.
