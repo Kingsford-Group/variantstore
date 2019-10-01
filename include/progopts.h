@@ -25,9 +25,11 @@ class QueryOpts {
 		uint32_t type;
 		uint32_t mode;
 		std::string region;
-		bool verbose = 0;
+		bool verbose;
 		std::string sample_name;
 		std::string outfile="";
+		std::string alt;
+		std::string ref;
 };
 
 #endif //__PROG_OPTS__

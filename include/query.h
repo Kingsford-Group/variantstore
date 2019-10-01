@@ -685,7 +685,7 @@ namespace variantdb {
 
 
 	/* ----------------------------------------------------------------------------
-	// Given a variant (ref & alt) and the position
+	// Given a variyinjie@yinjie-ubuntuant (ref & alt) and the position
 	// Return samples has such variant in the reference coordinate
 	*/
 	std::vector <std::string> samples_has_var ( VariantGraph *vg, Index *idx,
@@ -712,10 +712,22 @@ namespace variantdb {
 			}
 		}
 
+		// for (auto i = samples.begin(); i != samples.end(); ++i)
+		// {
+		// 	std::cout << *i << " ";
+		// }
+
 		if (print==true) {
+			ofstream out;
+			out.open(outfile);
+
 			for (auto i = samples.begin(); i != samples.end(); ++i)
-	    	std::cout << *i << ' ';
-			std::cout << std::endl;
+			{
+				out << *i << ' ';
+			}
+
+			out << std::endl;
+			out.close();
 		}
 
 		return samples;

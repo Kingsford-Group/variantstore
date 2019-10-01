@@ -135,6 +135,9 @@ query_main ( QueryOpts& opts )
 	if (opts.type == 6) {
 		console->info("6. Get variants in ref coordinate. ...");
 	}
+	if (opts.type == 7) {
+		console->info("7. Get samples have given variant. ...");
+	}
 
 	std::vector<std::tuple<uint64_t, uint64_t>> regions = read_regions(opts.region);
 
@@ -169,6 +172,9 @@ query_main ( QueryOpts& opts )
 		}
 		if (opts.type == 6) {
 			get_var_in_ref(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.verbose, opts.outfile);
+		}
+		if (opts.type == 7) {
+			samples_has_var(&vg, &idx, std::get<0>(*it), opts.ref, opts.alt, opts.verbose, opts.outfile);
 		}
 
 		query_num += 1;

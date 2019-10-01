@@ -101,11 +101,7 @@ main ( int argc, char *argv[] ) {
 									4. Get sample's variants in ref coordinate. \n \
                   5. Get sample's variants in sample coordinate. \n \
                   6. Get variants in ref coordinate. \n \
-									7. (TBD)Return samples with a given mutation.",
-									// required("-b","--begin") & value("begin", query_opt.begin) %
-									// "starting position",
-									// required("-e","--end") & value("end", query_opt.end) %
-									// "ending position",
+									7. Return samples with a given mutation.",
                   required("-r","--region") & value("region", query_opt.region) %
                   "region in format <start>:<end>, regions separated by ','",
                   required("-m","--mode") & value("mode", query_opt.mode) %
@@ -116,6 +112,12 @@ main ( int argc, char *argv[] ) {
 																											 query_opt.sample_name)
 										%
 									"sample name",
+                  option("-a","--alt-seq") & value("alt-seq",
+																											 query_opt.alt) %
+									"alternative sequence",
+                  option("-b","--ref-seq") & value("ref-seq",
+																											 query_opt.ref) %
+									"reference sequence",
                   option("-v","--verbose").set(query_opt.verbose, true) %
 									"print vcf"
 						 );
@@ -141,7 +143,7 @@ main ( int argc, char *argv[] ) {
   if(res) {
 		switch(selected) {
 			case mode::construct: construct_main(construct_opt); break;
-			case mode::query: 
+			case mode::query:
 				try {
 					ensure_sample_name(query_opt);
 				} catch (std::exception& e) {
@@ -150,7 +152,10 @@ main ( int argc, char *argv[] ) {
 					std::cout << "\n\n";
 					std::cout << make_man_page(cli, "variantdb");
 					return 1;
-				}
+				}// required("-b","--begin") & value("begin", query_opt.begin) %
+									// "starting position",
+									// required("-e","--end") & value("end", query_opt.end) %
+									// "ending position",
 				query_main(query_opt); break;
 			case mode::help:  break;
 		}
