@@ -150,7 +150,7 @@ query_main ( QueryOpts& opts )
 		std::string sample_id = vg.get_sample_name(id);
 		opts.sample_name = sample_id;
 
-		console->info("Query region {}:{}", std::get<0>(*it), std::get<1>(*it));
+		console->debug("Query region {}:{}", std::get<0>(*it), std::get<1>(*it));
 		if (opts.type == 1) {
 			query_sample_from_ref(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.sample_name, opts.verbose, opts.outfile);
 		}
