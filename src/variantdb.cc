@@ -114,10 +114,10 @@ main ( int argc, char *argv[] ) {
 									"sample name",
                   option("-a","--alt-seq") & value("alt-seq",
 																											 query_opt.alt) %
-									"alternative sequence",
+									"alternative sequences, separated by ','",
                   option("-b","--ref-seq") & value("ref-seq",
 																											 query_opt.ref) %
-									"reference sequence",
+									"reference sequences, separated by ','",
                   option("-v","--verbose").set(query_opt.verbose, true) %
 									"print vcf"
 						 );
