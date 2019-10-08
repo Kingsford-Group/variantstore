@@ -44,7 +44,7 @@ namespace variantdb {
     for (int i = 0; i < v->s_info_size(); i++) {
 			//const VariantGraphVertex::sample_info& s = v->s_info(i);
 			//  DEBUG("Node " << v->vertex_id() << " contains sample " << s.sample_id());
-			if (vg->get_sample_id(v->sampleclass_id(), i) == 0) {
+			if (vg->get_sample_id(*v, i) == 0) {
 				return true;
 			}
 		}
@@ -58,7 +58,7 @@ namespace variantdb {
 			std::to_string(static_cast<int>(v->length())) + "\n(";
     for (int i = 0; i < v->s_info_size(); ++i) {
 			const VariantGraphVertex::sample_info& s = v->s_info(i);
-			uint32_t s_id = vg->get_sample_id(v->sampleclass_id(), i);
+			uint32_t s_id = vg->get_sample_id(*v, i);
 			samples += vg->get_sample_name(s_id) + " i:" +
 				std::to_string(static_cast<int>(s.index()));
 			if (i < v->s_info_size() - 1)
