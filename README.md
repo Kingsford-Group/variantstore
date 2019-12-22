@@ -22,7 +22,8 @@ API
 
 Build
 -------
-- [protobuf](https://github.com/protocolbuffers/protobuf)
+Library dependencies (given version or higher):
+- [protobuf 3.7.1](https://github.com/protocolbuffers/protobuf)
 - [sdsl-lite](https://github.com/simongog/sdsl-lite)
 
 ```bash
