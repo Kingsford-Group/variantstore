@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # vcf file path:
-vdb_file="$1"
+vs_file="$1"
 len="$2"
 query_len="$3"
 mode="$4"
@@ -30,12 +30,12 @@ r2=${r2::-1}
 
 #set -x
 #echo "Benchmarking query type 1"
-#./variantdb query -t 1 -p $vdb_file -r $r1 -m $mode -s $sample -o temp.txt
+#./variantstore query -t 1 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt
 #echo "Benchmarking query type 2"
-#./variantdb query -t 2 -p $vdb_file -r $r1 -m $mode -s $sample -o temp.txt
+#./variantstore query -t 2 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt
 #echo "Benchmarking query type 4"
-#./variantdb query -t 4 -p $vdb_file -r $r1 -m $mode -s $sample -o temp.txt
+#./variantstore query -t 4 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt
 #echo "Benchmarking query type 5"
-#./variantdb query -t 5 -p $vdb_file -r $r1 -m $mode -s $sample -o temp.txt
+#./variantstore query -t 5 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt
 echo "Benchmarking query type 6"
-./variantdb query -t 6 -p $vdb_file -r $r1 -m $mode -s $sample -o temp.txt
+./variantstore query -t 6 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt

@@ -23,7 +23,7 @@
 
 #include "graph.h"
 
-using namespace variantdb;
+using namespace variantstore;
 std::shared_ptr<spdlog::logger> console;
 
 int test_correctness(const Graph& graph, std::unordered_map<uint32_t,

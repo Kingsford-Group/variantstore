@@ -22,7 +22,7 @@
 #include "util.h"
 #include "variant_graph.h"
 
-namespace variantdb {
+namespace variantstore {
 	class Index {
 		// A static index is build based on given variant graph
 		// An Index supports query node(in reference) at a given position

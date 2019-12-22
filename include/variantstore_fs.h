@@ -1,7 +1,7 @@
 /*
  * ============================================================================
  *
- *       Filename:  variantdb_fs.h
+ *       Filename:  variantstore_fs.h
  *
  *         Author:  Prashant Pandey (), ppandey2@cs.cmu.edu
  *   Organization:  Carnegie Mellon University
@@ -9,13 +9,13 @@
  * ============================================================================
  */
 
-#ifndef __VARIANTDB_FS_HPP__
-#define __VARIANTDB_FS_HPP__
+#ifndef __VARIANTSTORE_FS_HPP__
+#define __VARIANTSTORE_FS_HPP__
 
 #include <vector>
 #include <string>
 
-namespace variantdb {
+namespace variantstore {
 	namespace fs {
 		// Taken from
 		// http://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
@@ -30,4 +30,4 @@ namespace variantdb {
 	}
 }
 
-#endif //__VARIANTDB_FS_HPP__
+#endif //__VARIANTSTORE_FS_HPP__

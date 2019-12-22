@@ -1,7 +1,7 @@
 /*
  * ============================================================================
  *
- *       Filename:  variantdb_fs.cc
+ *       Filename:  variantstore_fs.cc
  *
  *         Author:  Prashant Pandey (), ppandey2@cs.cmu.edu
  *   Organization:  Carnegie Mellon University
@@ -9,13 +9,13 @@
  * ============================================================================
  */
 
-#include "variantdb_fs.h"
+#include "variantstore_fs.h"
 #include <sys/stat.h>
 #include <iostream>
 #include <algorithm>
 #include <dirent.h>
 
-namespace variantdb {
+namespace variantstore {
   namespace fs {
 
 		bool has_suffix(const std::string& s, const std::string& suffix)

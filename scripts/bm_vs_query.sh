@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # vcf file path:
-vdb_file="$1"
+vs_file="$1"
 num="$2"
 query_len="$3"
 len="$4"
@@ -34,8 +34,8 @@ set -x
 if (($type == 3))
 then
   echo "Benchmarking query type $type"
-  ./variantdb query -t $type -p $vdb_file -r $r2 -m $mode -o temp.txt
+  ./variantstore query -t $type -p $vs_file -r $r2 -m $mode -o temp.txt
 else
   echo "Benchmarking query type $type"
-  ./variantdb query -t $type -p $vdb_file -r $r1 -m $mode -s $sample -o temp.txt
+  ./variantstore query -t $type -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt
 fi

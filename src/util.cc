@@ -27,7 +27,7 @@
 
 #include "util.h"
 
-namespace variantdb {
+namespace variantstore {
 	/*return the integer representation of the base */
 	char map_int(uint8_t base) {
 		switch(base) {

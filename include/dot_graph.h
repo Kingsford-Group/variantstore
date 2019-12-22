@@ -37,9 +37,9 @@
 *
 * }
 */
-using namespace variantdb;
+using namespace variantstore;
 
-namespace variantdb {
+namespace variantstore {
   bool is_ref_node(const VariantGraph *vg, const VariantGraphVertex* v) {
     for (int i = 0; i < v->s_info_size(); i++) {
 			//const VariantGraphVertex::sample_info& s = v->s_info(i);

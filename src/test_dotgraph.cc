@@ -14,7 +14,7 @@
 #include "index.h"
 #include "variant_graph.h"
 
-using namespace variantdb;
+using namespace variantstore;
 std::shared_ptr<spdlog::logger> console;
 
 void print_index_info(const Index &idx, uint64_t len)

@@ -24,7 +24,7 @@
 
 #include "gqf_cpp.h"
 
-namespace variantdb {
+namespace variantstore {
 
 #define DEFAULT_SIZE (1ULL << 25)
 #define KEYBITS 40

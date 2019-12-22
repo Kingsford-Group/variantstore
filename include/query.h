@@ -24,7 +24,7 @@
 
 std::string REF = "ref";
 
-namespace variantdb {
+namespace variantstore {
 
 	typedef std::map <std::string, std::vector <std::string>> AltSamplesMap;
 

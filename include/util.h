@@ -40,7 +40,7 @@ extern std::shared_ptr<spdlog::logger> console;
 	{ std::cout << x << std::endl; } \
 } while (0)
 
-namespace variantdb {
+namespace variantstore {
 	enum DNA_MAP {A, C, T, G, N};  // A=0, C=1, T=2, G=3, N=4
 	char map_int(uint8_t base);
 	uint8_t map_base(char base);

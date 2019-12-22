@@ -1,7 +1,7 @@
 #!/bin/bash
 # Author: Yinjie Gao, yinjieg@andrew.cmu.edu
 # THis is the query benchmark using bcftools
-# equivalent to variantdb function -- get_var_in_ref
+# equivalent to variantstore function -- get_var_in_ref
 
 # vcf file path:
 vcf="$1"

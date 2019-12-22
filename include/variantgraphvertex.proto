@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package variantdb;
+package variantstore;
 
 // structure of vertex in variant graph
 message VariantGraphVertex {

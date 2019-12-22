@@ -21,7 +21,7 @@
 #include "dot_graph.h"
 #include "query.h"
 
-using namespace variantdb;
+using namespace variantstore;
 std::shared_ptr<spdlog::logger> console;
 
 int main ( int argc, char *argv[] )

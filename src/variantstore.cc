@@ -1,7 +1,7 @@
 /*
  * ============================================================================
  *
- *       Filename:  variantdb.cc
+ *       Filename:  variantstore.cc
  *
  *         Author:  Prashant Pandey (), ppandey2@cs.cmu.edu
  *   Organization:  Carnegie Mellon University
@@ -94,14 +94,14 @@ main ( int argc, char *argv[] ) {
 												query_opt.prefix) %
 									"output directory",
 									required("-t","--type") & value("query-type", query_opt.type) %
-									"types of query. \n \
-                  1. Get sample's sequence in ref coordinate. \n \
-                  2. Get sample's sequence in sample's coordinate. \n \
-                  3. Return closest mutation in ref coordinate. \n \
-									4. Get sample's variants in ref coordinate. \n \
-                  5. Get sample's variants in sample coordinate. \n \
-                  6. Get variants in ref coordinate. \n \
-									7. Return samples with a given mutation.",
+									"Types of query. \n \
+                  1. Get sample's sequence in reference coordinates. \n \
+                  2. Get sample's sequence in sample coordinates. \n \
+                  3. Return closest variant in reference coordinates. \n \
+                  4. Get sample's variants in reference coordinates. \n \
+                  5. Get sample's variants in sample coordinates. \n \
+                  6. Get variants in reference coordinates. \n \
+                  7. Return samples with a given mutation.",
                   required("-r","--region") & value("region", query_opt.region) %
                   "region in format <start>:<end>, regions separated by ','",
                   required("-m","--mode") & value("mode", query_opt.mode) %
@@ -136,7 +136,7 @@ main ( int argc, char *argv[] ) {
 		std::cout << "\n\nParsing command line failed with exception: " <<
 			e.what() << "\n";
     std::cout << "\n\n";
-    std::cout << make_man_page(cli, "variantdb");
+    std::cout << make_man_page(cli, "variantstore");
     return 1;
   }
 
@@ -150,7 +150,7 @@ main ( int argc, char *argv[] ) {
 					std::cout << "\n\nParsing command line failed with exception: " <<
 						e.what() << "\n";
 					std::cout << "\n\n";
-					std::cout << make_man_page(cli, "variantdb");
+					std::cout << make_man_page(cli, "variantstore");
 					return 1;
 				}// required("-b","--begin") & value("begin", query_opt.begin) %
 									// "starting position",
@@ -164,15 +164,15 @@ main ( int argc, char *argv[] ) {
     auto e = res.end();
     if (std::distance(b,e) > 0) {
       if (b->arg() == "construct") {
-        std::cout << make_man_page(construct_mode, "variantdb");
+        std::cout << make_man_page(construct_mode, "variantstore");
       } else if (b->arg() == "query") {
-        std::cout << make_man_page(query_mode, "variantdb");
+        std::cout << make_man_page(query_mode, "variantstore");
       }else {
         std::cout << "There is no command \"" << b->arg() << "\"\n";
-        std::cout << usage_lines(cli, "variantdb") << '\n';
+        std::cout << usage_lines(cli, "variantstore") << '\n';
       }
     } else {
-      std::cout << usage_lines(cli, "variantdb") << '\n';
+      std::cout << usage_lines(cli, "variantstore") << '\n';
     }
   }
 

@@ -20,7 +20,7 @@
 #include "progopts.h"
 #include "sys/time.h"
 
-using namespace variantdb;
+using namespace variantstore;
 
 /*
  * ===  FUNCTION  =============================================================

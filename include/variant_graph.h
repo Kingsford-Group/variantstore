@@ -35,9 +35,9 @@
 #include "util.h"
 #include "variantgraphvertex.pb.h"
 #include "graph.h"
-#include "variantdb_fs.h"
+#include "variantstore_fs.h"
 
-namespace variantdb {
+namespace variantstore {
 
 #define CACHE_SIZE 256
 //#define NUM_VERTEXES_IN_BLOCK 1000000
@@ -488,7 +488,7 @@ namespace variantdb {
 
 	void VariantGraph::serialize() {
 		if (mode == READ_ONLY_MODE) {
-			console->error("Serialization not allowed. VariantDB is loaded in READ ONLY mode");
+			console->error("Serialization not allowed. VariantStore is loaded in READ ONLY mode");
 			abort();
 		}
 

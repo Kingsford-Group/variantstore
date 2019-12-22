@@ -17,7 +17,7 @@
 #include "dot_graph.h"
 #include "variant_graph.h"
 
-using namespace variantdb;
+using namespace variantstore;
 std::shared_ptr<spdlog::logger> console;
 
 void print_vg_info(VariantGraph& vg, std::string& vcf_file,
