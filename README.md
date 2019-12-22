@@ -31,7 +31,7 @@ $ make proto
 $ make variantstore
 ```
 
-Construct variantion graph
+Construct variation graph
 
 ```bash
 $ ./variantstore construct -r data/x.fa -v data/x.vcf.gz -p ser/
