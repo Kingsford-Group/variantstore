@@ -276,7 +276,7 @@ namespace variantdb {
 		for (int i = 0; i < v->s_info_size(); ++i) {
 			//const VariantGraphVertex::sample_info& s = v->s_info(i);
 			std::string sample_id =
-				vg->get_sample_name(vg->get_sample_id(*v, i));
+				vg->get_sample_name(vg->get_sample_id(v->sampleclass_id(), i));
 			if (sample_id != REF) {
 				sample_ids.push_back(sample_id);
 				is_var = true;
@@ -553,6 +553,7 @@ namespace variantdb {
 			++it;
 		}
 
+		std::cout << "Number of variants get_sample_var_in_sample: " << vars.size() << '\n';
 		return vars;
 	} // get_sample_var_in_sample()
 
@@ -645,6 +646,7 @@ namespace variantdb {
 			++it;
 		}
 
+		std::cout << "Number of variants get_sample_var_in_ref: " << vars.size() << '\n';
 		return vars;
 	} // get_sample_var_in_ref()
 
@@ -678,14 +680,14 @@ namespace variantdb {
 				break;
 			}
 		}
-
+		std::cout << "Number of variants get_var_in_ref: " << vars.size() << '\n';
 		return vars;
 	} // get_sample_var_in_ref
 
 
 
 	/* ----------------------------------------------------------------------------
-	// Given a variyinjie@yinjie-ubuntuant (ref & alt) and the position
+	// Given a variant (ref & alt) and the position
 	// Return samples has such variant in the reference coordinate
 	*/
 	std::vector <std::string> samples_has_var ( VariantGraph *vg, Index *idx,
@@ -712,22 +714,10 @@ namespace variantdb {
 			}
 		}
 
-		// for (auto i = samples.begin(); i != samples.end(); ++i)
-		// {
-		// 	std::cout << *i << " ";
-		// }
-
 		if (print==true) {
-			ofstream out;
-			out.open(outfile);
-
 			for (auto i = samples.begin(); i != samples.end(); ++i)
-			{
-				out << *i << ' ';
-			}
-
-			out << std::endl;
-			out.close();
+	    	std::cout << *i << ' ';
+			std::cout << std::endl;
 		}
 
 		return samples;

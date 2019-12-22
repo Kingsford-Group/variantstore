@@ -91,24 +91,6 @@ std::vector<std::tuple<uint64_t, uint64_t>> read_regions (std::string region)
 	return regions;
 }
 
-
-std::vector<std::string> read_sequences (std::string s)
-{
-	std::vector<std::string> seqs;
-	auto pos = s.find(',');
-	while (true) {
-    std::string token = s.substr(0, pos);
-		seqs.push_back(token);
-
-		if (pos == std::string::npos)
-			break;
-
-		s = s.substr(pos + 1);
-		pos = s.find(',');
-		}
-	return seqs;
-}
-
 	int
 query_main ( QueryOpts& opts )
 {
@@ -134,9 +116,6 @@ query_main ( QueryOpts& opts )
 								vg.get_chr(), vg.get_num_vertices() , vg.get_num_edges(),
 								vg.get_seq_length());
 
-	std::vector<std::tuple<uint64_t, uint64_t>> regions = read_regions(opts.region);
-	std::vector<std::string> alts;
-	std::vector<std::string> refs;
 
 	if (opts.type == 1) {
 		console->info("1. Get sample's sequence in ref coordinate ...");
@@ -156,57 +135,40 @@ query_main ( QueryOpts& opts )
 	if (opts.type == 6) {
 		console->info("6. Get variants in ref coordinate. ...");
 	}
-	if (opts.type == 7) {
-		console->info("7. Get samples have given variant. ...");
-		alts = read_sequences(opts.alt);
-		refs = read_sequences(opts.ref);
-		// TODO: CHECK ALTS, REFS, REGIONS HAVE THE SAME LENGTH.
-	}
 
-
+	std::vector<std::tuple<uint64_t, uint64_t>> regions = read_regions(opts.region);
 
 	uint32_t query_num=0;
 	struct timeval start, end;
 	struct timezone tzp;                                                    gettimeofday(&start, &tzp);
 
 
-	for (uint32_t i = 0; i != regions.size(); i++)
+	for (auto it = regions.begin(); it != regions.end(); it++)
 	{
 		uint32_t max = 600;
 		uint32_t id = rand() % max + 1;
 		std::string sample_id = vg.get_sample_name(id);
 		opts.sample_name = sample_id;
 
-
+		console->debug("Query region {}:{}", std::get<0>(*it), std::get<1>(*it));
 		if (opts.type == 1) {
-			console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-			query_sample_from_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+			query_sample_from_ref(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.sample_name, opts.verbose, opts.outfile);
 		}
 		if (opts.type == 2) {
-			console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-			query_sample_from_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+			query_sample_from_sample(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.sample_name, opts.verbose, opts.outfile);
 		}
 		if (opts.type == 3) {
-			console->debug("Query region {}", std::get<0>(regions[i]));
 			Variant var;
-			closest_var(&vg, &idx, std::get<0>(regions[i]), var, opts.verbose, opts.outfile);
+			closest_var(&vg, &idx, std::get<0>(*it), var, opts.verbose, opts.outfile);
 		}
 		if (opts.type == 4) {
-			console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-			get_sample_var_in_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+			get_sample_var_in_sample(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.sample_name, opts.verbose, opts.outfile);
 		}
 		if (opts.type == 5) {
-			console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-			get_sample_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+			get_sample_var_in_ref(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.sample_name, opts.verbose, opts.outfile);
 		}
 		if (opts.type == 6) {
-			console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-			get_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.verbose, opts.outfile);
-		}
-		if (opts.type == 7) {
-			console->info("Looking for variant POS: {}, REF: {}, ALT: {}",
-			 std::get<0>(regions[i]), refs[i], alts[i]);
-			samples_has_var(&vg, &idx, std::get<0>(regions[i]), refs[i], alts[i], opts.verbose, opts.outfile);
+			get_var_in_ref(&vg, &idx, std::get<0>(*it), std::get<1>(*it), opts.verbose, opts.outfile);
 		}
 
 		query_num += 1;
@@ -219,5 +181,13 @@ query_main ( QueryOpts& opts )
 			print_time_elapsed(dsc, &start, &end);
 		}
 	}
+	gettimeofday(&end, &tzp);
+	std::string dsc = "Query" ;
+	dsc.append(std::to_string(query_num));
+	dsc.append(": ");
+	if (opts.type == 6)
+		dsc.append("(query_var_in_ref) ");
+	print_time_elapsed(dsc, &start, &end);
+
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
