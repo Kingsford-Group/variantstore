@@ -1371,9 +1371,9 @@ namespace variantstore {
 		else
 			mutation = INSERTION;
 
-		//console->info("Adding mutation: {} {} {} {} {}",
-									 //mutation_string(mutation), ref, alt, pos,
-									 //sample_list.size());
+		console->debug("Adding mutation: {} {} {} {} {}",
+									 mutation_string(mutation), ref, alt, pos,
+									 sample_list.size());
 		// update pos and alt/ref if it's an insertion/deletion.
 		if (mutation == INSERTION) {
 			pos = pos + ref.size();

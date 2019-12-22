@@ -17,8 +17,8 @@ storage devices to enable memory-efficient construction and query.
 
 API
 --------
-* 'variantstore construct': construct a variation graph and position index.
-* 'variantstore query': query variation graph for variants using the position index.
+* `variantstore construct`: construct a variation graph and position index.
+* `variantstore query`: query variation graph for variants using the position index.
 
 Build
 -------
@@ -31,6 +31,12 @@ $ make variantstore
 ```
 
 Construct variantion graph
+
+```bash
+$ ./variantstore construct -r data/x.fa -v data/x.vcf.gz -p ser/
+```
+
+The usage for this command are as follows:
 
 ```bash
 SYNOPSIS
@@ -47,6 +53,12 @@ OPTIONS
 ```
 
 Variant queries
+
+```bash
+$ ./variantstore query -p ser/ -t 6 -r 10:105 -m 0 -s 1 -o variant.txt -v
+```
+
+The usage for this command are as follows:
 
 ```bash
 SYNOPSIS

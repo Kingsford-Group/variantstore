@@ -172,10 +172,10 @@ query_main ( QueryOpts& opts )
 
 	for (uint32_t i = 0; i != regions.size(); i++)
 	{
-		uint32_t max = 600;
-		uint32_t id = rand() % max + 1;
-		std::string sample_id = vg.get_sample_name(id);
-		opts.sample_name = sample_id;
+		//uint32_t max = 600;
+		//uint32_t id = rand() % max + 1;
+		//std::string sample_id = vg.get_sample_name(id);
+		//opts.sample_name = sample_id;
 
 
 		if (opts.type == 1) {
