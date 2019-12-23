@@ -1041,7 +1041,8 @@ namespace variantstore {
 																					samples);
 
 		*new_vertex = v->vertex_id();
-		update_idx_vertex_id_map(*v);
+		if (cur_vertex.s_info(0).index() != v->s_info(0).index())
+			update_idx_vertex_id_map(*v);
 
 		// update length of the seq in the cur_vertex
 		get_mutable_vertex(vertex_id)->set_length(cur_vertex.length() - length);
@@ -1399,18 +1400,24 @@ namespace variantstore {
 
 		if (mutation == SUBSTITUTION) {
 			Graph::vertex prev_ref_vertex_id = 0, next_ref_vertex_id = 0;
-			// Either we got the vertex where there's already a substition 
+			// Either we got the vertex where there's already a substitution 
 			// or the vertex contains the seq with @pos
 			if (ref_vertex_idx == pos && ref_vertex.length() == ref.size()) {
 				// splitting not needed. mutation spans the whole vertex.
 				// find the prev ref vertex
-				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
-				if (temp_itr->first != ref_vertex_idx) {
-					console->error("Vertex id not found in the map");
-					abort();
-				}
-				--temp_itr;
-				prev_ref_vertex_id = temp_itr->second;
+
+				//auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
+				//if (temp_itr->first != ref_vertex_idx) {
+					//console->error("Vertex id not found in the map");
+					//abort();
+				//}
+				//--temp_itr;
+				//prev_ref_vertex_id = temp_itr->second;
+
+				// Adding a dummy node by splitting the ref_vertex
+				split_vertex(ref_vertex_id, 1, &next_ref_vertex_id);
+				prev_ref_vertex_id = ref_vertex_id;
+				ref_vertex_id = next_ref_vertex_id;
 
 				// find the next ref vertex
 				get_neighbor_vertex(ref_vertex_id, 0, &next_ref_vertex_id);		
@@ -1418,20 +1425,33 @@ namespace variantstore {
 				// vertex needs to be split into two. mutation is contained in the
 				// vertex.
 				// find the prev ref vertex
-				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
-				if (temp_itr->first != ref_vertex_idx) {
-					console->error("Vertex id not found in the map");
-					abort();
-				}
-				--temp_itr;
-				prev_ref_vertex_id = temp_itr->second;
+
+				//auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
+				//if (temp_itr->first != ref_vertex_idx) {
+					//console->error("Vertex id not found in the map");
+					//abort();
+				//}
+				//--temp_itr;
+				//prev_ref_vertex_id = temp_itr->second;
+
+				// Adding a dummy node by splitting the ref_vertex
+				split_vertex(ref_vertex_id, 1, &next_ref_vertex_id);
+				prev_ref_vertex_id = ref_vertex_id;
+				ref_vertex_id = next_ref_vertex_id;
 
 				// split the vertex
 				split_vertex(ref_vertex_id, ref.size() + 1, &next_ref_vertex_id);
 			} else if (ref_vertex_idx == pos && ref_vertex.length() < ref.size()) {
 				// splitting needed. mutation spans one or more vertexes.
 				// find the next ref vertex which contains the pos + ref.size()
+
 				VariantGraphVertex next_ref_vertex;
+	
+				// Adding a dummy node by splitting the ref_vertex
+				split_vertex(ref_vertex_id, 1, &next_ref_vertex_id);
+				prev_ref_vertex_id = ref_vertex_id;
+				ref_vertex_id = next_ref_vertex_id;
+
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
 				do {
 					++temp_itr;
@@ -1447,13 +1467,13 @@ namespace variantstore {
 				}
 
 				// find the prev vertex.
-				temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
-				if (temp_itr->first != ref_vertex_idx) {
-					console->error("Vertex id not found in the map");
-					abort();
-				}
-				--temp_itr;
-				prev_ref_vertex_id = temp_itr->second;
+				//temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
+				//if (temp_itr->first != ref_vertex_idx) {
+					//console->error("Vertex id not found in the map");
+					//abort();
+				//}
+				//--temp_itr;
+				//prev_ref_vertex_id = temp_itr->second;
 			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
 								 > pos + ref.size()) {
 				// vertex needs to be split into three. mutation contained in the
