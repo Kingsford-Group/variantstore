@@ -3,7 +3,7 @@
  *
  *       Filename:  query.h
  *
- *         Author:  Prashant Pandey <ppandey@cs.stonybrook.edu>
+ *         Author:  Prashant Pandey <ppandey2@cs.cmu.edu>
  *									Yinjie Gao <yinjieg@andrew.cmu.edu>
  *   Organization:  Carnegie Mellon University
  *
@@ -35,10 +35,7 @@ namespace variantstore {
 		AltSamplesMap alt_sample_map;
 	};
 
-	void print_var (Variant *var, std::string outfile) {
-		ofstream out;
-		out.open(outfile, ios::app);
-
+	void print_var (Variant *var, ofstream& out) {
 		for (auto a=var->alts.begin(); a!=var->alts.end(); a++) {
 			out << var->var_pos << "\t"<< var->ref << "\t";
 			out << *a << "\t";
@@ -48,7 +45,6 @@ namespace variantstore {
 			}
 			out << std::endl;
 		}
-		out.close();
 		return;
 	}
 
@@ -290,7 +286,9 @@ namespace variantstore {
 
 
 	/* ----------------------------------------------------------------------------
-		 Support Func: Return true if found the closest variants at or after the given pos. Return false is no variant is found reaching the end of the graph
+		 Support Func: Return true if found the closest variants at or after the
+		 given pos. Return false is no variant is found reaching the end of the
+		 graph
 		 */
 
 	bool next_variant_in_ref ( VariantGraph *vg, Index *idx, const uint64_t pos,
@@ -430,8 +428,12 @@ namespace variantstore {
 			var = next_var;
 		}
 
-		if (print==true)
-			print_var(&var, outfile);
+		if (print==true) {
+			ofstream out;
+			out.open(outfile);
+			print_var(&var, out);
+			out.close();
+		}
 
 		return true;
 	}
@@ -540,10 +542,7 @@ namespace variantstore {
 				var.var_pos = ref_pos;
 				get_samples((*it), vg, var.alt_sample_map[alt]);
 
-				if (print==true)
-					print_var(&var, outfile);
-				else
-					vars.push_back(var);
+				vars.push_back(var);
 			}
 
 			cur_ref = next_ref;
@@ -554,6 +553,14 @@ namespace variantstore {
 		}
 
 		std::cout << "Number of variants get_sample_var_in_sample: " << vars.size() << '\n';
+		if (print==true) {
+			ofstream out;
+			out.open(outfile);
+			for (auto var : vars)
+				print_var(&var, out);
+			out.close();
+		}
+
 		return vars;
 	} // get_sample_var_in_sample()
 
@@ -634,10 +641,8 @@ namespace variantstore {
 				var.ref = cur_ref;
 				var.var_pos = ref_pos;
 				get_samples((*it), vg, var.alt_sample_map[alt]);
-				if (print==true)
-					print_var(&var, outfile);
-				else
-					vars.push_back(var);
+				
+				vars.push_back(var);
 			}
 
 			cur_ref = next_ref;
@@ -647,6 +652,14 @@ namespace variantstore {
 		}
 
 		std::cout << "Number of variants get_sample_var_in_ref: " << vars.size() << '\n';
+		if (print==true) {
+			ofstream out;
+			out.open(outfile);
+			for (auto var : vars)
+				print_var(&var, out);
+			out.close();
+		}
+
 		return vars;
 	} // get_sample_var_in_ref()
 
@@ -666,15 +679,15 @@ namespace variantstore {
 		uint64_t cur_pos = pos_x;
 		while (cur_pos < pos_y)
 		{
-			Variant var;
+			Variant var, last_var;
 			if (next_variant_in_ref (vg, idx, cur_pos, var))
 			{
 				cur_pos = std::max(var.var_pos + 1, cur_pos + 1);
 				if (cur_pos < pos_y) {
-					if (print==true)
-						print_var(&var, outfile);
-					else
-						vars.push_back(var);
+					if (vars.size() == 0 || (vars.size() > 0 && last_var.var_pos !=
+							var.var_pos))
+					vars.push_back(var);
+					last_var = var;
 				}
 			} else {
 				break;
@@ -682,6 +695,14 @@ namespace variantstore {
 		}
 
 		std::cout << "Number of variants get_var_in_ref: " << vars.size() << '\n';
+		if (print==true) {
+			ofstream out;
+			out.open(outfile);
+			for (auto var : vars)
+				print_var(&var, out);
+			out.close();
+		}
+
 		return vars;
 	} // get_sample_var_in_ref
 

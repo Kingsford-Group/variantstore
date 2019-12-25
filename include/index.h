@@ -3,7 +3,7 @@
  *
  *       Filename:  index.h
  *
- *         Author:  Prashant Pandey <ppandey@cs.stonybrook.edu>
+ *         Author:  Prashant Pandey <ppandey2@cs.cmu.edu>
  *									Yinjie Gao <yinjieg@andrew.cmu.edu>
  *   Organization:  Carnegie Mellon University
  *
@@ -77,11 +77,12 @@ namespace variantstore {
 			//console->debug("At index {} has node {}", idx, node_id);
 
 			// extra check to determine loops in the ref path through the graph.
-			if (b[idx-1] == 1) {
-				console->error("Found a loop in the ref path at node: {}", node_id);
-				createDotGraph(vg, "./", node_id-5, 10);
-				abort();
-			}
+			//if (b[idx-1] == 1) {
+				//console->error("Found a loop in the ref path at node: {} and index: {}"
+											 //, node_id, idx - 1);
+				//createDotGraph(vg, "./", node_id-5, 10);
+				//abort();
+			//}
 			b[idx-1] = 1;
 			node_list[node_list_sz-1] = node_id;
 			++it;

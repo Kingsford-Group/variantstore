@@ -1,3 +1,16 @@
+/*
+ * ============================================================================
+ *
+ *       Filename:  test_graphcontainer.cc
+ *
+ *         Author:  Prashant Pandey (), ppandey2@cs.cmu.edu
+ 										Yinjie Gao <yinjieg@andrew.cmu.edu>
+ *   Organization:  Carnegie Mellon University
+ *
+ * ============================================================================
+ */
+
+
 #include <sdsl/bit_vectors.hpp>
 #include <sdsl/int_vector.hpp>
 #include <sdsl/util.hpp>
