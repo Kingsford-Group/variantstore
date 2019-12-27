@@ -95,9 +95,9 @@ main ( int argc, char *argv[] ) {
 									"output directory",
 									required("-t","--type") & value("query-type", query_opt.type) %
 									"Types of query. \n \
-                  1. Get sample's sequence in reference coordinates. \n \
-                  2. Get sample's sequence in sample coordinates. \n \
-                  3. Return closest variant in reference coordinates. \n \
+                  1. Return closest variant in reference coordinates. \n \
+                  2. Get sample's sequence in reference coordinates. \n \
+                  3. Get sample's sequence in sample coordinates. \n \
                   4. Get sample's variants in reference coordinates. \n \
                   5. Get sample's variants in sample coordinates. \n \
                   6. Get variants in reference coordinates. \n \

@@ -310,7 +310,7 @@ int main ( int argc, char *argv[] ) {
 		for (auto it = samples.begin(); it != samples.end(); it++) {
 			std::cout << (*it) << " ";
 		}
-		PRINT();
+		PRINT("");
 	}
 
 }

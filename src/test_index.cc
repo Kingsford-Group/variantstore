@@ -31,13 +31,13 @@ std::shared_ptr<spdlog::logger> console;
 
 void print_index_info(const Index &idx, uint64_t len)
 {
-  PRINT("Sequence length is");
+  PRINT("Sequence length is: " << len);
   PRINT("Pos\tNode_id");
 
-  for (uint64_t i=0; i<len; i++)
+  for (uint64_t i=1; i<len; i++)
   {
     uint64_t node_id = idx.find(i);
-    PRINT(i << ":" << node_id);
+    PRINT(i << "\t" << node_id);
   }
   return;
 }
@@ -110,14 +110,14 @@ main ( int argc, char *argv[] )
 
 	PRINT("Creating Index");
 	Index idx(&vg);
-	print_index_info(idx, 50);
+	print_index_info(idx, vg.get_ref_length());
 
 	PRINT("Storing Index");
-	idx.serialize();
+	idx.serialize("./ser");
 
 	PRINT("Reading Index");
 	Index idx2("./ser");
-	print_index_info(idx2, 50);
+	print_index_info(idx2, vg.get_ref_length());
 
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

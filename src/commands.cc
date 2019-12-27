@@ -135,35 +135,6 @@ query_main ( QueryOpts& opts )
 								vg.get_seq_length());
 
 	std::vector<std::tuple<uint64_t, uint64_t>> regions = read_regions(opts.region);
-	std::vector<std::string> alts;
-	std::vector<std::string> refs;
-
-	if (opts.type == 1) {
-		console->info("1. Get sample's sequence in ref coordinate ...");
-	}
-	if (opts.type == 2) {
-		console->info("2. Get sample's sequence in sample's coordinate ...");
-	}
-	if (opts.type == 3) {
-		console->info("3. Return closest mutation in ref coordinate. ...");
-	}
-	if (opts.type == 4) {
-		console->info("4. Get sample's variants in ref coordinate ...");
-	}
-	if (opts.type == 5) {
-		console->info("5. Get sample's variants in sample coordinate ...");
-	}
-	if (opts.type == 6) {
-		console->info("6. Get variants in ref coordinate. ...");
-	}
-	if (opts.type == 7) {
-		console->info("7. Get samples have given variant. ...");
-		alts = read_sequences(opts.alt);
-		refs = read_sequences(opts.ref);
-		// TODO: CHECK ALTS, REFS, REGIONS HAVE THE SAME LENGTH.
-	}
-
-
 
 	uint32_t query_num=0;
 	struct timeval start, end;
@@ -172,41 +143,52 @@ query_main ( QueryOpts& opts )
 
 	for (uint32_t i = 0; i != regions.size(); i++)
 	{
-		//uint32_t max = 600;
-		//uint32_t id = rand() % max + 1;
-		//std::string sample_id = vg.get_sample_name(id);
-		//opts.sample_name = sample_id;
-
-
-		if (opts.type == 1) {
-			console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-			query_sample_from_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
-		}
-		if (opts.type == 2) {
-			console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-			query_sample_from_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
-		}
-		if (opts.type == 3) {
-			console->debug("Query region {}", std::get<0>(regions[i]));
-			Variant var;
-			closest_var(&vg, &idx, std::get<0>(regions[i]), var, opts.verbose, opts.outfile);
-		}
-		if (opts.type == 4) {
-			console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-			get_sample_var_in_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
-		}
-		if (opts.type == 5) {
-			console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-			get_sample_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
-		}
-		if (opts.type == 6) {
-			console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-			get_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.verbose, opts.outfile);
-		}
-		if (opts.type == 7) {
-			console->info("Looking for variant POS: {}, REF: {}, ALT: {}",
-										std::get<0>(regions[i]), refs[i], alts[i]);
-			samples_has_var(&vg, &idx, std::get<0>(regions[i]), refs[i], alts[i], opts.verbose, opts.outfile);
+		std::vector<Variant> var;
+		std::vector<std::string> alts;
+		std::vector<std::string> refs;
+		switch (opts.type) {
+			case 1:
+				console->info("1. Return closest mutation in ref coordinate. ...");
+				console->debug("Query region {}", std::get<0>(regions[i]));
+				closest_var(&vg, &idx, std::get<0>(regions[i]), var, opts.verbose, opts.outfile);
+				break;
+			case 2:
+				console->info("2. Get sample's sequence in ref coordinate ...");
+				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
+				query_sample_from_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+				break;
+			case 3:
+				console->info("3. Get sample's sequence in sample's coordinate ...");
+				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
+				query_sample_from_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+				break;
+			case 4:
+				console->info("4. Get sample's variants in ref coordinate ...");
+				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
+				get_sample_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+				break;
+			case 5:
+				console->info("5. Get sample's variants in sample coordinate ...");
+				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
+				get_sample_var_in_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+				break;
+			case 6:
+				console->info("6. Get variants in ref coordinate. ...");
+				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
+				get_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.verbose, opts.outfile);
+				break;
+			case 7:
+				console->info("7. Get samples have given variant. ...");
+				alts = read_sequences(opts.alt);
+				refs = read_sequences(opts.ref);
+				// TODO: CHECK ALTS, REFS, REGIONS HAVE THE SAME LENGTH.
+				console->info("Looking for variant POS: {}, REF: {}, ALT: {}",
+											std::get<0>(regions[i]), refs[i], alts[i]);
+				samples_has_var(&vg, &idx, std::get<0>(regions[i]), refs[i], alts[i], opts.verbose, opts.outfile);
+				break;
+			default:
+				console->error("Unsupported query type");
+				break;
 		}
 
 		query_num += 1;

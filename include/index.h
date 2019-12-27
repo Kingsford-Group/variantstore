@@ -62,8 +62,6 @@ namespace variantstore {
 		VariantGraph::VariantGraphPathIterator it = vg->find("ref"); //  Iterate through reference
 		while(!it.done())
 		{
-			node_list_sz++;
-			if (node_list_sz > node_list.size()) {node_list.resize(node_list_sz);}
 			uint64_t node_id = (*it)->vertex_id();
 			Graph::vertex v = node_id;
 			VariantGraphVertex::sample_info sample;
@@ -83,10 +81,17 @@ namespace variantstore {
 				//createDotGraph(vg, "./", node_id-5, 10);
 				//abort();
 			//}
+				if (b[idx - 1] != 1) { // only update if not already set.
+				node_list_sz++;
+				if (node_list_sz > node_list.size()) {node_list.resize(node_list_sz);}
+				node_list[node_list_sz - 1] = node_id;
+			}
 			b[idx-1] = 1;
-			node_list[node_list_sz-1] = node_id;
 			++it;
 		}
+		
+		//std::cout << b << std::endl;
+		//std::cout << node_list << std::endl;
 
 		// Compress it & Construct rank support vector from vector
 		sdsl::util::assign(rrrb, sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>(b));
@@ -107,14 +112,18 @@ namespace variantstore {
 
 	Graph::vertex Index::find(const uint64_t pos) const
 	{
+		if (pos < 1) {
+			console->error("Can't find node corresponding to pos {}", pos);
+			abort();
+		}
 		if ( pos >= rank_rrrb.size())
 			return node_list[node_list.size()-1];
 
-		uint64_t node_idx = rank_rrrb(pos-1);
+		uint64_t node_idx = rank_rrrb(pos);
 		if ( node_idx == 0 )
 			return node_list[0];
 
-		return node_list[node_idx-1];
+		return node_list[node_idx - 1];
 	} // find(uint64_t pos)
 
 	Graph::vertex Index::find(const uint64_t pos, uint64_t &ref_node_rank) const
@@ -124,9 +133,9 @@ namespace variantstore {
 			ref_node_rank = node_list.size()-1;
 			return node_list[node_list.size()-1];
 		}
-		uint64_t node_idx = rank_rrrb(pos-1);
+		uint64_t node_idx = rank_rrrb(pos);
 		if ( node_idx == 0 )
-			node_idx = 1;
+			return node_list[0];
 
 		ref_node_rank = node_idx - 1;
 		return node_list[node_idx-1];
