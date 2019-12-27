@@ -48,7 +48,7 @@ bm: bm_query
 graph:	$(SER)/graph.png
 
 # dependencies between programs and .o files
-variantstore:							$(OBJDIR)/variantstore.o $(OBJDIR)/variantstore_fs.o \
+variantstore:						$(OBJDIR)/variantstore.o $(OBJDIR)/variantstore_fs.o \
 												$(OBJDIR)/commands.o \
 												$(OBJDIR)/variantgraphvertex.pb.o $(OBJDIR)/gqf.o \
 												$(OBJDIR)/gqf_file.o $(OBJDIR)/rank_select.o \
@@ -74,9 +74,10 @@ bm_query:								$(OBJDIR)/bm_query.o  $(OBJDIR)/variantstore_fs.o\
 												$(OBJDIR)/hashutil.o $(OBJDIR)/util.o
 
 # dependencies between .o files and .cc (or .c) files
-$(OBJDIR)/variantstore.o: 						$(LOC_SRC)/variantstore.cc 
+$(OBJDIR)/variantstore.o: 				$(LOC_SRC)/variantstore.cc 
 $(OBJDIR)/commands.o: 						$(LOC_SRC)/commands.cc \
 																	$(LOC_INCLUDE)/variant_graph.h \
+																	$(LOC_INCLUDE)/query.h \
 																	$(LOC_INCLUDE)/index.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
 																	$(LOC_INCLUDE)/variantstore_fs.h \
@@ -94,11 +95,13 @@ $(OBJDIR)/test_variantgraph.o: 		$(LOC_SRC)/test_variantgraph.cc \
 																	$(LOC_INCLUDE)/stream.hpp
 $(OBJDIR)/test_index.o: 					$(LOC_SRC)/test_index.cc \
 																	$(LOC_INCLUDE)/index.h \
+																	$(LOC_INCLUDE)/query.h \
 																	$(LOC_INCLUDE)/variant_graph.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \
 																	$(LOC_INCLUDE)/variantstore_fs.h \
 																	$(LOC_INCLUDE)/graph.h
 $(OBJDIR)/test_query.o: 					$(LOC_SRC)/test_query.cc \
+																	$(LOC_INCLUDE)/query.h \
 																	$(LOC_INCLUDE)/index.h \
 																	$(LOC_INCLUDE)/variant_graph.h \
 																	$(LOC_INCLUDE)/variantgraphvertex.pb.h \

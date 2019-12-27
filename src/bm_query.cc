@@ -3,7 +3,7 @@
  *
  *       Filename:  bm_query.h
  *
- *         Author:  Prashant Pandey <ppandey@cs.stonybrook.edu>
+ *         Author:  Prashant Pandey <ppandey2@cs.cmu.edu>
  										Yinjie Gao <yinjieg@andrew.cmu.edu>
  *   Organization:  Carnegie Mellon University
  *

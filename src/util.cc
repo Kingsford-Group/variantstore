@@ -2,7 +2,7 @@
  * ============================================================================
  *
  *         Author:  Prashant Pandey (), ppandey2@cs.cmu.edu
- *   Organization:  Stony Brook University
+ *   Organization:  Carnegie Mellon University
  *
  * ============================================================================
  */

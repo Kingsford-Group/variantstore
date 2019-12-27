@@ -3,7 +3,7 @@
  *
  *       Filename:  query.h
  *
- *         Author:  Prashant Pandey <ppandey@cs.stonybrook.edu>
+ *         Author:  Prashant Pandey <ppandey2@cs.cmu.edu>
  *									Yinjie Gao <yinjieg@andrew.cmu.edu>
  *   Organization:  Carnegie Mellon University
  *
@@ -35,10 +35,7 @@ namespace variantstore {
 		AltSamplesMap alt_sample_map;
 	};
 
-	void print_var (Variant *var, std::string outfile) {
-		ofstream out;
-		out.open(outfile, ios::app);
-
+	void print_var (Variant *var, ofstream& out) {
 		for (auto a=var->alts.begin(); a!=var->alts.end(); a++) {
 			out << var->var_pos << "\t"<< var->ref << "\t";
 			out << *a << "\t";
@@ -48,7 +45,6 @@ namespace variantstore {
 			}
 			out << std::endl;
 		}
-		out.close();
 		return;
 	}
 
@@ -290,11 +286,15 @@ namespace variantstore {
 
 
 	/* ----------------------------------------------------------------------------
-		 Support Func: Return true if found the closest variants at or after the given pos. Return false is no variant is found reaching the end of the graph
+		 Support Func: Return true if found the closest variants at or after the
+		 given pos. Return false if no variant is found reaching the end of the
+		 graph
 		 */
 
-	bool next_variant_in_ref ( VariantGraph *vg, Index *idx, const uint64_t pos,
-														 Variant &var)
+	bool next_variant_in_ref ( VariantGraph *vg, Index *idx,
+																							const uint64_t pos,
+																							vector<Variant> &vars,
+																							uint64_t &next_pos)
 	{
 		bool found_var = false;
 		Graph::vertex v = idx->find(pos); // the node before pos
@@ -310,6 +310,7 @@ namespace variantstore {
 			// check all outgoing edges and record alternatives
 			while (!bfs_it.done())
 			{
+				Variant var;
 				if ((*bfs_it)->vertex_id() == (*next_it)->vertex_id()) {
 					++bfs_it;
 					continue;
@@ -320,34 +321,34 @@ namespace variantstore {
 				std::vector <std::string> sample_ids;
 				// got variant nodes' samples_ids
 				if (get_samples((*bfs_it), vg, sample_ids)) { // found var
-					found_var = true;
 					VariantGraphVertex::sample_info sample;
 
 					// Deletion
 					if (vg->get_sample_from_vertex_if_exists((*bfs_it)-> vertex_id(),
-																																REF, sample)) {
-						// console->debug("Found a deletion");
-						std::string alt = vg->get_sequence(*(*it));
-						//alt = alt.substr(alt.length()-1, 1); // last character
-						alt = "";
-						++it;
-						std::string ref = alt + vg->get_sequence(*(*it));
+																									 REF, sample)) {
+						console->debug("Found a deletion");
+						std::string alt = "";
+						std::string ref = vg->get_sequence(*(*next_it));
 						var.ref.assign(ref);
 						var.alts.push_back(alt);
 						var.alt_sample_map[alt] = sample_ids;
-						vg->get_sample_from_vertex_if_exists((*it)-> vertex_id(), REF,
-																									sample);
-						var.var_pos = sample.index();
+						if (vg->get_sample_from_vertex_if_exists((*next_it)-> vertex_id(),
+																										 REF, sample)) {
+							var.var_pos = sample.index();
+						} else {
+							console->error("{} is not in the reference path", (*next_it)->
+														 vertex_id());
+						}
 					} else {
 						vg->get_sample_from_vertex_if_exists((*it)-> vertex_id(), REF,
-																									sample);
+																								 sample);
 						uint64_t prev_ref_idx = sample.index();
 						// dfs from bfs_it in sample's path
-						VariantGraph::VariantGraphPathIterator dfs_it = vg->find((*bfs_it)->
-																																vertex_id(), sample_ids[0]);
+						VariantGraph::VariantGraphPathIterator dfs_it =
+							vg->find((*bfs_it)->vertex_id(), sample_ids[0]);
 						++dfs_it;
 						if (!vg->get_sample_from_vertex_if_exists((*dfs_it)-> vertex_id(),
-																																	REF, sample))
+																											REF, sample))
 						{
 							console->error("consecutive mutation near {}", pos);
 						}
@@ -358,32 +359,35 @@ namespace variantstore {
 						// Insertion
 						if (next_ref_idx == prev_ref_idx + prev_ref.length()) {
 							// console->debug("Found an insertion");
-							std::string ref = prev_ref.substr(prev_ref.length()-1, 1);
-							ref = "";
+							std::string ref = "";
 							var.ref.assign(ref);
-							std::string alt = ref + vg->get_sequence(*(*bfs_it));
-							var.alts.push_back(alt);
-							var.alt_sample_map[alt] = sample_ids;
-							var.var_pos = sample.index();
-						} else {
-						// substitution
-							++it;
 							std::string alt = vg->get_sequence(*(*bfs_it));
 							var.alts.push_back(alt);
 							var.alt_sample_map[alt] = sample_ids;
-							var.ref.assign(vg->get_sequence(*(*it)));
-							if (vg->get_sample_from_vertex_if_exists((*it)-> vertex_id(),REF,
-																												sample)) {
+							var.var_pos = next_ref_idx - 1;
+						} else {
+							// substitution
+							std::string alt = vg->get_sequence(*(*bfs_it));
+							var.alts.push_back(alt);
+							std::string ref = vg->get_sequence(*(*next_it));
+							var.ref.assign(ref);
+							var.alt_sample_map[alt] = sample_ids;
+							if (vg->get_sample_from_vertex_if_exists((*next_it)-> vertex_id(),
+																											 REF, sample)) {
 								var.var_pos = sample.index();
-								// console->debug("Found a substitution at {}", var.var_pos);
 							} else {
-								console->error("{} is not in the reference path", (*it)->
-																																	vertex_id());
+								console->error("{} is not in the reference path", (*next_it)->
+															 vertex_id());
 							}
 						}
 					}
 				}
 
+				// only add var if not seen before.
+				if (vars.size() < 1 || (vars.back().var_pos != var.var_pos)) {
+					found_var = true;
+					vars.push_back(var);
+				}
 				++bfs_it;
 			}
 
@@ -394,6 +398,15 @@ namespace variantstore {
 			++it;
 			++next_it;
 		} // end DFS in ref
+		
+		VariantGraphVertex::sample_info sample;
+		if (vg->get_sample_from_vertex_if_exists((*next_it)-> vertex_id(),
+																						 REF, sample)) {
+			next_pos = sample.index();
+		} else {
+			console->error("{} is not in the reference path", (*next_it)->
+										 vertex_id());
+		}
 
 		return found_var;
 	}
@@ -402,36 +415,44 @@ namespace variantstore {
 		 Find a variant near given position
 		 */
 	bool closest_var ( VariantGraph *vg, Index *idx, const uint64_t pos,
-										 Variant &var, bool print=false, std::string outfile="")
+										 std::vector<Variant> &vars, bool print=false, std::string
+										 outfile="")
 	{
-		Variant next_var;
+		std::vector<Variant> next_var;
+		uint64_t next_pos;
 
-		if (next_variant_in_ref(vg, idx, pos, next_var)) {
-			uint64_t next_var_pos = next_var.var_pos;
-			Variant prev_var;
+		if (next_variant_in_ref(vg, idx, pos, next_var, next_pos)) {
+			uint64_t next_var_pos = next_var[0].var_pos;
+			std::vector<Variant> prev_var;
 			int cur_pos = pos-(next_var_pos-pos);
 			if (cur_pos > 0) {
-				next_variant_in_ref(vg, idx, cur_pos, prev_var);
-				uint64_t prev_var_pos = prev_var.var_pos;
+				next_variant_in_ref(vg, idx, cur_pos, prev_var, next_pos);
+				uint64_t prev_var_pos = prev_var[0].var_pos;
 				if (prev_var_pos != next_var_pos) {
-					var = prev_var;
+					vars = prev_var;
 				} else {
-	 				var = next_var;
+	 				vars = next_var;
  				}
 			} else {
-				var = next_var;
+				vars = next_var;
 			}
 		} else {
 			int cur_pos = pos - 1;
-			while (cur_pos > 0 && !next_variant_in_ref(vg, idx, cur_pos, next_var)) {
+			while (cur_pos > 0 && !next_variant_in_ref(vg, idx, cur_pos, next_var,
+																								 next_pos)) {
 				if (cur_pos == 1) { return false;}
 				cur_pos--;
 			}
-			var = next_var;
+			vars = next_var;
 		}
 
-		if (print==true)
-			print_var(&var, outfile);
+		if (print==true) {
+			ofstream out;
+			out.open(outfile);
+			for (auto var : vars)
+				print_var(&var, out);
+			out.close();
+		}
 
 		return true;
 	}
@@ -478,7 +499,7 @@ namespace variantstore {
 
 		sample_pos = sample_pos - seq_len;
 
-		console->debug("Closest ref note before node containing sample with sample_pos < {}: Sample pos: {}",
+		console->debug("Closest ref node before node containing sample with sample_pos < {}: Sample pos: {}",
 									 pos_x, closest_v, sample_pos);
 
 		// DFS from such node and record seq btw [pos_x, pos_y) in sample's coordinate
@@ -517,33 +538,32 @@ namespace variantstore {
 				// Insertion
 				if (ref_pos == next_ref_pos) {
 					cur_ref = vg->get_sequence(prev_v);
-					//ref_pos --;
-					//cur_ref = cur_ref.substr(cur_ref.length() - 1, 1);
 					cur_ref = "";
 					console->debug("There is an insertion at (ref): {}", ref_pos);
 					alt = cur_ref + vg->get_sequence(*(*it));
+					var.var_pos = ref_pos;
 				} else
 					// Deletion
 					if (vg->get_sample_from_vertex_if_exists(cur_v, REF, sample)) {
 						console->debug("There is a deletion at (ref): {}", ref_pos);
-						//alt = vg->get_sequence(prev_v).substr(cur_ref.length() - 1, 1);
 						alt = "";
-						cur_ref = alt + cur_ref;
-						//ref_pos --;
-					} else {
+						vg->get_sample_from_vertex_if_exists(cur_v, sample_id, sample);
+						var.var_pos = sample.index();
+						Graph::vertex v = idx->find(ref_pos - 1); // the node before pos
+						auto it = vg->find(v);
+						cur_ref = vg->get_sequence(*(*it));
+										} else {
 						console->debug("There is a substitution at (ref): {}", ref_pos);
 						alt = vg->get_sequence(*(*it));
+						vg->get_sample_from_vertex_if_exists(cur_v, sample_id, sample);
+						var.var_pos = sample.index();
 					}
 
 				var.alts.push_back(alt);
 				var.ref = cur_ref;
-				var.var_pos = ref_pos;
 				get_samples((*it), vg, var.alt_sample_map[alt]);
 
-				if (print==true)
-					print_var(&var, outfile);
-				else
-					vars.push_back(var);
+				vars.push_back(var);
 			}
 
 			cur_ref = next_ref;
@@ -554,6 +574,14 @@ namespace variantstore {
 		}
 
 		std::cout << "Number of variants get_sample_var_in_sample: " << vars.size() << '\n';
+		if (print==true) {
+			ofstream out;
+			out.open(outfile);
+			for (auto var : vars)
+				print_var(&var, out);
+			out.close();
+		}
+
 		return vars;
 	} // get_sample_var_in_sample()
 
@@ -606,38 +634,38 @@ namespace variantstore {
 			if (ref_pos >= pos_y) {break;}
 
 			if (ref_pos >= pos_x && vg->get_sample_from_vertex_if_exists(cur_v,
-																																	sample_id,
-																																	sample)) {
+																																	 sample_id,
+																																	 sample)) {
 				std::string alt;
 				// Insertion
 				if (ref_pos == next_ref_pos) {
 					cur_ref = vg->get_sequence(prev_v);
-					//ref_pos --;
-					//cur_ref = cur_ref.substr(cur_ref.length() - 1, 1);
 					cur_ref = "";
 					console->debug("There is an insertion at (ref): {}", ref_pos);
-					alt = cur_ref + vg->get_sequence(*(*it));
+					alt = vg->get_sequence(*(*it));
+					var.var_pos = ref_pos - 1;
 				} else
 					// Deletion
 					if (vg->get_sample_from_vertex_if_exists(cur_v, REF, sample)) {
-						console->debug("There is a deletion at (ref): {}", ref_pos);
-						//alt = vg->get_sequence(prev_v).substr(cur_ref.length() - 1, 1);
+						console->debug("There is a deletion at (ref): {}", ref_pos - 1);
 						alt = "";
-						cur_ref = alt + cur_ref;
-						//ref_pos --;
+						Graph::vertex v = idx->find(ref_pos - 1); // the node before pos
+						auto it = vg->find(v);
+						cur_ref = vg->get_sequence(*(*it));
+						if (vg->get_sample_from_vertex_if_exists(v, REF, sample)) {
+							var.var_pos = sample.index();
+						}
 					} else {
 						console->debug("There is a substitution at (ref): {}", ref_pos);
 						alt = vg->get_sequence(*(*it));
+						var.var_pos = ref_pos;
 					}
 
 				var.alts.push_back(alt);
 				var.ref = cur_ref;
-				var.var_pos = ref_pos;
 				get_samples((*it), vg, var.alt_sample_map[alt]);
-				if (print==true)
-					print_var(&var, outfile);
-				else
-					vars.push_back(var);
+
+				vars.push_back(var);
 			}
 
 			cur_ref = next_ref;
@@ -647,6 +675,14 @@ namespace variantstore {
 		}
 
 		std::cout << "Number of variants get_sample_var_in_ref: " << vars.size() << '\n';
+		if (print==true) {
+			ofstream out;
+			out.open(outfile);
+			for (auto var : vars)
+				print_var(&var, out);
+			out.close();
+		}
+
 		return vars;
 	} // get_sample_var_in_ref()
 
@@ -666,15 +702,12 @@ namespace variantstore {
 		uint64_t cur_pos = pos_x;
 		while (cur_pos < pos_y)
 		{
-			Variant var;
-			if (next_variant_in_ref (vg, idx, cur_pos, var))
+			uint64_t next_pos;
+			if (next_variant_in_ref (vg, idx, cur_pos, vars, next_pos))
 			{
-				cur_pos = std::max(var.var_pos + 1, cur_pos + 1);
-				if (cur_pos < pos_y) {
-					if (print==true)
-						print_var(&var, outfile);
-					else
-						vars.push_back(var);
+				cur_pos = next_pos;
+				if (cur_pos >= pos_y) {
+					break;
 				}
 			} else {
 				break;
@@ -682,6 +715,14 @@ namespace variantstore {
 		}
 
 		std::cout << "Number of variants get_var_in_ref: " << vars.size() << '\n';
+		if (print==true) {
+			ofstream out;
+			out.open(outfile);
+			for (auto var : vars)
+				print_var(&var, out);
+			out.close();
+		}
+
 		return vars;
 	} // get_sample_var_in_ref
 
@@ -697,41 +738,44 @@ namespace variantstore {
 																							std::string alt,
 																						  bool print=false, std::string outfile="")
 	{
-		Variant var;
+		std::vector<Variant> vars;
+		uint64_t next_pos;
 		std::vector <std::string> samples;
 
-		next_variant_in_ref(vg, idx, pos, var);
-		if (var.ref != ref || var.var_pos != pos) {
-			console->error("There is no such variant!");
-		}
+		next_variant_in_ref(vg, idx, pos, vars, next_pos);
+		for  (auto var : vars) {
+			if (var.ref == ref || var.var_pos == pos) {
+				for (uint32_t i=0; i<var.alts.size(); i++)
+				{
+					if (var.alts[i] == alt)
+					{
+						samples.assign(var.alt_sample_map[alt].begin(),
+													 var.alt_sample_map[alt].end());
+						break;
+					}
+				}
 
-		for (uint32_t i=0; i<var.alts.size(); i++)
-		{
-			if (var.alts[i] == alt)
-			{
-				samples.assign(var.alt_sample_map[alt].begin(),
-											 var.alt_sample_map[alt].end());
-				break;
+				// for (auto i = samples.begin(); i != samples.end(); ++i)
+				// {
+				// 	std::cout << *i << " ";
+				// }
+
+				if (print==true) {
+					ofstream out;
+					out.open(outfile);
+
+					for (auto i = samples.begin(); i != samples.end(); ++i)
+					{
+						out << *i << ' ';
+					}
+
+					out << std::endl;
+					out.close();
+				}
+				return samples;
 			}
 		}
-
-		// for (auto i = samples.begin(); i != samples.end(); ++i)
-		// {
-		// 	std::cout << *i << " ";
-		// }
-
-		if (print==true) {
-			ofstream out;
-			out.open(outfile);
-
-			for (auto i = samples.begin(); i != samples.end(); ++i)
-			{
-				out << *i << ' ';
-			}
-
-			out << std::endl;
-			out.close();
-		}
+		console->error("There is no such variant!");
 
 		return samples;
 	} // samples_has_var()

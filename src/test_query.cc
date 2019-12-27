@@ -1,3 +1,15 @@
+/*
+ * ============================================================================
+ *
+ *       Filename:  test_graphcontainer.cc
+ *
+ *         Author:  Prashant Pandey (), ppandey2@cs.cmu.edu
+ 										Yinjie Gao <yinjieg@andrew.cmu.edu>
+ *   Organization:  Carnegie Mellon University
+ *
+ * ============================================================================
+ */
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -298,7 +310,7 @@ int main ( int argc, char *argv[] ) {
 		for (auto it = samples.begin(); it != samples.end(); it++) {
 			std::cout << (*it) << " ";
 		}
-		PRINT();
+		PRINT("");
 	}
 
 }
