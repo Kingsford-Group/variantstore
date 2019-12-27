@@ -1,0 +1,269 @@
+      1 [2019-10-04 00:52:58.810] [info] Creating variant graph
+      2 [2019-10-04 00:53:04.105] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr1.vcf.gz #Samples: 8640
+      3 Resizing the CQF.
+      4 [2019-10-04 05:27:47.013] [info] Num mutations: 2277649 num mutations-sample: 5004473
+      5 [2019-10-04 05:27:47.013] [info] Num vars: 2246928
+      6 [2019-10-04 05:27:53.090] [info] Fixing sample indexes in the graph
+      7 [2019-10-04 05:28:38.185] [info] Graph stats:
+      8 [2019-10-04 05:28:38.185] [info] Chromosome: chr1 #Vertices: 6651922 #Edges: 8953671 Seq length: 251327147
+      9 [2019-10-04 05:28:38.185] [info] Serializing variant graph to disk
+     10 [2019-10-04 05:28:49.404] [info] Number of sample vector classes: 0
+     11 [2019-10-04 05:28:49.409] [info] Creating Index
+     12 [2019-10-04 05:29:06.932] [info] Serializing index to disk
+     13 [2019-10-04 05:29:08.489] [info] Creating variant graph
+     14 [2019-10-04 05:29:13.633] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr2.vcf.gz #Samples: 8640
+     15 [2019-10-04 09:23:50.524] [error] Unsupported mutation: chr2 233144847 K 2
+     16 [2019-10-04 09:36:25.419] [info] Num mutations: 2063922 num mutations-sample: 3992241
+     17 [2019-10-04 09:36:25.419] [info] Num vars: 2043909
+     18 [2019-10-04 09:36:30.242] [info] Fixing sample indexes in the graph
+     19 [2019-10-04 09:37:18.653] [info] Graph stats:
+     20 [2019-10-04 09:37:18.653] [info] Chromosome: 2 #Vertices: 6062698 #Edges: 8143424 Seq length: 244332559
+     21 [2019-10-04 09:37:18.653] [info] Serializing variant graph to disk
+     22 [2019-10-04 09:37:27.609] [info] Number of sample vector classes: 0
+     23 [2019-10-04 09:37:27.616] [info] Creating Index
+     24 [2019-10-04 09:37:49.074] [info] Serializing index to disk
+     25 [2019-10-04 09:37:50.514] [info] Creating variant graph
+     26 [2019-10-04 09:37:55.019] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr3.vcf.gz #Samples: 8640
+     27 [2019-10-04 10:49:31.627] [error] Unsupported mutation: chr3 66186453 Y 3
+     28 [2019-10-04 13:00:37.294] [info] Num mutations: 1689756 num mutations-sample: 3212724
+     29 [2019-10-04 13:00:37.294] [info] Num vars: 1675125
+     30 [2019-10-04 13:00:44.376] [info] Fixing sample indexes in the graph
+     31 [2019-10-04 13:01:13.229] [info] Graph stats:
+     32 [2019-10-04 13:01:13.229] [info] Chromosome: 3 #Vertices: 4973528 #Edges: 6675092 Seq length: 200051523
+     33 [2019-10-04 13:01:13.229] [info] Serializing variant graph to disk
+     34 [2019-10-04 13:01:24.058] [info] Number of sample vector classes: 0
+     35 [2019-10-04 13:01:24.063] [info] Creating Index
+     36 [2019-10-04 13:01:36.577] [info] Serializing index to disk
+     37 [2019-10-04 13:01:37.737] [info] Creating variant graph
+     38 [2019-10-04 13:01:42.036] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr4.vcf.gz #Samples: 8640
+     39 [2019-10-04 16:04:37.806] [info] Num mutations: 1522961 num mutations-sample: 3133049
+     40 [2019-10-04 16:04:37.806] [info] Num vars: 1498956
+     41 [2019-10-04 16:04:43.321] [info] Fixing sample indexes in the graph
+     42 [2019-10-04 16:05:13.419] [info] Graph stats:
+     43 [2019-10-04 16:05:13.419] [info] Chromosome: 4 #Vertices: 4447711 #Edges: 5989237 Seq length: 191803635
+     44 [2019-10-04 16:05:13.419] [info] Serializing variant graph to disk
+     45 [2019-10-04 16:05:22.466] [info] Number of sample vector classes: 0
+     46 [2019-10-04 16:05:22.471] [info] Creating Index
+     47 [2019-10-04 16:05:35.379] [info] Serializing index to disk
+     48 [2019-10-04 16:05:36.423] [info] Creating variant graph
+     49 [2019-10-04 16:05:40.625] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr5.vcf.gz #Samples: 8640
+     50 [2019-10-04 19:05:36.814] [info] Num mutations: 1488342 num mutations-sample: 2829563
+     51 [2019-10-04 19:05:36.814] [info] Num vars: 1473203
+     52 [2019-10-04 19:05:42.230] [info] Fixing sample indexes in the graph
+     53 [2019-10-04 19:06:12.230] [info] Graph stats:
+     54 [2019-10-04 19:06:12.230] [info] Chromosome: 5 #Vertices: 4375443 #Edges: 5875885 Seq length: 183078120
+     55 [2019-10-04 19:06:12.230] [info] Serializing variant graph to disk
+     56 [2019-10-04 19:06:21.025] [info] Number of sample vector classes: 0
+     57 [2019-10-04 19:06:21.033] [info] Creating Index
+     58 [2019-10-04 19:06:34.082] [info] Serializing index to disk
+     59 [2019-10-04 19:06:35.111] [info] Creating variant graph
+     60 [2019-10-04 19:06:39.073] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr6.vcf.gz #Samples: 8640
+     61 [2019-10-04 22:04:16.116] [info] Num mutations: 1474496 num mutations-sample: 2947881
+     62 [2019-10-04 22:04:16.116] [info] Num vars: 1460349
+     63 [2019-10-04 22:04:21.438] [info] Fixing sample indexes in the graph
+     64 [2019-10-04 22:04:51.967] [info] Graph stats:
+     65 [2019-10-04 22:04:51.967] [info] Chromosome: 6 #Vertices: 4330193 #Edges: 5815764 Seq length: 172331997
+     66 [2019-10-04 22:04:51.967] [info] Serializing variant graph to disk
+     67 [2019-10-04 22:05:00.565] [info] Number of sample vector classes: 0
+     68 [2019-10-04 22:05:00.574] [info] Creating Index
+     69 [2019-10-04 22:05:14.026] [info] Serializing index to disk
+     70 [2019-10-04 22:05:15.041] [info] Creating variant graph
+     71 [2019-10-04 22:05:18.793] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr7.vcf.gz #Samples: 8640
+     72 [2019-10-05 00:49:21.162] [error] Unsupported mutation: chr7 154575459 R 7
+     73 [2019-10-05 00:56:33.787] [info] Num mutations: 1430028 num mutations-sample: 3088832
+     74 [2019-10-05 00:56:33.787] [info] Num vars: 1416174
+     75 [2019-10-05 00:56:39.005] [info] Fixing sample indexes in the graph
+     76 [2019-10-05 00:57:10.360] [info] Graph stats:
+     77 [2019-10-05 00:57:10.360] [info] Chromosome: 7 #Vertices: 4199623 #Edges: 5640707 Seq length: 160827015
+     78 [2019-10-05 00:57:10.360] [info] Serializing variant graph to disk
+     79 [2019-10-05 00:57:19.030] [info] Number of sample vector classes: 0
+     80 [2019-10-05 00:57:19.038] [info] Creating Index
+     81 [2019-10-05 00:57:33.178] [info] Serializing index to disk
+     82 [2019-10-05 00:57:34.157] [info] Creating variant graph
+     83 [2019-10-05 00:57:37.600] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr8.vcf.gz #Samples: 8640
+     84 [2019-10-05 03:41:08.602] [info] Num mutations: 1348164 num mutations-sample: 2585201
+     85 [2019-10-05 03:41:08.602] [info] Num vars: 1336896
+     86 [2019-10-05 03:41:15.466] [info] Fixing sample indexes in the graph
+     87 [2019-10-05 03:41:36.717] [info] Graph stats:
+     88 [2019-10-05 03:41:36.717] [info] Chromosome: 8 #Vertices: 3969877 #Edges: 5326518 Seq length: 146530714
+     89 [2019-10-05 03:41:36.717] [info] Serializing variant graph to disk
+     90 [2019-10-05 03:41:46.787] [info] Number of sample vector classes: 0
+     91 [2019-10-05 03:41:46.791] [info] Creating Index
+     92 [2019-10-05 03:41:56.874] [info] Serializing index to disk
+     93 [2019-10-05 03:41:57.793] [info] Creating variant graph
+     94 [2019-10-05 03:42:01.100] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr9.vcf.gz #Samples: 8640
+     95 [2019-10-05 05:48:54.152] [info] Num mutations: 1053888 num mutations-sample: 2337061
+     96 [2019-10-05 05:48:54.152] [info] Num vars: 1043538
+     97 [2019-10-05 05:48:58.667] [info] Fixing sample indexes in the graph
+     98 [2019-10-05 05:49:21.251] [info] Graph stats:
+     99 [2019-10-05 05:49:21.251] [info] Chromosome: 9 #Vertices: 3096320 #Edges: 4157864 Seq length: 139477347
+    100 [2019-10-05 05:49:21.251] [info] Serializing variant graph to disk
+    101 [2019-10-05 05:49:28.533] [info] Number of sample vector classes: 0
+    102 [2019-10-05 05:49:28.539] [info] Creating Index
+    103 [2019-10-05 05:49:39.136] [info] Serializing index to disk
+    104 [2019-10-05 05:49:39.862] [info] Creating variant graph
+    105 [2019-10-05 05:49:43.126] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr10.vcf.gz #Samples: 8640
+    106 [2019-10-05 08:23:23.777] [info] Num mutations: 1264305 num mutations-sample: 2827175
+    107 [2019-10-05 08:23:23.777] [info] Num vars: 1244321
+    108 [2019-10-05 08:23:29.660] [info] Fixing sample indexes in the graph
+    109 [2019-10-05 08:23:50.910] [info] Graph stats:
+    110 [2019-10-05 08:23:50.910] [info] Chromosome: 10 #Vertices: 3687818 #Edges: 4970925 Seq length: 135119498
+    111 [2019-10-05 08:23:50.910] [info] Serializing variant graph to disk
+    112 [2019-10-05 08:23:59.792] [info] Number of sample vector classes: 0
+    113 [2019-10-05 08:23:59.797] [info] Creating Index
+    114 [2019-10-05 08:24:09.692] [info] Serializing index to disk
+    115 [2019-10-05 08:24:10.553] [info] Creating variant graph
+    116 [2019-10-05 08:24:13.800] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr11.vcf.gz #Samples: 8640
+    117 [2019-10-05 10:47:27.120] [info] Num mutations: 1194525 num mutations-sample: 2375919
+    118 [2019-10-05 10:47:27.120] [info] Num vars: 1183905
+    119 [2019-10-05 10:47:32.549] [info] Fixing sample indexes in the graph
+    120 [2019-10-05 10:47:53.252] [info] Graph stats:
+    121 [2019-10-05 10:47:53.252] [info] Chromosome: 11 #Vertices: 3514132 #Edges: 4717072 Seq length: 136320057
+    122 [2019-10-05 10:47:53.252] [info] Serializing variant graph to disk
+    123 [2019-10-05 10:48:01.585] [info] Number of sample vector classes: 0
+    124 [2019-10-05 10:48:01.593] [info] Creating Index
+    125 [2019-10-05 10:48:11.395] [info] Serializing index to disk
+    126 [2019-10-05 10:48:12.214] [info] Creating variant graph
+    127 [2019-10-05 10:48:15.477] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr12.vcf.gz #Samples: 8640
+    128 [2019-10-05 13:13:18.895] [info] Num mutations: 1203218 num mutations-sample: 2358886
+    129 [2019-10-05 13:13:18.895] [info] Num vars: 1191904
+    130 [2019-10-05 13:13:24.385] [info] Fixing sample indexes in the graph
+    131 [2019-10-05 13:13:45.079] [info] Graph stats:
+    132 [2019-10-05 13:13:45.079] [info] Chromosome: 12 #Vertices: 3532962 #Edges: 4745816 Seq length: 134521041
+    133 [2019-10-05 13:13:45.079] [info] Serializing variant graph to disk
+    134 [2019-10-05 13:13:53.437] [info] Number of sample vector classes: 0
+    135 [2019-10-05 13:13:53.445] [info] Creating Index
+    136 [2019-10-05 13:14:03.224] [info] Serializing index to disk
+    137 [2019-10-05 13:14:04.053] [info] Creating variant graph
+    138 [2019-10-05 13:14:06.907] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr13.vcf.gz #Samples: 8640
+    139 [2019-10-05 14:46:41.551] [info] Num mutations: 768897 num mutations-sample: 1419551
+    140 [2019-10-05 14:46:41.551] [info] Num vars: 762593
+    141 [2019-10-05 14:46:45.949] [info] Fixing sample indexes in the graph
+    142 [2019-10-05 14:46:59.181] [info] Graph stats:
+    143 [2019-10-05 14:46:59.181] [info] Chromosome: 13 #Vertices: 2264710 #Edges: 3037753 Seq length: 115150634
+    144 [2019-10-05 14:46:59.181] [info] Serializing variant graph to disk
+    145 [2019-10-05 14:47:05.999] [info] Number of sample vector classes: 0
+    146 [2019-10-05 14:47:06.007] [info] Creating Index
+    147 [2019-10-05 14:47:13.288] [info] Serializing index to disk
+    148 [2019-10-05 14:47:13.798] [info] Creating variant graph
+    149 [2019-10-05 14:47:16.542] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr14.vcf.gz #Samples: 8640
+    150 [2019-10-05 16:21:39.588] [info] Num mutations: 780867 num mutations-sample: 1555096
+    151 [2019-10-05 16:21:39.588] [info] Num vars: 773925
+    152 [2019-10-05 16:21:44.202] [info] Fixing sample indexes in the graph
+    153 [2019-10-05 16:21:58.102] [info] Graph stats:
+    154 [2019-10-05 16:21:58.102] [info] Chromosome: 14 #Vertices: 2296815 #Edges: 3082887 Seq length: 107846696
+    155 [2019-10-05 16:21:58.102] [info] Serializing variant graph to disk
+    156 [2019-10-05 16:22:05.285] [info] Number of sample vector classes: 0
+    157 [2019-10-05 16:22:05.293] [info] Creating Index
+    158 [2019-10-05 16:22:12.765] [info] Serializing index to disk
+    159 [2019-10-05 16:22:13.292] [info] Creating variant graph
+    160 [2019-10-05 16:22:15.928] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr15.vcf.gz #Samples: 8640
+    161 [2019-10-05 17:52:52.287] [info] Num mutations: 754063 num mutations-sample: 1553922
+    162 [2019-10-05 17:52:52.287] [info] Num vars: 746494
+    163 [2019-10-05 17:52:56.637] [info] Fixing sample indexes in the graph
+    164 [2019-10-05 17:53:10.231] [info] Graph stats:
+    165 [2019-10-05 17:53:10.231] [info] Chromosome: 15 #Vertices: 2212773 #Edges: 2973110 Seq length: 102770338
+    166 [2019-10-05 17:53:10.231] [info] Serializing variant graph to disk
+    167 [2019-10-05 17:53:17.023] [info] Number of sample vector classes: 0
+    168 [2019-10-05 17:53:17.030] [info] Creating Index
+    169 [2019-10-05 17:53:24.399] [info] Serializing index to disk
+    170 [2019-10-05 17:53:24.903] [info] Creating variant graph
+    171 [2019-10-05 17:53:27.342] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr16.vcf.gz #Samples: 8640
+    172 [2019-10-05 19:27:39.692] [error] Unsupported mutation: chr16 88366825 R 16
+    173 [2019-10-05 19:30:31.238] [info] Num mutations: 807687 num mutations-sample: 2064855
+    174 [2019-10-05 19:30:31.238] [info] Num vars: 797079
+    175 [2019-10-05 19:30:36.279] [info] Fixing sample indexes in the graph
+    176 [2019-10-05 19:30:50.443] [info] Graph stats:
+    177 [2019-10-05 19:30:50.443] [info] Chromosome: 16 #Vertices: 2364049 #Edges: 3181069 Seq length: 91179762
+    178 [2019-10-05 19:30:50.443] [info] Serializing variant graph to disk
+    179 [2019-10-05 19:30:58.420] [info] Number of sample vector classes: 0
+    180 [2019-10-05 19:30:58.425] [info] Creating Index
+    181 [2019-10-05 19:31:06.356] [info] Serializing index to disk
+    182 [2019-10-05 19:31:06.915] [info] Creating variant graph
+    183 [2019-10-05 19:31:09.199] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr17.vcf.gz #Samples: 8640
+    184 [2019-10-05 21:12:16.441] [info] Num mutations: 846153 num mutations-sample: 1949803
+    185 [2019-10-05 21:12:16.441] [info] Num vars: 834968
+    186 [2019-10-05 21:12:21.532] [info] Fixing sample indexes in the graph
+    187 [2019-10-05 21:12:35.354] [info] Graph stats:
+    188 [2019-10-05 21:12:35.354] [info] Chromosome: 17 #Vertices: 2470324 #Edges: 3325389 Seq length: 84135600
+    189 [2019-10-05 21:12:35.354] [info] Serializing variant graph to disk
+    190 [2019-10-05 21:12:42.946] [info] Number of sample vector classes: 0
+    191 [2019-10-05 21:12:42.951] [info] Creating Index
+    192 [2019-10-05 21:12:50.677] [info] Serializing index to disk
+    193 [2019-10-05 21:12:51.262] [info] Creating variant graph
+    194 [2019-10-05 21:12:53.484] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr18.vcf.gz #Samples: 8640
+    195 [2019-10-05 22:28:19.015] [info] Num mutations: 634266 num mutations-sample: 1241797
+    196 [2019-10-05 22:28:19.015] [info] Num vars: 627690
+    197 [2019-10-05 22:28:24.935] [info] Fixing sample indexes in the graph
+    198 [2019-10-05 22:28:31.292] [info] Graph stats:
+    199 [2019-10-05 22:28:31.292] [info] Chromosome: 18 #Vertices: 1864586 #Edges: 2503394 Seq length: 81030324
+    200 [2019-10-05 22:28:31.292] [info] Serializing variant graph to disk
+    201 [2019-10-05 22:28:39.416] [info] Number of sample vector classes: 0
+    202 [2019-10-05 22:28:39.421] [info] Creating Index
+    203 [2019-10-05 22:28:43.350] [info] Serializing index to disk
+    204 [2019-10-05 22:28:43.815] [info] Creating variant graph
+    205 [2019-10-05 22:28:45.658] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr19.vcf.gz #Samples: 8640
+    206 [2019-10-05 23:49:18.420] [info] Num mutations: 677586 num mutations-sample: 1737531
+    207 [2019-10-05 23:49:18.420] [info] Num vars: 668847
+    208 [2019-10-05 23:49:25.183] [info] Fixing sample indexes in the graph
+    209 [2019-10-05 23:49:32.289] [info] Graph stats:
+    210 [2019-10-05 23:49:32.289] [info] Chromosome: 19 #Vertices: 1977214 #Edges: 2663166 Seq length: 59321618
+    211 [2019-10-05 23:49:32.289] [info] Serializing variant graph to disk
+    212 [2019-10-05 23:49:41.736] [info] Number of sample vector classes: 0
+    213 [2019-10-05 23:49:41.740] [info] Creating Index
+    214 [2019-10-05 23:49:46.309] [info] Serializing index to disk
+    215 [2019-10-05 23:49:46.818] [info] Creating variant graph
+    216 [2019-10-05 23:49:48.781] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr20.vcf.gz #Samples: 8640
+    217 [2019-10-06 01:14:45.349] [info] Num mutations: 721030 num mutations-sample: 2122017
+    218 [2019-10-06 01:14:45.349] [info] Num vars: 705785
+    219 [2019-10-06 01:14:49.434] [info] Fixing sample indexes in the graph
+    220 [2019-10-06 01:15:04.554] [info] Graph stats:
+    221 [2019-10-06 01:15:04.554] [info] Chromosome: 20 #Vertices: 2089150 #Edges: 2826538 Seq length: 65219130
+    222 [2019-10-06 01:15:04.554] [info] Serializing variant graph to disk
+    223 [2019-10-06 01:15:10.946] [info] Number of sample vector classes: 0
+    224 [2019-10-06 01:15:10.951] [info] Creating Index
+    225 [2019-10-06 01:15:19.393] [info] Serializing index to disk
+    226 [2019-10-06 01:15:19.901] [info] Creating variant graph
+    227 [2019-10-06 01:15:21.556] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr21.vcf.gz #Samples: 8640
+    228 [2019-10-06 02:00:16.543] [info] Num mutations: 377944 num mutations-sample: 1318235
+    229 [2019-10-06 02:00:16.543] [info] Num vars: 370142
+    230 [2019-10-06 02:00:20.546] [info] Fixing sample indexes in the graph
+    231 [2019-10-06 02:00:24.690] [info] Graph stats:
+    232 [2019-10-06 02:00:24.690] [info] Chromosome: 21 #Vertices: 1093013 #Edges: 1479823 Seq length: 47110487
+    233 [2019-10-06 02:00:24.690] [info] Serializing variant graph to disk
+    234 [2019-10-06 02:00:30.846] [info] Number of sample vector classes: 0
+    235 [2019-10-06 02:00:30.851] [info] Creating Index
+    236 [2019-10-06 02:00:33.591] [info] Serializing index to disk
+    237 [2019-10-06 02:00:33.905] [info] Creating variant graph
+    238 [2019-10-06 02:00:35.647] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chr22.vcf.gz #Samples: 8640
+    239 [2019-10-06 02:51:14.096] [info] Num mutations: 427035 num mutations-sample: 1233903
+    240 [2019-10-06 02:51:14.096] [info] Num vars: 421000
+    241 [2019-10-06 02:51:18.587] [info] Fixing sample indexes in the graph
+    242 [2019-10-06 02:51:23.126] [info] Graph stats:
+    243 [2019-10-06 02:51:23.126] [info] Chromosome: 22 #Vertices: 1245090 #Edges: 1677875 Seq length: 51261644
+    244 [2019-10-06 02:51:23.126] [info] Serializing variant graph to disk
+    245 [2019-10-06 02:51:29.484] [info] Number of sample vector classes: 0
+    246 [2019-10-06 02:51:29.489] [info] Creating Index
+    247 [2019-10-06 02:51:32.425] [info] Serializing index to disk
+    248 [2019-10-06 02:51:32.760] [info] Creating variant graph
+    249 [2019-10-06 02:51:36.370] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chrX.vcf.gz #Samples: 8640
+    250 [2019-10-06 04:57:52.584] [info] Num mutations: 1052564 num mutations-sample: 1755736
+    251 [2019-10-06 04:57:52.584] [info] Num vars: 1044307
+    252 [2019-10-06 04:57:56.956] [info] Fixing sample indexes in the graph
+    253 [2019-10-06 04:58:18.644] [info] Graph stats:
+    254 [2019-10-06 04:58:18.644] [info] Chromosome: X #Vertices: 3101084 #Edges: 4160920 Seq length: 157129644
+    255 [2019-10-06 04:58:18.644] [info] Serializing variant graph to disk
+    256 [2019-10-06 04:58:25.881] [info] Number of sample vector classes: 0
+    257 [2019-10-06 04:58:25.889] [info] Creating Index
+    258 [2019-10-06 04:58:36.044] [info] Serializing index to disk
+    259 [2019-10-06 04:58:36.758] [info] Creating variant graph
+    260 [2019-10-06 04:58:38.563] [info] Adding mutations from: /dbgap/ckingsf_A018251/ppandey2/tcga-new/tcga-merged/brca/chrY.vcf.gz #Samples: 8640
+    261 [2019-10-06 05:02:53.747] [info] Num mutations: 40495 num mutations-sample: 409179
+    262 [2019-10-06 05:02:53.747] [info] Num vars: 33466
+    263 [2019-10-06 05:02:54.274] [info] Fixing sample indexes in the graph
+    264 [2019-10-06 05:02:54.859] [info] Graph stats:
+    265 [2019-10-06 05:02:54.859] [info] Chromosome: Y #Vertices: 96119 #Edges: 140345 Seq length: 57280113
+    266 [2019-10-06 05:02:54.859] [info] Serializing variant graph to disk
+    267 [2019-10-06 05:02:56.771] [info] Number of sample vector classes: 0
+    268 [2019-10-06 05:02:56.776] [info] Creating Index
+    269 [2019-10-06 05:02:57.221] [info] Serializing index to disk
