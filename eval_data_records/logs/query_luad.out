@@ -1,0 +1,181 @@
+Query length: 42776
+Benchmarking query type 1
+[2019-11-22 00:55:51.338] [info] Loading Index ...
+[2019-11-22 00:55:51.563] [info] Loading variant graph ...
+[2019-11-22 00:55:51.563] [info] Read index only ..
+[2019-11-22 00:55:53.944] [info] Graph stats:
+[2019-11-22 00:55:53.944] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 00:55:53.944] [info] 1. Get sample's sequence in ref coordinate ...
+Query10: Total Time Elapsed: 20.562197seconds
+Query length: 42776
+Benchmarking query type 1
+[2019-11-22 00:56:14.754] [info] Loading Index ...
+[2019-11-22 00:56:14.763] [info] Loading variant graph ...
+[2019-11-22 00:56:14.763] [info] Read index only ..
+[2019-11-22 00:56:15.413] [info] Graph stats:
+[2019-11-22 00:56:15.413] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 00:56:15.414] [info] 1. Get sample's sequence in ref coordinate ...
+Query10: Total Time Elapsed: 5.790367seconds
+Query100: Total Time Elapsed: 320.748810seconds
+Query length: 42776
+Benchmarking query type 1
+[2019-11-22 01:01:36.707] [info] Loading Index ...
+[2019-11-22 01:01:36.715] [info] Loading variant graph ...
+[2019-11-22 01:01:36.715] [info] Read index only ..
+[2019-11-22 01:01:37.357] [info] Graph stats:
+[2019-11-22 01:01:37.357] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 01:01:37.358] [info] 1. Get sample's sequence in ref coordinate ...
+Query10: Total Time Elapsed: 1.492812seconds
+Query100: Total Time Elapsed: 29.970598seconds
+Query1000: Total Time Elapsed: 2933.386475seconds
+Query length: 42776
+Benchmarking query type 2
+[2019-11-22 01:50:30.871] [info] Loading Index ...
+[2019-11-22 01:50:30.878] [info] Loading variant graph ...
+[2019-11-22 01:50:30.878] [info] Read index only ..
+[2019-11-22 01:50:31.518] [info] Graph stats:
+[2019-11-22 01:50:31.518] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 01:50:31.518] [info] 2. Get sample's sequence in sample's coordinate ...
+Query10: Total Time Elapsed: 15.655592seconds
+Query length: 42776
+Benchmarking query type 2
+[2019-11-22 01:50:47.383] [info] Loading Index ...
+[2019-11-22 01:50:47.390] [info] Loading variant graph ...
+[2019-11-22 01:50:47.390] [info] Read index only ..
+[2019-11-22 01:50:48.032] [info] Graph stats:
+[2019-11-22 01:50:48.032] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 01:50:48.032] [info] 2. Get sample's sequence in sample's coordinate ...
+Query10: Total Time Elapsed: 3.771254seconds
+Query100: Total Time Elapsed: 254.580383seconds
+Query length: 42776
+Benchmarking query type 2
+[2019-11-22 01:55:03.162] [info] Loading Index ...
+[2019-11-22 01:55:03.170] [info] Loading variant graph ...
+[2019-11-22 01:55:03.170] [info] Read index only ..
+[2019-11-22 01:55:03.815] [info] Graph stats:
+[2019-11-22 01:55:03.815] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 01:55:03.816] [info] 2. Get sample's sequence in sample's coordinate ...
+Query10: Total Time Elapsed: 1.633399seconds
+Query100: Total Time Elapsed: 28.341944seconds
+Query1000: Total Time Elapsed: 2475.042236seconds
+Query length: 42776
+Benchmarking query type 3
+[2019-11-22 02:36:18.985] [info] Loading Index ...
+[2019-11-22 02:36:18.993] [info] Loading variant graph ...
+[2019-11-22 02:36:18.993] [info] Read index only ..
+[2019-11-22 02:36:19.630] [info] Graph stats:
+[2019-11-22 02:36:19.630] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 02:36:19.630] [info] 3. Return closest mutation in ref coordinate. ...
+Query10: Total Time Elapsed: 4.041734seconds
+Query length: 42776
+Benchmarking query type 3
+[2019-11-22 02:36:23.927] [info] Loading Index ...
+[2019-11-22 02:36:23.934] [info] Loading variant graph ...
+[2019-11-22 02:36:23.934] [info] Read index only ..
+[2019-11-22 02:36:24.574] [info] Graph stats:
+[2019-11-22 02:36:24.574] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 02:36:24.575] [info] 3. Return closest mutation in ref coordinate. ...
+Query10: Total Time Elapsed: 1.300761seconds
+Query100: Total Time Elapsed: 4.575422seconds
+Query length: 42776
+Benchmarking query type 3
+[2019-11-22 02:36:29.748] [info] Loading Index ...
+[2019-11-22 02:36:29.756] [info] Loading variant graph ...
+[2019-11-22 02:36:29.756] [info] Read index only ..
+[2019-11-22 02:36:30.397] [info] Graph stats:
+[2019-11-22 02:36:30.397] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 02:36:30.398] [info] 3. Return closest mutation in ref coordinate. ...
+Query10: Total Time Elapsed: 1.275882seconds
+Query100: Total Time Elapsed: 1.278490seconds
+Query1000: Total Time Elapsed: 4.629893seconds
+Query length: 42776
+Benchmarking query type 4
+[2019-11-22 02:36:35.280] [info] Loading Index ...
+[2019-11-22 02:36:35.288] [info] Loading variant graph ...
+[2019-11-22 02:36:35.288] [info] Read index only ..
+[2019-11-22 02:36:35.929] [info] Graph stats:
+[2019-11-22 02:36:35.929] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 02:36:35.929] [info] 4. Get sample's variants in ref coordinate ...
+Query10: Total Time Elapsed: 38.434776seconds
+Query length: 42776
+Benchmarking query type 4
+[2019-11-22 02:37:14.591] [info] Loading Index ...
+[2019-11-22 02:37:14.599] [info] Loading variant graph ...
+[2019-11-22 02:37:14.599] [info] Read index only ..
+[2019-11-22 02:37:15.239] [info] Graph stats:
+[2019-11-22 02:37:15.239] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 02:37:15.239] [info] 4. Get sample's variants in ref coordinate ...
+Query10: Total Time Elapsed: 4.153669seconds
+Query100: Total Time Elapsed: 384.499420seconds
+Query length: 42776
+Benchmarking query type 4
+[2019-11-22 02:43:40.271] [info] Loading Index ...
+[2019-11-22 02:43:40.280] [info] Loading variant graph ...
+[2019-11-22 02:43:40.280] [info] Read index only ..
+[2019-11-22 02:43:40.922] [info] Graph stats:
+[2019-11-22 02:43:40.922] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 02:43:40.923] [info] 4. Get sample's variants in ref coordinate ...
+Query10: Total Time Elapsed: 1.751449seconds
+Query100: Total Time Elapsed: 43.685551seconds
+Query1000: Total Time Elapsed: 3319.402588seconds
+Query length: 42776
+Benchmarking query type 5
+[2019-11-22 03:39:00.452] [info] Loading Index ...
+[2019-11-22 03:39:00.459] [info] Loading variant graph ...
+[2019-11-22 03:39:00.459] [info] Read index only ..
+[2019-11-22 03:39:01.098] [info] Graph stats:
+[2019-11-22 03:39:01.098] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 03:39:01.098] [info] 5. Get sample's variants in sample coordinate ...
+Query10: Total Time Elapsed: 37.720650seconds
+Query length: 42776
+Benchmarking query type 5
+[2019-11-22 03:39:39.040] [info] Loading Index ...
+[2019-11-22 03:39:39.047] [info] Loading variant graph ...
+[2019-11-22 03:39:39.047] [info] Read index only ..
+[2019-11-22 03:39:39.693] [info] Graph stats:
+[2019-11-22 03:39:39.693] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 03:39:39.693] [info] 5. Get sample's variants in sample coordinate ...
+Query10: Total Time Elapsed: 4.014443seconds
+Query100: Total Time Elapsed: 334.051270seconds
+Query length: 42776
+Benchmarking query type 5
+[2019-11-22 03:45:14.285] [info] Loading Index ...
+[2019-11-22 03:45:14.292] [info] Loading variant graph ...
+[2019-11-22 03:45:14.292] [info] Read index only ..
+[2019-11-22 03:45:14.932] [info] Graph stats:
+[2019-11-22 03:45:14.932] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 03:45:14.933] [info] 5. Get sample's variants in sample coordinate ...
+Query10: Total Time Elapsed: 1.829138seconds
+Query100: Total Time Elapsed: 38.293839seconds
+Query1000: Total Time Elapsed: 3195.307373seconds
+Query length: 42776
+Benchmarking query type 6
+[2019-11-22 04:38:30.356] [info] Loading Index ...
+[2019-11-22 04:38:30.364] [info] Loading variant graph ...
+[2019-11-22 04:38:30.364] [info] Read index only ..
+[2019-11-22 04:38:31.005] [info] Graph stats:
+[2019-11-22 04:38:31.005] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 04:38:31.005] [info] 6. Get variants in ref coordinate. ...
+Query10: Total Time Elapsed: 4.045505seconds
+Query length: 42776
+Benchmarking query type 6
+[2019-11-22 04:38:35.302] [info] Loading Index ...
+[2019-11-22 04:38:35.309] [info] Loading variant graph ...
+[2019-11-22 04:38:35.309] [info] Read index only ..
+[2019-11-22 04:38:35.951] [info] Graph stats:
+[2019-11-22 04:38:35.951] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 04:38:35.951] [info] 6. Get variants in ref coordinate. ...
+Query10: Total Time Elapsed: 1.310403seconds
+Query100: Total Time Elapsed: 4.808437seconds
+Query length: 42776
+Benchmarking query type 6
+[2019-11-22 04:38:41.368] [info] Loading Index ...
+[2019-11-22 04:38:41.376] [info] Loading variant graph ...
+[2019-11-22 04:38:41.376] [info] Read index only ..
+[2019-11-22 04:38:42.020] [info] Graph stats:
+[2019-11-22 04:38:42.020] [info] Chromosome: 2 #Vertices: 3177980 #Edges: 0 Seq length: 243294047
+[2019-11-22 04:38:42.021] [info] 6. Get variants in ref coordinate. ...
+Query10: Total Time Elapsed: 1.313968seconds
+Query100: Total Time Elapsed: 1.539433seconds
+Query1000: Total Time Elapsed: 7.068211seconds
+
