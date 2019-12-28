@@ -26,25 +26,20 @@ std::string REF = "ref";
 
 namespace variantstore {
 
-	typedef std::map <std::string, std::vector <std::string>> AltSamplesMap;
-
 	struct Variant {
 		uint64_t var_pos;
 		std::string ref;
-		std::vector <std::string> alts;
-		AltSamplesMap alt_sample_map;
+		std::string alt;
+		// sample names and phasing info.
+		std::vector<std::pair<std::string, std::string>> samples;
 	};
 
 	void print_var (Variant *var, ofstream& out) {
-		for (auto a=var->alts.begin(); a!=var->alts.end(); a++) {
-			out << var->var_pos << "\t"<< var->ref << "\t";
-			out << *a << "\t";
-			for (auto s=var->alt_sample_map[*a].begin();
-								s != var-> alt_sample_map[*a].end(); s++) {
-				out << (*s) << ",";
-			}
-			out << std::endl;
+		out << var->var_pos << "\t"<< var->ref << "\t" << var->alt << "\t";
+		for (auto sample : var->samples) {
+			out << sample.first << "(" << sample.second << ") ";
 		}
+		out << std::endl;
 		return;
 	}
 
@@ -199,7 +194,7 @@ namespace variantstore {
 																				 const uint64_t pos_x,
 																				 const uint64_t pos_y,
 																				 const string sample_id,
-																			 	 bool print=false, std::string outfile="")
+																				 bool print=false, std::string outfile="")
 	{
 		std::string seq = "";
 		uint64_t ref_pos;
@@ -264,8 +259,9 @@ namespace variantstore {
 		 Support Func: get samples in a nodes
 		 Return true if the node contains samples other than ref
 		 */
-	bool get_samples ( const VariantGraphVertex* v, VariantGraph *vg,
-										 std::vector <std::string> &sample_ids)
+	bool get_samples(const VariantGraphVertex* v, VariantGraph *vg,
+									 std::vector<std::pair<std::string, std::string>>
+									 &sample_ids)
 	{
 		bool is_var = false;
 		sample_ids = {};
@@ -274,7 +270,8 @@ namespace variantstore {
 			std::string sample_id =
 				vg->get_sample_name(vg->get_sample_id(*v, i));
 			if (sample_id != REF) {
-				sample_ids.push_back(sample_id);
+				std::string phasing = vg->get_sample_phasing(*v, i); 					
+				sample_ids.push_back(std::make_pair(sample_id, phasing));
 				is_var = true;
 			}
 		}
@@ -292,9 +289,9 @@ namespace variantstore {
 		 */
 
 	bool next_variant_in_ref ( VariantGraph *vg, Index *idx,
-																							const uint64_t pos,
-																							vector<Variant> &vars,
-																							uint64_t &next_pos)
+														 const uint64_t pos,
+														 vector<Variant> &vars,
+														 uint64_t &next_pos)
 	{
 		bool found_var = false;
 		Graph::vertex v = idx->find(pos); // the node before pos
@@ -318,7 +315,7 @@ namespace variantstore {
 				// console->debug("Check bfs vertex: {}", (*bfs_it)->vertex_id());
 				num_out_nodes++;
 				//Graph::vertex out_v = (*bfs_it)->vertex_id();
-				std::vector <std::string> sample_ids;
+				std::vector<std::pair<std::string, std::string>> sample_ids;
 				// got variant nodes' samples_ids
 				if (get_samples((*bfs_it), vg, sample_ids)) { // found var
 					VariantGraphVertex::sample_info sample;
@@ -330,8 +327,8 @@ namespace variantstore {
 						std::string alt = "";
 						std::string ref = vg->get_sequence(*(*next_it));
 						var.ref.assign(ref);
-						var.alts.push_back(alt);
-						var.alt_sample_map[alt] = sample_ids;
+						var.alt.assign(alt);
+						var.samples = sample_ids;
 						if (vg->get_sample_from_vertex_if_exists((*next_it)-> vertex_id(),
 																										 REF, sample)) {
 							var.var_pos = sample.index();
@@ -345,7 +342,7 @@ namespace variantstore {
 						uint64_t prev_ref_idx = sample.index();
 						// dfs from bfs_it in sample's path
 						VariantGraph::VariantGraphPathIterator dfs_it =
-							vg->find((*bfs_it)->vertex_id(), sample_ids[0]);
+							vg->find((*bfs_it)->vertex_id(), sample_ids[0].first);
 						++dfs_it;
 						if (!vg->get_sample_from_vertex_if_exists((*dfs_it)-> vertex_id(),
 																											REF, sample))
@@ -362,16 +359,16 @@ namespace variantstore {
 							std::string ref = "";
 							var.ref.assign(ref);
 							std::string alt = vg->get_sequence(*(*bfs_it));
-							var.alts.push_back(alt);
-							var.alt_sample_map[alt] = sample_ids;
+							var.alt.assign(alt);
+							var.samples = sample_ids;
 							var.var_pos = next_ref_idx - 1;
 						} else {
 							// substitution
 							std::string alt = vg->get_sequence(*(*bfs_it));
-							var.alts.push_back(alt);
+							var.alt.assign(alt);
 							std::string ref = vg->get_sequence(*(*next_it));
 							var.ref.assign(ref);
-							var.alt_sample_map[alt] = sample_ids;
+							var.samples = sample_ids;
 							if (vg->get_sample_from_vertex_if_exists((*next_it)-> vertex_id(),
 																											 REF, sample)) {
 								var.var_pos = sample.index();
@@ -398,7 +395,7 @@ namespace variantstore {
 			++it;
 			++next_it;
 		} // end DFS in ref
-		
+
 		VariantGraphVertex::sample_info sample;
 		if (vg->get_sample_from_vertex_if_exists((*next_it)-> vertex_id(),
 																						 REF, sample)) {
@@ -431,8 +428,8 @@ namespace variantstore {
 				if (prev_var_pos != next_var_pos) {
 					vars = prev_var;
 				} else {
-	 				vars = next_var;
- 				}
+					vars = next_var;
+				}
 			} else {
 				vars = next_var;
 			}
@@ -466,7 +463,7 @@ namespace variantstore {
 																									 const uint64_t pos_x,
 																									 const uint64_t pos_y,
 																									 const std::string sample_id,
-																								 	 bool print=false, std::string outfile="")
+																									 bool print=false, std::string outfile="")
 	{
 		// traverse in sample's coordinate from pos_x to pos_y
 		// report if the sample's node is a variant node
@@ -540,7 +537,7 @@ namespace variantstore {
 					cur_ref = vg->get_sequence(prev_v);
 					cur_ref = "";
 					console->debug("There is an insertion at (ref): {}", ref_pos);
-					alt = cur_ref + vg->get_sequence(*(*it));
+					alt = vg->get_sequence(*(*it));
 					var.var_pos = ref_pos;
 				} else
 					// Deletion
@@ -552,16 +549,16 @@ namespace variantstore {
 						Graph::vertex v = idx->find(ref_pos - 1); // the node before pos
 						auto it = vg->find(v);
 						cur_ref = vg->get_sequence(*(*it));
-										} else {
+					} else {
 						console->debug("There is a substitution at (ref): {}", ref_pos);
 						alt = vg->get_sequence(*(*it));
 						vg->get_sample_from_vertex_if_exists(cur_v, sample_id, sample);
 						var.var_pos = sample.index();
 					}
 
-				var.alts.push_back(alt);
+				var.alt.assign(alt);
 				var.ref = cur_ref;
-				get_samples((*it), vg, var.alt_sample_map[alt]);
+				get_samples((*it), vg, var.samples);
 
 				vars.push_back(var);
 			}
@@ -590,10 +587,10 @@ namespace variantstore {
 		 Return all variants in sample_id occuring in ref coordinate [pos_x, pos_y)
 		 */
 	std::vector <Variant> get_sample_var_in_ref ( VariantGraph *vg, Index *idx,
-	 																							const uint64_t pos_x,
-	 																							const uint64_t pos_y,
-	 																							const std::string sample_id,
-																							  bool print=false, std::string outfile="")
+																								const uint64_t pos_x,
+																								const uint64_t pos_y,
+																								const std::string sample_id,
+																								bool print=false, std::string outfile="")
 	{
 		// traverse in sample's coordinate from pos_x to pos_y
 		// report if the sample's node is a variant node
@@ -661,9 +658,9 @@ namespace variantstore {
 						var.var_pos = ref_pos;
 					}
 
-				var.alts.push_back(alt);
+				var.alt.assign(alt);
 				var.ref = cur_ref;
-				get_samples((*it), vg, var.alt_sample_map[alt]);
+				get_samples((*it), vg, var.samples);
 
 				vars.push_back(var);
 			}
@@ -689,8 +686,8 @@ namespace variantstore {
 
 
 	/* ---------------------------------------------------------------------------- Given the position range
-	Return all variants  occuring in ref coordinate [pos_x, pos_y)
-	*/
+		 Return all variants  occuring in ref coordinate [pos_x, pos_y)
+		 */
 	std::vector <Variant> get_var_in_ref ( VariantGraph *vg, Index *idx,
 																				 const uint64_t pos_x,
 																				 const uint64_t pos_y,
@@ -732,53 +729,38 @@ namespace variantstore {
 	// Given a variant (ref & alt) and the position
 	// Return samples has such variant in the reference coordinate
 	*/
-	std::vector <std::string> samples_has_var ( VariantGraph *vg, Index *idx,
-																							const uint64_t pos, const
-																							std::string ref, const
-																							std::string alt,
-																						  bool print=false, std::string outfile="")
-	{
-		std::vector<Variant> vars;
-		uint64_t next_pos;
-		std::vector <std::string> samples;
+	std::vector<std::pair<std::string, std::string>>
+		samples_has_var(VariantGraph *vg, Index *idx, const uint64_t pos, const
+										std::string ref, const std::string alt, bool print=false,
+										std::string outfile="")
+		{
+			std::vector<Variant> vars;
+			uint64_t next_pos;
+			std::vector<std::pair<std::string, std::string>> samples;
 
-		next_variant_in_ref(vg, idx, pos, vars, next_pos);
-		for  (auto var : vars) {
-			if (var.ref == ref || var.var_pos == pos) {
-				for (uint32_t i=0; i<var.alts.size(); i++)
-				{
-					if (var.alts[i] == alt)
-					{
-						samples.assign(var.alt_sample_map[alt].begin(),
-													 var.alt_sample_map[alt].end());
-						break;
+			next_variant_in_ref(vg, idx, pos, vars, next_pos);
+			for  (auto var : vars) {
+				if (var.ref == ref && var.var_pos == pos && var.alt == alt) {
+					samples.assign(var.samples.begin(),
+												 var.samples.end());
+
+					if (print == true) {
+						ofstream out;
+						out.open(outfile);
+						for (auto i = samples.begin(); i != samples.end(); ++i)
+						{
+							out << i->first << ' ' << i->second;
+						}
+						out << std::endl;
+						out.close();
 					}
+					return samples;
 				}
-
-				// for (auto i = samples.begin(); i != samples.end(); ++i)
-				// {
-				// 	std::cout << *i << " ";
-				// }
-
-				if (print==true) {
-					ofstream out;
-					out.open(outfile);
-
-					for (auto i = samples.begin(); i != samples.end(); ++i)
-					{
-						out << *i << ' ';
-					}
-
-					out << std::endl;
-					out.close();
-				}
-				return samples;
 			}
-		}
-		console->error("There is no such variant!");
+			console->error("There is no such variant!");
 
-		return samples;
-	} // samples_has_var()
+			return samples;
+		} // samples_has_var()
 
 }
 

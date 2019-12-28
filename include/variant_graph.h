@@ -126,6 +126,9 @@ namespace variantstore {
 																						VariantGraphVertex::sample_info&
 																						sample) const;
 			uint32_t get_sample_id(const VariantGraphVertex& v, uint32_t index) const;
+
+			std::string get_sample_phasing(const VariantGraphVertex& v, uint32_t
+																		 index) const;
 			//uint32_t get_sample_id_fast(uint32_t sampleclass_id, uint32_t index)
 				//const;
 
@@ -867,6 +870,26 @@ namespace variantstore {
 				get_sample_id(v.sampleclass_id(0), index);
 	}
 
+	std::string VariantGraph::get_sample_phasing(const VariantGraphVertex& v,
+																							 uint32_t index) const {
+			const VariantGraphVertex::sample_info& s = v.s_info(index);
+			std::string phasing;
+			if (s.gt_1() == true)
+				phasing += "1";
+			else
+				phasing += "0";
+			if (s.phase() == true)
+				phasing += "|";
+			else
+				phasing += "/";
+			if (s.gt_2() == true)
+				phasing += "1";
+			else
+				phasing += "0";
+
+			return phasing;
+	}
+
 	uint32_t VariantGraph::get_sample_id(uint32_t sampleclass_id, uint32_t
 																			 index) const {
 		if (sampleclass_id == 0) { // only ref sample
@@ -1009,6 +1032,7 @@ namespace variantstore {
 			s->set_index(sample.index());
 			if (use_bit_vector == false)
 				s->add_sample_id(sample.sample_id(0));
+			s->set_phase(sample.phase());
 			s->set_gt_1(sample.gt_1());
 			s->set_gt_2(sample.gt_2());
 		}
@@ -1033,6 +1057,7 @@ namespace variantstore {
 		s.set_index(cur_vertex.s_info(0).index() + pos - 1);
 		if (use_bit_vector == false)
 			s.add_sample_id(cur_vertex.s_info(0).sample_id(0));
+		s.set_phase(cur_vertex.s_info(0).phase());
 		s.set_gt_1(cur_vertex.s_info(0).gt_1());
 		s.set_gt_2(cur_vertex.s_info(0).gt_2());
 		std::vector<VariantGraphVertex::sample_info> samples = {s};
@@ -1152,6 +1177,7 @@ namespace variantstore {
 		for (int i = 0; i < v.s_info_size(); i++) {
 			const VariantGraphVertex::sample_info& s = v.s_info(i);
 			samples.append("Sample id: " + get_sample_name(get_sample_id(v, i)));
+			samples.append(" Sample phase: " + get_sample_phasing(v, i));
 			samples.append(" Index: " +  std::to_string((int)s.index()) + " ");
 		}
 		return "ID: " + std::to_string(v.vertex_id()) + " Offset: " +
@@ -1524,6 +1550,8 @@ namespace variantstore {
 			VariantGraphVertex* sample_vertex = add_vertex(alt, 0,
 																										 sampleclass_id,
 																										 sample_list[0]);
+			std::cout << print_vertex_info(*sample_vertex) << std::endl;
+
 			// make connections for the new vertex in the graph
 			topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
 			topology.add_edge(sample_vertex->vertex_id(), next_ref_vertex_id);
