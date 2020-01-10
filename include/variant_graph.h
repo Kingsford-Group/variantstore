@@ -1518,8 +1518,9 @@ namespace variantstore {
 				// split the current vertex to get prev_vertex. mutation spans one or
 				// more vertexes.
 				prev_ref_vertex_id = ref_vertex_id;
-				split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
-										 &ref_vertex_id);
+				if (ref_vertex.length() > 1)
+					split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
+											 &ref_vertex_id);
 
 				// find the next ref vertex
 				VariantGraphVertex next_ref_vertex;
@@ -1531,10 +1532,13 @@ namespace variantstore {
 				if (temp_itr->first + next_ref_vertex.length() == pos +
 						ref.size()) {
 					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
-				} else {
+				} else if (temp_itr->first + next_ref_vertex.length() < pos +
+						ref.size()) {
 					// split the vertex
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
 											 &next_ref_vertex_id);
+				} else {
+					next_ref_vertex_id = next_ref_vertex.vertex_id();
 				}
 			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
 								 == pos + ref.size()) { // split the current vertex to get prev_vertex
@@ -1696,8 +1700,10 @@ namespace variantstore {
 			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
 								 < pos + ref.size()) { // split the current vertex to get prev_vertex
 				prev_ref_vertex_id = ref_vertex_id;
-				split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
-										 &ref_vertex_id);	
+
+				if (ref_vertex.length() > 1)
+					split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
+											 &ref_vertex_id);	
 				// find the next ref vertex
 				VariantGraphVertex next_ref_vertex;
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
@@ -1707,10 +1713,13 @@ namespace variantstore {
 				} while (temp_itr->first + next_ref_vertex.length() < pos + ref.size());
 				if (temp_itr->first + next_ref_vertex.length() == pos + ref.size()) {
 					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
-				} else {
+				} else if (temp_itr->first + next_ref_vertex.length() < pos +
+									 ref.size()) {
 					// split the vertex
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
 											 &next_ref_vertex_id);
+				} else {
+					next_ref_vertex_id = next_ref_vertex.vertex_id();
 				}
 			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
 								 == pos + ref.size()) { // split the current vertex to get prev_vertex
