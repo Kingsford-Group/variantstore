@@ -34,6 +34,11 @@ namespace variantstore {
 		std::vector<std::pair<std::string, std::string>> samples;
 	};
 
+	void print_header(ofstream& out) {
+		out << "Pos\tRef\tAlt\tSamples\n";
+		return;
+	}
+
 	void print_var (Variant *var, ofstream& out) {
 		out << var->var_pos << "\t"<< var->ref << "\t" << var->alt << "\t";
 		for (auto sample : var->samples) {
@@ -289,9 +294,9 @@ namespace variantstore {
 		 */
 
 	bool next_variant_in_ref ( VariantGraph *vg, Index *idx,
-														 const uint64_t pos,
-														 vector<Variant> &vars,
-														 uint64_t &next_pos)
+														 const uint64_t pos, vector<Variant> &vars,
+														 uint64_t &next_pos, const uint64_t end =
+														 UINT64_MAX)
 	{
 		bool found_var = false;
 		Graph::vertex v = idx->find(pos); // the node before pos
@@ -300,6 +305,12 @@ namespace variantstore {
 		++next_it;
 
 		while (!it.done()) {
+			VariantGraphVertex::sample_info ref_sample;
+			if (vg->get_sample_from_vertex_if_exists((*it)->vertex_id(),
+																							 REF, ref_sample)) {
+				if (ref_sample.index() + (*it)->length() >= end)
+					break;
+			}
 			// console->debug("Check vertex: {}", (*it)->vertex_id());
 			VariantGraph::VariantGraphIterator bfs_it=vg->find((*it)->vertex_id(), 1);
 			++bfs_it;
@@ -355,7 +366,7 @@ namespace variantstore {
 
 						// Insertion
 						if (next_ref_idx == prev_ref_idx + prev_ref.length()) {
-							// console->debug("Found an insertion");
+							console->debug("Found an insertion");
 							std::string ref = "";
 							var.ref.assign(ref);
 							std::string alt = vg->get_sequence(*(*bfs_it));
@@ -364,6 +375,7 @@ namespace variantstore {
 							var.var_pos = next_ref_idx - 1;
 						} else {
 							// substitution
+							console->debug("Found a substitution");
 							std::string alt = vg->get_sequence(*(*bfs_it));
 							var.alt.assign(alt);
 							std::string ref = vg->get_sequence(*(*next_it));
@@ -446,6 +458,7 @@ namespace variantstore {
 		if (print==true) {
 			ofstream out;
 			out.open(outfile);
+			print_header(out);
 			for (auto var : vars)
 				print_var(&var, out);
 			out.close();
@@ -505,6 +518,8 @@ namespace variantstore {
 		VariantGraphVertex prev_v;
 
 		while (!it.done()) {
+			if (sample_pos >= pos_y) {break;}
+
 			Graph::vertex cur_v = (*it)->vertex_id();
 			std::vector <std::string> samples_in_node;
 			Variant var;
@@ -525,8 +540,6 @@ namespace variantstore {
 				}
 				++bfs_it;
 			}
-
-			if (sample_pos >= pos_y) {break;}
 
 			if (sample_pos > pos_x && vg->get_sample_from_vertex_if_exists(cur_v,
 																																		 sample_id,
@@ -574,6 +587,7 @@ namespace variantstore {
 		if (print==true) {
 			ofstream out;
 			out.open(outfile);
+			print_header(out);
 			for (auto var : vars)
 				print_var(&var, out);
 			out.close();
@@ -608,6 +622,8 @@ namespace variantstore {
 		VariantGraphVertex prev_v;
 
 		while (!it.done()) {
+			if (ref_pos >= pos_y) {break;}
+
 			Graph::vertex cur_v = (*it)->vertex_id();
 			std::vector <std::string> samples_in_node;
 			Variant var;
@@ -628,7 +644,6 @@ namespace variantstore {
 				++bfs_it;
 			}
 
-			if (ref_pos >= pos_y) {break;}
 
 			if (ref_pos >= pos_x && vg->get_sample_from_vertex_if_exists(cur_v,
 																																	 sample_id,
@@ -675,6 +690,7 @@ namespace variantstore {
 		if (print==true) {
 			ofstream out;
 			out.open(outfile);
+			print_header(out);
 			for (auto var : vars)
 				print_var(&var, out);
 			out.close();
@@ -700,7 +716,7 @@ namespace variantstore {
 		while (cur_pos < pos_y)
 		{
 			uint64_t next_pos;
-			if (next_variant_in_ref (vg, idx, cur_pos, vars, next_pos))
+			if (next_variant_in_ref (vg, idx, cur_pos, vars, next_pos, pos_y))
 			{
 				cur_pos = next_pos;
 				if (cur_pos >= pos_y) {
@@ -715,6 +731,7 @@ namespace variantstore {
 		if (print==true) {
 			ofstream out;
 			out.open(outfile);
+			print_header(out);
 			for (auto var : vars)
 				print_var(&var, out);
 			out.close();
