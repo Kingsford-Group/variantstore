@@ -1474,7 +1474,8 @@ namespace variantstore {
 				VariantGraphVertex next_ref_vertex;
 	
 				// Adding a dummy node by splitting the ref_vertex
-				split_vertex(ref_vertex_id, 1, &next_ref_vertex_id);
+				if (ref_vertex.length() > 1)
+					split_vertex(ref_vertex_id, 1, &next_ref_vertex_id);
 				prev_ref_vertex_id = ref_vertex_id;
 				ref_vertex_id = next_ref_vertex_id;
 
@@ -1486,10 +1487,13 @@ namespace variantstore {
 				if (temp_itr->first + next_ref_vertex.length() == pos +
 						ref.size()) {
 					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
-				} else {
+				} else if (temp_itr->first + next_ref_vertex.length() < pos +
+						ref.size()) {
 					// split the vertex
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
 											 &next_ref_vertex_id);
+				} else {
+					next_ref_vertex_id = next_ref_vertex.vertex_id();
 				}
 
 				// find the prev vertex.
