@@ -1550,7 +1550,6 @@ namespace variantstore {
 			VariantGraphVertex* sample_vertex = add_vertex(alt, 0,
 																										 sampleclass_id,
 																										 sample_list[0]);
-			std::cout << print_vertex_info(*sample_vertex) << std::endl;
 
 			// make connections for the new vertex in the graph
 			topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
