@@ -1,0 +1,380 @@
+ppandey@savanna:/mnt/disk34/user/ppandey/variantstore$ (seq 1 22;) | parallel -j 24 /usr/bin/time ./variantstore construct -r ../vcfdata/ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.{}.fa -v
+ ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz -p vs_v1/chr{}
+[2020-01-09 22:56:16.361] [info] Creating variant graph
+[2020-01-09 22:56:16.639] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:17.399] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+[2020-01-09 23:25:14.101] [info] Num mutations: 1106184 num mutations-sample: 152688520
+[2020-01-09 23:25:14.101] [info] Num vars: 1103547
+[2020-01-09 23:25:19.995] [info] Fixing sample indexes in the graph
+[2020-01-09 23:28:42.003] [info] Graph stats:
+[2020-01-09 23:28:42.003] [info] Chromosome: 22 #Vertices: 3263748 #Edges: 4382222 Seq length: 52420579
+[2020-01-09 23:28:42.003] [info] Serializing variant graph to disk
+[2020-01-09 23:28:52.971] [info] Number of sample vector classes: 490775
+[2020-01-09 23:28:54.626] [info] Creating Index
+[2020-01-09 23:30:18.146] [info] Serializing index to disk
+2022.73user 20.09system 34:03.16elapsed 99%CPU (0avgtext+0avgdata 6156832maxresident)k
+415280inputs+1310696outputs (0major+5688856minor)pagefaults 0swaps
+[2020-01-09 22:56:16.359] [info] Creating variant graph
+[2020-01-09 22:56:16.634] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:17.338] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr21.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+[2020-01-09 23:25:14.877] [info] Num mutations: 1108561 num mutations-sample: 169589577
+[2020-01-09 23:25:14.877] [info] Num vars: 1105538
+[2020-01-09 23:25:19.862] [info] Fixing sample indexes in the graph
+[2020-01-09 23:28:56.672] [info] Graph stats:
+[2020-01-09 23:28:56.672] [info] Chromosome: 21 #Vertices: 3267549 #Edges: 4388333 Seq length: 49241580
+[2020-01-09 23:28:56.672] [info] Serializing variant graph to disk
+[2020-01-09 23:29:05.975] [info] Number of sample vector classes: 484536
+[2020-01-09 23:29:07.620] [info] Creating Index
+[2020-01-09 23:30:35.271] [info] Serializing index to disk
+2042.42user 17.30system 34:20.08elapsed 99%CPU (0avgtext+0avgdata 6304520maxresident)k
+425448inputs+1380736outputs (0major+5057126minor)pagefaults 0swaps
+[2020-01-09 22:56:16.355] [info] Creating variant graph
+[2020-01-09 22:56:16.689] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:17.607] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr20.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+[2020-01-09 23:42:58.098] [info] Num mutations: 1815622 num mutations-sample: 236884315
+[2020-01-09 23:42:58.098] [info] Num vars: 1812841
+[2020-01-09 23:43:04.465] [info] Fixing sample indexes in the graph
+[2020-01-09 23:48:04.060] [info] Graph stats:
+[2020-01-09 23:48:04.060] [info] Chromosome: 20 #Vertices: 5363774 #Edges: 7196954 Seq length: 64849724
+[2020-01-09 23:48:04.060] [info] Serializing variant graph to disk
+[2020-01-09 23:48:16.631] [info] Number of sample vector classes: 759587
+[2020-01-09 23:48:19.117] [info] Creating Index
+[2020-01-09 23:50:11.830] [info] Serializing index to disk
+3215.59user 21.27system 53:57.47elapsed 99%CPU (0avgtext+0avgdata 6882584maxresident)k
+666880inputs+1974984outputs (0major+7285028minor)pagefaults 0swaps
+[2020-01-09 22:56:16.352] [info] Creating variant graph
+[2020-01-09 22:56:16.638] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:17.500] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr19.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+[2020-01-09 23:45:13.800] [info] Num mutations: 1837381 num mutations-sample: 257198369
+[2020-01-09 23:45:13.800] [info] Num vars: 1832506
+[2020-01-09 23:45:19.376] [info] Fixing sample indexes in the graph
+[2020-01-09 23:52:03.042] [info] Graph stats:
+[2020-01-09 23:52:03.042] [info] Chromosome: 19 #Vertices: 5419831 #Edges: 7277819 Seq length: 60977529
+[2020-01-09 23:52:03.042] [info] Serializing variant graph to disk
+[2020-01-09 23:52:14.499] [info] Number of sample vector classes: 798787
+[2020-01-09 23:52:17.296] [info] Creating Index
+[2020-01-09 23:55:49.811] [info] Serializing index to disk
+3542.44user 32.57system 59:35.70elapsed 99%CPU (0avgtext+0avgdata 6440628maxresident)k
+701448inputs+2116136outputs (0major+11791083minor)pagefaults 0swaps
+[2020-01-09 22:56:16.346] [info] Creating variant graph
+[2020-01-09 22:56:16.718] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:17.901] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr17.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+[2020-01-09 23:57:15.946] [info] Num mutations: 2333734 num mutations-sample: 305236748
+[2020-01-09 23:57:15.946] [info] Num vars: 2329288
+[2020-01-09 23:57:21.667] [info] Fixing sample indexes in the graph
+[2020-01-10 00:04:10.769] [info] Graph stats:
+[2020-01-10 00:04:10.769] [info] Chromosome: 17 #Vertices: 6885306 #Edges: 9243020 Seq length: 83539584
+[2020-01-10 00:04:10.769] [info] Serializing variant graph to disk
+[2020-01-10 00:04:22.375] [info] Number of sample vector classes: 978776
+[2020-01-10 00:04:25.565] [info] Creating Index
+[2020-01-10 00:07:12.880] [info] Serializing index to disk
+4224.01user 34.41system 1:10:59elapsed 99%CPU (0avgtext+0avgdata 6707216maxresident)k
+847144inputs+2647608outputs (0major+8518324minor)pagefaults 0swaps
+[2020-01-09 22:56:16.342] [info] Creating variant graph
+[2020-01-09 22:56:16.739] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:18.237] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr15.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+[2020-01-10 00:00:00.044] [info] Num mutations: 2429153 num mutations-sample: 329245400
+[2020-01-10 00:00:00.044] [info] Num vars: 2424689
+[2020-01-10 00:00:07.053] [info] Fixing sample indexes in the graph
+[2020-01-10 00:07:09.685] [info] Graph stats:
+[2020-01-10 00:07:09.685] [info] Chromosome: 15 #Vertices: 7170153 #Edges: 9622904 Seq length: 104962626
+[2020-01-10 00:07:09.685] [info] Serializing variant graph to disk
+[2020-01-10 00:07:23.555] [info] Number of sample vector classes: 1012443
+[2020-01-10 00:07:26.956] [info] Creating Index
+[2020-01-10 00:10:05.210] [info] Serializing index to disk
+4400.88user 30.36system 1:13:51elapsed 99%CPU (0avgtext+0avgdata 7448024maxresident)k
+894120inputs+2821400outputs (0major+10231683minor)pagefaults 0swaps
+[2020-01-09 22:56:16.349] [info] Creating variant graph
+[2020-01-09 22:56:17.852] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr18.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+[2020-01-09 23:58:52.776] [info] Num mutations: 2271168 num mutations-sample: 321166040
+[2020-01-09 23:58:52.776] [info] Num vars: 2267185
+[2020-01-09 23:59:03.918] [info] Fixing sample indexes in the graph
+[2020-01-10 00:09:11.909] [info] Graph stats:
+[2020-01-10 00:09:11.909] [info] Chromosome: 18 #Vertices: 6705567 #Edges: 8998233 Seq length: 80352466
+[2020-01-10 00:09:11.909] [info] Serializing variant graph to disk
+[2020-01-10 00:09:34.909] [info] Number of sample vector classes: 0
+[2020-01-10 00:09:34.915] [info] Creating Index
+[2020-01-10 00:13:27.901] [info] Serializing index to disk
+4591.24user 40.28system 1:17:13elapsed 99%CPU (0avgtext+0avgdata 9443152maxresident)k
+852240inputs+4697208outputs (0major+11891929minor)pagefaults 0swaps
+[2020-01-09 22:56:16.343] [info] Creating variant graph
+[2020-01-09 22:56:16.714] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:18.038] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr16.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+[2020-01-10 00:08:00.519] [info] Num mutations: 2704463 num mutations-sample: 344069572
+[2020-01-10 00:08:00.519] [info] Num vars: 2697949
+[2020-01-10 00:08:07.319] [info] Fixing sample indexes in the graph
+[2020-01-10 00:15:25.792] [info] Graph stats:
+[2020-01-10 00:15:25.792] [info] Chromosome: 16 #Vertices: 7997308 #Edges: 10730422 Seq length: 93067554
+[2020-01-10 00:15:25.792] [info] Serializing variant graph to disk
+[2020-01-10 00:15:39.037] [info] Number of sample vector classes: 1126389
+[2020-01-10 00:15:42.729] [info] Creating Index
+[2020-01-10 00:18:26.335] [info] Serializing index to disk
+4896.88user 35.58system 1:22:13elapsed 99%CPU (0avgtext+0avgdata 7496304maxresident)k
+966344inputs+2954816outputs (0major+10872606minor)pagefaults 0swaps
+[2020-01-09 22:56:16.338] [info] Creating variant graph
+[2020-01-09 22:56:16.740] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:18.313] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr14.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+[2020-01-10 00:07:05.280] [info] Num mutations: 2660071 num mutations-sample: 365866604
+[2020-01-10 00:07:05.280] [info] Num vars: 2655067
+[2020-01-10 00:07:11.755] [info] Fixing sample indexes in the graph
+[2020-01-10 00:15:24.030] [info] Graph stats:
+[2020-01-10 00:15:24.030] [info] Chromosome: 14 #Vertices: 7849798 #Edges: 10535785 Seq length: 110013590
+[2020-01-10 00:15:24.030] [info] Serializing variant graph to disk
+[2020-01-10 00:15:37.247] [info] Number of sample vector classes: 1074887
+[2020-01-10 00:15:40.890] [info] Creating Index
+[2020-01-10 00:19:05.167] [info] Serializing index to disk
+4940.34user 30.67system 1:22:51elapsed 99%CPU (0avgtext+0avgdata 7023916maxresident)k
+988928inputs+3080272outputs (0major+9911578minor)pagefaults 0swaps
+[2020-01-09 22:56:16.337] [info] Creating variant graph
+[2020-01-09 22:56:16.758] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:18.443] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr13.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+[2020-01-10 00:11:38.741] [info] Num mutations: 2862476 num mutations-sample: 424851417
+[2020-01-10 00:11:38.741] [info] Num vars: 2857916
+[2020-01-10 00:11:44.809] [info] Fixing sample indexes in the graph
+[2020-01-10 00:22:29.818] [info] Graph stats:
+[2020-01-10 00:22:29.818] [info] Chromosome: 13 #Vertices: 8441489 #Edges: 11332036 Seq length: 118033962
+[2020-01-10 00:22:29.818] [info] Serializing variant graph to disk
+[2020-01-10 00:22:42.110] [info] Number of sample vector classes: 1146888
+[2020-01-10 00:22:46.018] [info] Creating Index
+[2020-01-10 00:27:49.497] [info] Serializing index to disk
+5438.48user 56.47system 1:31:36elapsed 99%CPU (0avgtext+0avgdata 7297624maxresident)k
+1086864inputs+3480712outputs (0major+15412640minor)pagefaults 0swaps
+[2020-01-09 22:56:16.326] [info] Creating variant graph
+[2020-01-09 22:56:16.839] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:18.920] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr9.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+[2020-01-10 00:29:39.555] [info] Num mutations: 3568023 num mutations-sample: 473524746
+[2020-01-10 00:29:39.555] [info] Num vars: 3560687
+[2020-01-10 00:29:45.469] [info] Fixing sample indexes in the graph
+[2020-01-10 00:40:20.607] [info] Graph stats:
+[2020-01-10 00:40:20.607] [info] Chromosome: 9 #Vertices: 10539854 #Edges: 14142295 Seq length: 144786533
+[2020-01-10 00:40:20.607] [info] Serializing variant graph to disk
+[2020-01-10 00:40:33.225] [info] Number of sample vector classes: 1460484
+[2020-01-10 00:40:38.217] [info] Creating Index
+[2020-01-10 00:44:48.658] [info] Serializing index to disk
+6460.67user 54.54system 1:48:36elapsed 99%CPU (0avgtext+0avgdata 7323588maxresident)k
+1312768inputs+3961768outputs (0major+14671949minor)pagefaults 0swaps
+[2020-01-09 22:56:16.335] [info] Creating variant graph
+[2020-01-09 22:56:16.853] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:18.814] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr12.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+[2020-01-10 00:39:36.586] [info] Num mutations: 3874988 num mutations-sample: 536545748
+[2020-01-10 00:39:36.586] [info] Num vars: 3868428
+[2020-01-10 00:39:43.324] [info] Fixing sample indexes in the graph
+[2020-01-10 00:53:09.443] [info] Graph stats:
+[2020-01-10 00:53:09.443] [info] Chromosome: 12 #Vertices: 11431885 #Edges: 15345177 Seq length: 137736042
+[2020-01-10 00:53:09.443] [info] Serializing variant graph to disk
+[2020-01-10 00:53:23.982] [info] Number of sample vector classes: 1541629
+[2020-01-10 00:53:29.217] [info] Creating Index
+[2020-01-10 01:00:57.781] [info] Serializing index to disk
+7425.50user 59.71system 2:04:46elapsed 99%CPU (0avgtext+0avgdata 7949984maxresident)k
+1445968inputs+4398848outputs (0major+15226695minor)pagefaults 0swaps
+[2020-01-09 22:56:16.331] [info] Creating variant graph
+[2020-01-09 22:56:16.856] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:18.833] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr11.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+[2020-01-10 00:44:50.173] [info] Num mutations: 4053657 num mutations-sample: 566285941
+[2020-01-10 00:44:50.173] [info] Num vars: 4045628
+[2020-01-10 00:44:56.578] [info] Fixing sample indexes in the graph
+[2020-01-10 00:57:09.845] [info] Graph stats:
+[2020-01-10 00:57:09.845] [info] Chromosome: 11 #Vertices: 11971839 #Edges: 16064321 Seq length: 139067412
+[2020-01-10 00:57:09.845] [info] Serializing variant graph to disk
+[2020-01-10 00:57:23.369] [info] Number of sample vector classes: 1576804
+[2020-01-10 00:57:28.680] [info] Creating Index
+[2020-01-10 01:01:58.037] [info] Serializing index to disk
+7484.96user 60.31system 2:05:46elapsed 99%CPU (0avgtext+0avgdata 8276928maxresident)k
+1495232inputs+4603088outputs (0major+13225130minor)pagefaults 0swaps
+[2020-01-09 22:56:16.329] [info] Creating variant graph
+[2020-01-09 22:56:16.848] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:18.824] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr10.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+[2020-01-10 00:43:45.859] [info] Num mutations: 4000513 num mutations-sample: 563687102
+[2020-01-10 00:43:45.859] [info] Num vars: 3992219
+[2020-01-10 00:43:52.330] [info] Fixing sample indexes in the graph
+[2020-01-10 00:59:13.026] [info] Graph stats:
+[2020-01-10 00:59:13.026] [info] Chromosome: 10 #Vertices: 11811138 #Edges: 15851288 Seq length: 139544519
+[2020-01-10 00:59:13.026] [info] Serializing variant graph to disk
+[2020-01-10 00:59:26.336] [info] Number of sample vector classes: 1613467
+[2020-01-10 00:59:31.809] [info] Creating Index
+[2020-01-10 01:09:11.758] [info] Serializing index to disk
+7915.10user 64.00system 2:13:00elapsed 99%CPU (0avgtext+0avgdata 7731924maxresident)k
+1509600inputs+4604640outputs (0major+15325652minor)pagefaults 0swaps
+[2020-01-09 22:56:16.320] [info] Creating variant graph
+[2020-01-09 22:56:16.863] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:19.185] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr7.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+[2020-01-10 01:04:12.780] [info] Num mutations: 4725056 num mutations-sample: 650568706
+[2020-01-10 01:04:12.780] [info] Num vars: 4716715
+[2020-01-10 01:04:19.854] [info] Fixing sample indexes in the graph
+[2020-01-10 01:18:58.989] [info] Graph stats:
+[2020-01-10 01:18:58.989] [info] Chromosome: 7 #Vertices: 13950853 #Edges: 18721490 Seq length: 163869418
+[2020-01-10 01:18:58.989] [info] Serializing variant graph to disk
+[2020-01-10 01:19:15.973] [info] Number of sample vector classes: 1891780
+[2020-01-10 01:19:22.549] [info] Creating Index
+[2020-01-10 01:24:28.443] [info] Serializing index to disk
+8823.56user 73.21system 2:28:18elapsed 99%CPU (0avgtext+0avgdata 8934800maxresident)k
+1772840inputs+5590296outputs (0major+22744987minor)pagefaults 0swaps
+[2020-01-09 22:56:16.322] [info] Creating variant graph
+[2020-01-09 22:56:16.856] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:18.996] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr8.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+[2020-01-10 00:58:37.254] [info] Num mutations: 4607553 num mutations-sample: 601566688
+[2020-01-10 00:58:37.254] [info] Num vars: 4597105
+[2020-01-10 00:58:43.726] [info] Fixing sample indexes in the graph
+[2020-01-10 01:14:30.311] [info] Graph stats:
+[2020-01-10 01:14:30.311] [info] Chromosome: 8 #Vertices: 13619509 #Edges: 18271622 Seq length: 150976714
+[2020-01-10 01:14:30.311] [info] Serializing variant graph to disk
+[2020-01-10 01:14:43.626] [info] Number of sample vector classes: 1801446
+[2020-01-10 01:14:49.650] [info] Creating Index
+[2020-01-10 01:25:13.726] [info] Serializing index to disk
+8878.37user 63.26system 2:29:02elapsed 99%CPU (0avgtext+0avgdata 7767660maxresident)k
+1681152inputs+5195160outputs (0major+21958099minor)pagefaults 0swaps
+[2020-01-09 22:56:16.312] [info] Creating variant graph
+[2020-01-09 22:56:16.894] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:19.539] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr5.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+[2020-01-10 01:18:04.359] [info] Num mutations: 5275427 num mutations-sample: 684919699
+[2020-01-10 01:18:04.359] [info] Num vars: 5265763
+[2020-01-10 01:18:11.994] [info] Fixing sample indexes in the graph
+[2020-01-10 01:32:58.802] [info] Graph stats:
+[2020-01-10 01:32:58.802] [info] Chromosome: 5 #Vertices: 15569855 #Edges: 20896919 Seq length: 186192204
+[2020-01-10 01:32:58.802] [info] Serializing variant graph to disk
+[2020-01-10 01:33:15.723] [info] Number of sample vector classes: 2042003
+[2020-01-10 01:33:22.653] [info] Creating Index
+[2020-01-10 01:38:39.293] [info] Serializing index to disk
+9673.22user 74.97system 2:42:29elapsed 99%CPU (0avgtext+0avgdata 9258668maxresident)k
+1931464inputs+5916904outputs (0major+19386337minor)pagefaults 0swaps
+[2020-01-09 22:56:16.316] [info] Creating variant graph
+[2020-01-09 22:56:16.892] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:19.400] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr6.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+[2020-01-10 01:27:09.339] [info] Num mutations: 5033378 num mutations-sample: 734461452
+[2020-01-10 01:27:09.339] [info] Num vars: 5024119
+[2020-01-10 01:27:16.873] [info] Fixing sample indexes in the graph
+[2020-01-10 01:45:15.768] [info] Graph stats:
+[2020-01-10 01:45:15.768] [info] Chromosome: 6 #Vertices: 14846841 #Edges: 19930423 Seq length: 176157141
+[2020-01-10 01:45:15.768] [info] Serializing variant graph to disk
+[2020-01-10 01:45:31.397] [info] Number of sample vector classes: 1971498
+[2020-01-10 01:45:38.274] [info] Creating Index
+[2020-01-10 01:55:27.350] [info] Serializing index to disk
+10660.28user 95.65system 2:59:17elapsed 99%CPU (0avgtext+0avgdata 12755952maxresident)k
+[2020-01-09 22:56:16.308] [info] Creating variant graph
+[2020-01-09 22:56:16.895] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:19.687] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr4.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+[2020-01-10 01:30:39.721] [info] Num mutations: 5742318 num mutations-sample: 833121714
+[2020-01-10 01:30:39.721] [info] Num vars: 5732585
+[2020-01-10 01:30:48.074] [info] Fixing sample indexes in the graph
+[2020-01-10 01:49:01.662] [info] Graph stats:
+[2020-01-10 01:49:01.662] [info] Chromosome: 4 #Vertices: 16942925 #Edges: 22740933 Seq length: 196897589
+[2020-01-10 01:49:01.662] [info] Serializing variant graph to disk
+[2020-01-10 01:49:22.452] [info] Number of sample vector classes: 2232397
+[2020-01-10 01:49:30.180] [info] Creating Index
+[2020-01-10 01:55:51.454] [info] Serializing index to disk
+10682.74user 97.97system 2:59:42elapsed 99%CPU (0avgtext+0avgdata 10206720maxresident)k
+2181128inputs+6935440outputs (0major+29083209minor)pagefaults 0swaps
+[2020-01-09 22:56:16.308] [info] Creating variant graph
+[2020-01-09 22:56:16.902] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:19.785] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr3.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+[2020-01-10 01:34:25.102] [info] Num mutations: 5842732 num mutations-sample: 787786843
+[2020-01-10 01:34:25.102] [info] Num vars: 5832276
+[2020-01-10 01:34:31.813] [info] Fixing sample indexes in the graph
+[2020-01-10 01:53:54.037] [info] Graph stats:
+[2020-01-10 01:53:54.037] [info] Chromosome: 3 #Vertices: 17249025 #Edges: 23146744 Seq length: 203869820
+[2020-01-10 01:53:54.037] [info] Serializing variant graph to disk
+[2020-01-10 01:54:09.252] [info] Number of sample vector classes: 2255571
+[2020-01-10 01:54:17.014] [info] Creating Index
+[2020-01-10 02:05:08.843] [info] Serializing index to disk
+11244.91user 91.23system 3:08:59elapsed 99%CPU (0avgtext+0avgdata 8934052maxresident)k
+2159056inputs+6692304outputs (0major+25547297minor)pagefaults 0swaps
+
+[2020-01-09 22:56:16.296] [info] Creating variant graph
+[2020-01-09 22:56:16.940] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:20.588] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+[2020-01-10 01:54:22.796] [info] Num mutations: 6478359 num mutations-sample: 874606426
+[2020-01-10 01:54:22.796] [info] Num vars: 6468094
+[2020-01-10 01:54:30.516] [info] Fixing sample indexes in the graph
+[2020-01-10 02:13:28.365] [info] Graph stats:
+[2020-01-10 02:13:28.365] [info] Chromosome: 1 #Vertices: 19128571 #Edges: 25666978 Seq length: 255738585
+[2020-01-10 02:13:28.365] [info] Serializing variant graph to disk
+[2020-01-10 02:13:46.990] [info] Number of sample vector classes: 2542974
+[2020-01-10 02:13:55.201] [info] Creating Index
+[2020-01-10 02:20:40.405] [info] Serializing index to disk
+12074.72user 196.41system 3:24:31elapsed 99%CPU (0avgtext+0avgdata 10335608maxresident)k
+2375864inputs+7423944outputs (0major+35110076minor)pagefaults 0swaps
+[2020-01-09 22:56:16.304] [info] Creating variant graph
+[2020-01-09 22:56:16.958] [info] Building sample vector based variant graph.
+[2020-01-09 22:56:20.506] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr2.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz #Samples: 2504
+Resizing the CQF.
+Resizing the CQF.
+[2020-01-10 02:12:15.399] [info] Num mutations: 7092230 num mutations-sample: 924024439
+[2020-01-10 02:12:15.399] [info] Num vars: 7081600
+[2020-01-10 02:12:21.933] [info] Fixing sample indexes in the graph
+[2020-01-10 02:31:36.441] [info] Graph stats:
+[2020-01-10 02:31:36.441] [info] Chromosome: 2 #Vertices: 20944285 #Edges: 28103100 Seq length: 250294423
+[2020-01-10 02:31:36.441] [info] Serializing variant graph to disk
+[2020-01-10 02:31:51.735] [info] Number of sample vector classes: 2757986
+[2020-01-10 02:31:59.975] [info] Creating Index
+[2020-01-10 02:38:27.388] [info] Serializing index to disk
+13235.32user 102.44system 3:42:18elapsed 99%CPU (0avgtext+0avgdata 9627688maxresident)k
+2563296inputs+7868568outputs (0major+28743821minor)pagefaults 0swaps
+[2020-01-10 15:08:20.776] [info] Creating variant graph
+[2020-01-10 15:08:22.684] [info] Building sample vector based variant graph.
+[2020-01-10 15:08:29.008] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrX.phase3_shapeit2_mvncall_integrated_v1b.20130502.genotypes.vcf.gz #Samples: 2504
+'
+Resizing the CQF.
+[2020-01-10 17:22:21.932] [info] Num mutations: 3489446 num mutations-sample: 350239087
+[2020-01-10 17:22:21.932] [info] Num vars: 3468093
+[2020-01-10 17:22:26.722] [info] Fixing sample indexes in the graph
+[2020-01-10 17:30:34.082] [info] Graph stats:
+[2020-01-10 17:30:34.082] [info] Chromosome: X #Vertices: 10158635 #Edges: 13704031 Seq length: 158749026
+[2020-01-10 17:30:34.082] [info] Serializing variant graph to disk
+[2020-01-10 17:30:45.918] [info] Number of sample vector classes: 1286355
+[2020-01-10 17:30:49.961] [info] Creating Index
+[2020-01-10 17:33:39.768] [info] Serializing index to disk
+6616.55user 41.18system 2:25:25elapsed 76%CPU (0avgtext+0avgdata 7417072maxresident)k
+2734424inputs+3334632outputs (0major+11718775minor)pagefaults 0swaps
+[2020-01-10 17:38:16.160] [info] Creating variant graph
+[2020-01-10 17:38:16.351] [info] Building sample vector based variant graph.
+[2020-01-10 17:38:17.167] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrY.phase3_integrated_v2a.20130502.genotypes.vcf.gz #Samples: 1233
+[2020-01-10 17:38:59.288] [info] Num mutations: 61871 num mutations-sample: 982566
+[2020-01-10 17:38:59.288] [info] Num vars: 62042
+[2020-01-10 17:38:59.781] [info] Fixing sample indexes in the graph
+[2020-01-10 17:39:00.575] [info] Graph stats:
+[2020-01-10 17:39:00.575] [info] Chromosome: Y #Vertices: 184229 #Edges: 246126 Seq length: 59435107
+[2020-01-10 17:39:00.575] [info] Serializing variant graph to disk
+[2020-01-10 17:39:01.793] [info] Number of sample vector classes: 7058
+[2020-01-10 17:39:01.809] [info] Creating Index
+[2020-01-10 17:39:02.367] [info] Serializing index to disk
+45.49user 0.46system 0:46.27elapsed 99%CPU (0avgtext+0avgdata 585184maxresident)k
+8inputs+206496outputs (0major+180057minor)pagefaults 0swaps
+[2020-01-10 17:38:16.160] [info] Creating variant graph
+[2020-01-10 17:38:16.351] [info] Building sample vector based variant graph.
+[2020-01-10 17:38:17.167] [info] Adding mutations from: ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrY.phase3_integrated_v2a.20130502.genotypes.vcf.gz #Samples: 1233
+[2020-01-10 17:38:59.288] [info] Num mutations: 61871 num mutations-sample: 982566
+[2020-01-10 17:38:59.288] [info] Num vars: 62042
+[2020-01-10 17:38:59.781] [info] Fixing sample indexes in the graph
+[2020-01-10 17:39:00.575] [info] Graph stats:
+[2020-01-10 17:39:00.575] [info] Chromosome: Y #Vertices: 184229 #Edges: 246126 Seq length: 59435107
+[2020-01-10 17:39:00.575] [info] Serializing variant graph to disk
+[2020-01-10 17:39:01.793] [info] Number of sample vector classes: 7058
+[2020-01-10 17:39:01.809] [info] Creating Index
+[2020-01-10 17:39:02.367] [info] Serializing index to disk
+45.49user 0.46system 0:46.27elapsed 99%CPU (0avgtext+0avgdata 585184maxresident)k
+8inputs+206496outputs (0major+180057minor)pagefaults 0swaps
+
