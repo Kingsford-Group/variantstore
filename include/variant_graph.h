@@ -899,24 +899,6 @@ namespace variantstore {
 			return phasing;
 	}
 
-	//uint32_t VariantGraph::get_sample_id_read_mode(uint32_t sampleclass_id,
-				//uint32_t index)
-		//const {
-			//if (sampleclass_id == 0) { // only ref sample
-				//sample_ids.push_back(0);
-			//} else {
-				//uint64_t start_idx = (sampleclass_id - 1) * num_samples;
-				//uint64_t rank_prev = rank_rrr(start_idx);
-				//uint64_t rank_incl = rank_rrr(start_idx + num_samples);
-		
-				//while (rank_prev < rank_incl) {
-					//sample_ids.push_back(select_rrr(rank_prev++) - start_idx);
-					//rank_prev++;
-				//}
-			//}	
-			//return sample_ids;
-		//}
-
 	uint32_t VariantGraph::get_sample_id(uint32_t sampleclass_id, uint32_t
 																			 index) const {
 		if (sampleclass_id == 0) { // only ref sample
