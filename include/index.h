@@ -37,6 +37,7 @@ namespace variantstore {
 		// Query node_id given position
 		Graph::vertex find(const uint64_t pos) const;
 		Graph::vertex find(const uint64_t pos, uint64_t &ref_node_rank) const;
+		bool is_empty(const uint64_t pos_x, const uint64_t pos_y) const;
 		Graph::vertex previous(const uint64_t ref_node_rank) const;
 		void serialize(const std::string prefix);
 
@@ -44,6 +45,7 @@ namespace variantstore {
 		//bit_vector bound_vec;
 		sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE> rrrb;
 		sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type rank_rrrb;
+		sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::select_1_type select_rrrb;
 		sdsl::int_vector<> node_list;
 	};
 
@@ -97,6 +99,8 @@ namespace variantstore {
 		sdsl::util::assign(rrrb, sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>(b));
 		sdsl::util::assign(rank_rrrb,
 			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type(&rrrb));
+		sdsl::util::assign(select_rrrb,
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::select_1_type(&rrrb));
 		sdsl::util::bit_compress(node_list);
 		return;
 	} // Index(const VariantGraph vg)
@@ -107,6 +111,8 @@ namespace variantstore {
 		sdsl::load_from_file(node_list, prefix + "/ref_node_id.sdsl");
 		sdsl::util::assign(rank_rrrb,
 			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type(&rrrb));
+		sdsl::util::assign(select_rrrb,
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::select_1_type(&rrrb));
 		return;
 	} // Index(const std::string filename)
 
@@ -140,6 +146,24 @@ namespace variantstore {
 		ref_node_rank = node_idx - 1;
 		return node_list[node_idx-1];
 	} // find(uint64_t pos)
+
+	bool Index::is_empty(const uint64_t pos_x, const uint64_t pos_y) const {
+		if (pos_x < 1) {
+			console->error("Can't find node corresponding to pos {}", pos_x);
+			abort();
+		}
+		if (pos_x > rank_rrrb.size())
+			return true;
+
+		uint64_t pos_x_rank = rank_rrrb(pos_x);
+		uint64_t index_x = select_rrrb(pos_x_rank);
+		uint64_t index_y = select_rrrb(pos_x_rank + 1);
+
+		if (index_x <= pos_x && index_y <= pos_y)
+			return false;
+
+		return true;
+	}
 
 	Graph::vertex Index::previous(const uint64_t ref_node_rank) const
 	{

@@ -31,7 +31,7 @@ r1=${r1::-1}
 r2=${r2::-1}
 
 set -x
-if (($type == 3))
+if (($type == 1))
 then
   echo "Benchmarking query type $type"
   ./variantstore query -t $type -p $vs_file -r $r2 -m $mode -o temp.txt

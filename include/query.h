@@ -393,9 +393,23 @@ namespace variantstore {
 				}
 
 				// only add var if not seen before.
-				if (vars.size() < 1 || (vars.back().var_pos != var.var_pos)) {
-					found_var = true;
-					vars.push_back(var);
+				if (vars.size() < 1 || (vars.back().var_pos != var.var_pos ||
+																vars.back().alt != var.alt)) {
+					bool found_same{false};
+					if (vars.size() > 1 && vars.back().var_pos == var.var_pos) {
+						for (auto it = vars.rbegin(); it != vars.rend(); ++it) {
+							if ((*it).var_pos < var.var_pos)
+								break;
+							if ((*it).var_pos == var.var_pos && (*it).alt == var.alt) {
+								found_same = true;
+								break;
+							}
+						}
+					}
+					if (!found_same) {
+						found_var = true;
+						vars.push_back(var);
+					}
 				}
 				++bfs_it;
 			}
@@ -611,6 +625,20 @@ namespace variantstore {
 		std::vector <Variant> vars;
 		uint64_t ref_pos;
 		uint64_t sample_pos;
+
+		if (idx->is_empty(pos_x, pos_y)) {
+			std::cout << "Number of variants get_sample_var_in_ref: " << vars.size() << '\n';
+			if (print==true) {
+				ofstream out;
+				out.open(outfile);
+				print_header(out);
+				for (auto var : vars)
+					print_var(&var, out);
+				out.close();
+			}
+			return vars;
+		}
+
 		Graph::vertex closest_v = get_prev_vertex_with_sample(vg, idx, pos_x,
 																													sample_id,
 																													ref_pos, sample_pos);
@@ -712,6 +740,20 @@ namespace variantstore {
 		// report if the sample's node is a variant node
 		// use next_variant_in_ref()
 		std::vector <Variant> vars;
+
+		if (idx->is_empty(pos_x, pos_y)) {
+			std::cout << "Number of variants get_sample_var_in_ref: " << vars.size() << '\n';
+			if (print==true) {
+				ofstream out;
+				out.open(outfile);
+				print_header(out);
+				for (auto var : vars)
+					print_var(&var, out);
+				out.close();
+			}
+			return vars;
+		}
+
 		uint64_t cur_pos = pos_x;
 		while (cur_pos < pos_y)
 		{
