@@ -183,6 +183,7 @@ namespace variantstore {
 			};
 
 			uint32_t get_sample_id(uint32_t sampleclass_id, uint32_t index) const;
+			std::vector<uint32_t> get_sample_ids_read_mode(uint32_t sampleclass_id) const;
 			std::vector<uint32_t> get_sample_ids(uint32_t sampleclass_id) const;
 			bool is_chr_equal(const std::string var, const std::string chr) const;
 			bool is_bit_vector(const VariantGraphVertex& v) const;
@@ -305,6 +306,8 @@ namespace variantstore {
 			std::unordered_map<uint32_t, std::string> idsample_map;
 			std::unordered_map<uint64_t, uint32_t> sampleclass_map;
 			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE> rrr_sample_vector;
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type rank_rrr;
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::select_1_type select_rrr;
 			mutable std::map<uint32_t, VariantGraphVertexList*> in_memory_vertex_lists;
 
 			/* structures to persist when serializing variant graph. */
@@ -408,6 +411,10 @@ namespace variantstore {
 			console->error("Failed to load sample vector {}.", sample_vector_name);
 			abort();
 		}
+		sdsl::util::assign(rank_rrr,
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type(&rrr_sample_vector));
+		sdsl::util::assign(select_rrr,
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::select_1_type(&rrr_sample_vector));
 
 		//load sampleid map
 		std::string sampleid_map_name = prefix + "/sampleid_map.lst";
@@ -892,6 +899,24 @@ namespace variantstore {
 			return phasing;
 	}
 
+	//uint32_t VariantGraph::get_sample_id_read_mode(uint32_t sampleclass_id,
+				//uint32_t index)
+		//const {
+			//if (sampleclass_id == 0) { // only ref sample
+				//sample_ids.push_back(0);
+			//} else {
+				//uint64_t start_idx = (sampleclass_id - 1) * num_samples;
+				//uint64_t rank_prev = rank_rrr(start_idx);
+				//uint64_t rank_incl = rank_rrr(start_idx + num_samples);
+		
+				//while (rank_prev < rank_incl) {
+					//sample_ids.push_back(select_rrr(rank_prev++) - start_idx);
+					//rank_prev++;
+				//}
+			//}	
+			//return sample_ids;
+		//}
+
 	uint32_t VariantGraph::get_sample_id(uint32_t sampleclass_id, uint32_t
 																			 index) const {
 		if (sampleclass_id == 0) { // only ref sample
@@ -934,8 +959,32 @@ namespace variantstore {
 		return UINT32_MAX;
 	}
 
+	std::vector<uint32_t> VariantGraph::get_sample_ids_read_mode(uint32_t
+																															 sampleclass_id)
+		const {
+			std::vector<uint32_t> sample_ids;
+			if (sampleclass_id == 0) { // only ref sample
+				sample_ids.push_back(0);
+			} else {
+				uint64_t start_idx = (sampleclass_id - 1) * num_samples;
+				uint64_t rank_prev = rank_rrr(start_idx);
+				uint64_t rank_incl = rank_rrr(start_idx + num_samples);
+	
+				if (start_idx == 0 || select_rrr(rank_prev) < start_idx)
+					rank_prev++;
+				while (rank_prev <= rank_incl) {
+					sample_ids.push_back(select_rrr(rank_prev) - start_idx);
+					rank_prev++;
+				}
+			}	
+			return sample_ids;
+		}
+
 	std::vector<uint32_t> VariantGraph::get_sample_ids(uint32_t sampleclass_id)
 		const {
+			if (mode == READ_ONLY_MODE) {
+				return get_sample_ids_read_mode(sampleclass_id);
+			}
 			std::vector<uint32_t> sample_ids;
 			if (sampleclass_id == 0) { // only ref sample
 				sample_ids.push_back(0);
@@ -1271,8 +1320,9 @@ namespace variantstore {
 			uint32_t idx = 0;
 			auto sample_ids = get_sample_ids(cur_vertex.sampleclass_id(0));
 			if ((unsigned int)cur_vertex.s_info_size() != sample_ids.size()) {
-				console->error("Returned number of sample ids is not equal to the number of sample info objects. vertex: {} num_s_info: {} num_ids: {}",
-											 v, cur_vertex.s_info_size(), sample_ids.size());
+				console->error("Returned number of sample ids is not equal to the number of sample info objects. vertex: {} sample_class_id: {} num_s_info: {} num_ids: {}",
+											 v, cur_vertex.sampleclass_id(0),
+											 cur_vertex.s_info_size(), sample_ids.size());
 			}
 			for (auto id : sample_ids) {
 				if (id == sample_id) {
@@ -1376,8 +1426,9 @@ namespace variantstore {
 				uint32_t idx = 0;
 				auto sample_ids = get_sample_ids(vertex.sampleclass_id(0));
 				if ((unsigned int)vertex.s_info_size() != sample_ids.size()) {
-					console->error("Returned number of sample ids is not equal to the number of sample info objects. vertex: {} num_s_info: {} num_ids: {}",
-												 v_id, vertex.s_info_size(), sample_ids.size());
+				console->error("Returned number of sample ids is not equal to the number of sample info objects. vertex: {} sample_class_id: {} num_s_info: {} num_ids: {}",
+											 v_id, vertex.sampleclass_id(0),
+											 vertex.s_info_size(), sample_ids.size());
 				}
 				for (auto s_id : sample_ids) {
 					if (s_id != 0 && s_id == sample_id) {
