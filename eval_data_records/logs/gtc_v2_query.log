@@ -1,0 +1,76 @@
+++ for i in {1..2}
+++ echo 1
+1
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr22/output 10 43185 51304566 1 0
+HG01872
+0.67user 0.17system 0:01.19elapsed 70%CPU (0avgtext+0avgdata 11024maxresident)k
+16inputs+206136outputs (0major+16639minor)pagefaults 0swaps
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr22/output 100 43185 51304566 1 0
+HG01872
+5.83user 1.38system 0:10.76elapsed 67%CPU (0avgtext+0avgdata 11396maxresident)k
+0inputs+1810520outputs (0major+160739minor)pagefaults 0swaps
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr22/output 1000 43185 51304566 1 0
+HG01872
+58.56user 12.89system 1:50.23elapsed 64%CPU (0avgtext+0avgdata
+12200maxresident)k
+136inputs+18364600outputs (0major+1604955minor)pagefaults 0swaps
+++ for i in {1..2}
+++ echo 2
+2
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr22/output 10 43185 51304566 2 0
+HG01872
+0.20user 0.05system 0:00.51elapsed 50%CPU (0avgtext+0avgdata 10736maxresident)k
+0inputs+640outputs (0major+15587minor)pagefaults 0swaps
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr22/output 100 43185 51304566 2 0
+HG01872
+2.00user 0.53system 0:03.81elapsed 66%CPU (0avgtext+0avgdata 10928maxresident)k
+0inputs+8976outputs (0major+152526minor)pagefaults 0swaps
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr22/output 1000 43185 51304566 2 0
+HG01872
+20.39user 4.98system 0:37.98elapsed 66%CPU (0avgtext+0avgdata 11000maxresident)k
+0inputs+88016outputs (0major+1521508minor)pagefaults 0swaps
+
+
+++ for i in {1..2}
+++ echo 1
+1
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr2/output 10 43185 243199373 1 0
+HG01872
+0.81user 0.23system 0:01.41elapsed 74%CPU (0avgtext+0avgdata 13540maxresident)k
+8inputs+257144outputs (0major+23072minor)pagefaults 0swaps
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr2/output 100 43185 243199373 1 0
+HG01872
+8.12user 1.66system 0:13.63elapsed 71%CPU (0avgtext+0avgdata 14024maxresident)k
+120inputs+2535112outputs (0major+226816minor)pagefaults 0swaps
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr2/output 1000 43185 243199373 1 0
+HG01872
+80.25user 16.66system 2:19.23elapsed 69%CPU (0avgtext+0avgdata
+13700maxresident)k
+296inputs+24927560outputs (0major+2262390minor)pagefaults 0swaps
+++ for i in {1..2}
+++ echo 2
+2
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr2/output 10 43185 243199373 2 0
+HG01872
+0.62user 0.06system 0:01.05elapsed 65%CPU (0avgtext+0avgdata 15812maxresident)k
+0inputs+1016outputs (0major+26117minor)pagefaults 0swaps
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr2/output 100 43185 243199373 2 0
+HG01872
+4.66user 0.64system 0:07.00elapsed 75%CPU (0avgtext+0avgdata 15796maxresident)k
+0inputs+10376outputs (0major+243527minor)pagefaults 0swaps
+++ for j in 10 100 1000
+++ /usr/bin/time ./bm_gtc_query.sh gtc_v2/chr2/output 1000 43185 243199373 2 0
+HG01872
+45.73user 6.58system 1:09.44elapsed 75%CPU (0avgtext+0avgdata 15824maxresident)k
+0inputs+104360outputs (0major+2423681minor)pagefaults 0swaps

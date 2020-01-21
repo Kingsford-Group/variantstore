@@ -1,0 +1,1370 @@
+File with list of samples (gtc_v2/chr22/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr22/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr22/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	2220480
+no_unique:	 906857
+no_zero_vectors:	1100389
+no_copies:	 213234
+no_zero_runs:	3579695
+no_ones_runs:	677205
+no_matches:	962151
+no_same_vec_match	357729
+no_literals(all):	8198140
+no_lit_runs:	29223
+no_literals_in_runs:	1053099
+
+Archive file (gtc_v2/chr22/output.gtc) created.
+File with list of samples (gtc_v2/chr21/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr21/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr21/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	2224456
+no_unique:	 897987
+no_zero_vectors:	1102047
+no_copies:	 224422
+no_zero_runs:	3324893
+no_ones_runs:	646237
+no_matches:	868668
+no_same_vec_match	301353
+no_literals(all):	7624680
+no_lit_runs:	30520
+no_literals_in_runs:	1432725
+
+Archive file (gtc_v2/chr21/output.gtc) created.
+File with list of samples (gtc_v2/chr20/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr20/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr20/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	3644536
+no_unique:	 1462249
+no_zero_vectors:	1809187
+no_copies:	 373100
+no_zero_runs:	5297323
+no_ones_runs:	947851
+no_matches:	1348748
+no_same_vec_match	478946
+no_literals(all):	10419329
+no_lit_runs:	28015
+no_literals_in_runs:	928953
+
+Archive file (gtc_v2/chr20/output.gtc) created.
+File with list of samples (gtc_v2/chr19/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr19/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr19/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	3686576
+no_unique:	 1498895
+no_zero_vectors:	1826629
+no_copies:	 361052
+no_zero_runs:	5809810
+no_ones_runs:	1101306
+no_matches:	1519977
+no_same_vec_match	562591
+no_literals(all):	12801167
+no_lit_runs:	42070
+no_literals_in_runs:	1388245
+
+Archive file (gtc_v2/chr19/output.gtc) created.
+File with list of samples (gtc_v2/chr18/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr18/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr18/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	4558516
+no_unique:	 1818613
+no_zero_vectors:	2261963
+no_copies:	 477940
+no_zero_runs:	6394413
+no_ones_runs:	1195899
+no_matches:	1610568
+no_same_vec_match	563978
+no_literals(all):	12374399
+no_lit_runs:	32764
+no_literals_in_runs:	1096175
+
+Archive file (gtc_v2/chr18/output.gtc) created.
+File with list of samples (gtc_v2/chr17/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr17/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr17/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	4683682
+no_unique:	 1892372
+no_zero_vectors:	2323748
+no_copies:	 467562
+no_zero_runs:	7026767
+no_ones_runs:	1302153
+no_matches:	1707778
+no_same_vec_match	615785
+no_literals(all):	14742318
+no_lit_runs:	46300
+no_literals_in_runs:	1564536
+
+Archive file (gtc_v2/chr17/output.gtc) created.
+File with list of samples (gtc_v2/chr15/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr15/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr15/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	4875064
+no_unique:	 1959785
+no_zero_vectors:	2419091
+no_copies:	 496188
+no_zero_runs:	7092007
+no_ones_runs:	1343185
+no_matches:	1809001
+no_same_vec_match	614682
+no_literals(all):	14488298
+no_lit_runs:	42947
+no_literals_in_runs:	1640358
+
+Archive file (gtc_v2/chr15/output.gtc) created.
+File with list of samples (gtc_v2/chr14/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr14/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr14/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	5338728
+no_unique:	 2115051
+no_zero_vectors:	2648747
+no_copies:	 574930
+no_zero_runs:	7280769
+no_ones_runs:	1342772
+no_matches:	1789976
+no_same_vec_match	589194
+no_literals(all):	13739077
+no_lit_runs:	36500
+no_literals_in_runs:	1262443
+
+Archive file (gtc_v2/chr14/output.gtc) created.
+File with list of samples (gtc_v2/chr16/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr16/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr16/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	5427858
+no_unique:	 2189472
+no_zero_vectors:	2690126
+no_copies:	 548260
+no_zero_runs:	7932176
+no_ones_runs:	1506712
+no_matches:	2048628
+no_same_vec_match	688145
+no_literals(all):	15678405
+no_lit_runs:	41775
+no_literals_in_runs:	1412970
+
+Archive file (gtc_v2/chr16/output.gtc) created.
+File with list of samples (gtc_v2/chr13/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr13/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr13/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	5746056
+no_unique:	 2265058
+no_zero_vectors:	2851813
+no_copies:	 629185
+no_zero_runs:	7604902
+no_ones_runs:	1446506
+no_matches:	1846013
+no_same_vec_match	602122
+no_literals(all):	13633962
+no_lit_runs:	30314
+no_literals_in_runs:	987316
+
+Archive file (gtc_v2/chr13/output.gtc) created.
+File with list of samples (gtc_v2/chr9/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr9/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr9/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	7159942
+no_unique:	 2854956
+no_zero_vectors:	3551349
+no_copies:	 753637
+no_zero_runs:	9986624
+no_ones_runs:	1865084
+no_matches:	2558836
+no_same_vec_match	827232
+no_literals(all):	19116295
+no_lit_runs:	49679
+no_literals_in_runs:	1824442
+
+Archive file (gtc_v2/chr9/output.gtc) created.
+File with list of samples (gtc_v2/chr12/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+3600000 variants preprocessed
+3700000 variants preprocessed
+3800000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr12/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr12/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	7778434
+no_unique:	 3079529
+no_zero_vectors:	3860002
+no_copies:	 838903
+no_zero_runs:	10497101
+no_ones_runs:	1946035
+no_matches:	2526359
+no_same_vec_match	832249
+no_literals(all):	19418680
+no_lit_runs:	48495
+no_literals_in_runs:	1590532
+
+Archive file (gtc_v2/chr12/output.gtc) created.
+File with list of samples (gtc_v2/chr10/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+3600000 variants preprocessed
+3700000 variants preprocessed
+3800000 variants preprocessed
+3900000 variants preprocessed
+4000000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr10/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr10/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	8027138
+no_unique:	 3183371
+no_zero_vectors:	3982021
+no_copies:	 861746
+no_zero_runs:	10894761
+no_ones_runs:	2049296
+no_matches:	2682721
+no_same_vec_match	867168
+no_literals(all):	20091461
+no_lit_runs:	48778
+no_literals_in_runs:	1656454
+
+Archive file (gtc_v2/chr10/output.gtc) created.
+File with list of samples (gtc_v2/chr11/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+3600000 variants preprocessed
+3700000 variants preprocessed
+3800000 variants preprocessed
+3900000 variants preprocessed
+4000000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr11/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr11/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	8134482
+no_unique:	 3205040
+no_zero_vectors:	4035507
+no_copies:	 893935
+no_zero_runs:	10553909
+no_ones_runs:	1957035
+no_matches:	2499738
+no_same_vec_match	784036
+no_literals(all):	18493736
+no_lit_runs:	40836
+no_literals_in_runs:	1311770
+
+Archive file (gtc_v2/chr11/output.gtc) created.
+File with list of samples (gtc_v2/chr8/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+3600000 variants preprocessed
+3700000 variants preprocessed
+3800000 variants preprocessed
+3900000 variants preprocessed
+4000000 variants preprocessed
+4100000 variants preprocessed
+4200000 variants preprocessed
+4300000 variants preprocessed
+4400000 variants preprocessed
+4500000 variants preprocessed
+4600000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr8/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr8/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	9245398
+no_unique:	 3635667
+no_zero_vectors:	4584377
+no_copies:	 1025354
+no_zero_runs:	11874198
+no_ones_runs:	2124133
+no_matches:	2876898
+no_same_vec_match	863189
+no_literals(all):	20154778
+no_lit_runs:	40975
+no_literals_in_runs:	1379578
+
+Archive file (gtc_v2/chr8/output.gtc) created.
+File with list of samples (gtc_v2/chr7/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+3600000 variants preprocessed
+3700000 variants preprocessed
+3800000 variants preprocessed
+3900000 variants preprocessed
+4000000 variants preprocessed
+4100000 variants preprocessed
+4200000 variants preprocessed
+4300000 variants preprocessed
+4400000 variants preprocessed
+4500000 variants preprocessed
+4600000 variants preprocessed
+4700000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr7/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr7/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	9483414
+no_unique:	 3754966
+no_zero_vectors:	4705709
+no_copies:	 1022739
+no_zero_runs:	12649147
+no_ones_runs:	2368208
+no_matches:	3136449
+no_same_vec_match	970656
+no_literals(all):	22880436
+no_lit_runs:	54041
+no_literals_in_runs:	1790533
+
+Archive file (gtc_v2/chr7/output.gtc) created.
+File with list of samples (gtc_v2/chr6/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+3600000 variants preprocessed
+3700000 variants preprocessed
+3800000 variants preprocessed
+3900000 variants preprocessed
+4000000 variants preprocessed
+4100000 variants preprocessed
+4200000 variants preprocessed
+4300000 variants preprocessed
+4400000 variants preprocessed
+4500000 variants preprocessed
+4600000 variants preprocessed
+4700000 variants preprocessed
+4800000 variants preprocessed
+4900000 variants preprocessed
+5000000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr6/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr6/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	10103570
+no_unique:	 3957804
+no_zero_vectors:	5012477
+no_copies:	 1133289
+no_zero_runs:	13018619
+no_ones_runs:	2430128
+no_matches:	3184073
+no_same_vec_match	998234
+no_literals(all):	23084140
+no_lit_runs:	54438
+no_literals_in_runs:	1775412
+
+Archive file (gtc_v2/chr6/output.gtc) created.
+File with list of samples (gtc_v2/chr5/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+3600000 variants preprocessed
+3700000 variants preprocessed
+3800000 variants preprocessed
+3900000 variants preprocessed
+4000000 variants preprocessed
+4100000 variants preprocessed
+4200000 variants preprocessed
+4300000 variants preprocessed
+4400000 variants preprocessed
+4500000 variants preprocessed
+4600000 variants preprocessed
+4700000 variants preprocessed
+4800000 variants preprocessed
+4900000 variants preprocessed
+5000000 variants preprocessed
+5100000 variants preprocessed
+5200000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr5/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr5/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	10588150
+no_unique:	 4154608
+no_zero_vectors:	5253384
+no_copies:	 1180158
+no_zero_runs:	13526051
+no_ones_runs:	2399604
+no_matches:	3177459
+no_same_vec_match	985288
+no_literals(all):	23002004
+no_lit_runs:	48506
+no_literals_in_runs:	1554738
+
+Archive file (gtc_v2/chr5/output.gtc) created.
+File with list of samples (gtc_v2/chr4/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+3600000 variants preprocessed
+3700000 variants preprocessed
+3800000 variants preprocessed
+3900000 variants preprocessed
+4000000 variants preprocessed
+4100000 variants preprocessed
+4200000 variants preprocessed
+4300000 variants preprocessed
+4400000 variants preprocessed
+4500000 variants preprocessed
+4600000 variants preprocessed
+4700000 variants preprocessed
+4800000 variants preprocessed
+4900000 variants preprocessed
+5000000 variants preprocessed
+5100000 variants preprocessed
+5200000 variants preprocessed
+5300000 variants preprocessed
+5400000 variants preprocessed
+5500000 variants preprocessed
+5600000 variants preprocessed
+5700000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr4/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr4/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	11527594
+no_unique:	 4510247
+no_zero_vectors:	5720045
+no_copies:	 1297302
+no_zero_runs:	14687801
+no_ones_runs:	2694463
+no_matches:	3497036
+no_same_vec_match	1078172
+no_literals(all):	25332717
+no_lit_runs:	56636
+no_literals_in_runs:	1934579
+
+Archive file (gtc_v2/chr4/output.gtc) created.
+File with list of samples (gtc_v2/chr3/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+3600000 variants preprocessed
+3700000 variants preprocessed
+3800000 variants preprocessed
+3900000 variants preprocessed
+4000000 variants preprocessed
+4100000 variants preprocessed
+4200000 variants preprocessed
+4300000 variants preprocessed
+4400000 variants preprocessed
+4500000 variants preprocessed
+4600000 variants preprocessed
+4700000 variants preprocessed
+4800000 variants preprocessed
+4900000 variants preprocessed
+5100000 variants preprocessed
+5200000 variants preprocessed
+5300000 variants preprocessed
+5400000 variants preprocessed
+5500000 variants preprocessed
+5600000 variants preprocessed
+5700000 variants preprocessed
+5800000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr3/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr3/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	11725554
+no_unique:	 4606259
+no_zero_vectors:	5818960
+no_copies:	 1300335
+no_zero_runs:	15070353
+no_ones_runs:	2734543
+no_matches:	3628982
+no_same_vec_match	1114238
+no_literals(all):	25829376
+no_lit_runs:	52287
+no_literals_in_runs:	1661464
+
+Archive file (gtc_v2/chr3/output.gtc) created.
+File with list of samples (gtc_v2/chr1/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+3600000 variants preprocessed
+3700000 variants preprocessed
+3800000 variants preprocessed
+3900000 variants preprocessed
+4000000 variants preprocessed
+4100000 variants preprocessed
+4200000 variants preprocessed
+4300000 variants preprocessed
+4400000 variants preprocessed
+4500000 variants preprocessed
+4600000 variants preprocessed
+4700000 variants preprocessed
+4800000 variants preprocessed
+4900000 variants preprocessed
+5000000 variants preprocessed
+5100000 variants preprocessed
+5200000 variants preprocessed
+5300000 variants preprocessed
+5400000 variants preprocessed
+5500000 variants preprocessed
+5600000 variants preprocessed
+5700000 variants preprocessed
+5800000 variants preprocessed
+5900000 variants preprocessed
+6000000 variants preprocessed
+6100000 variants preprocessed
+6200000 variants preprocessed
+6300000 variants preprocessed
+6400000 variants preprocessed
+6500000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr1/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr1/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	13001084
+no_unique:	 5145493
+no_zero_vectors:	6455009
+no_copies:	 1400582
+no_zero_runs:	17673427
+no_ones_runs:	3150636
+no_matches:	4014753
+no_same_vec_match	1308375
+no_literals(all):	32754932
+no_lit_runs:	87863
+no_literals_in_runs:	3233493
+
+Archive file (gtc_v2/chr1/output.gtc) created.
+File with list of samples (gtc_v2/chr2/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+3600000 variants preprocessed
+3700000 variants preprocessed
+3800000 variants preprocessed
+3900000 variants preprocessed
+4000000 variants preprocessed
+4100000 variants preprocessed
+4200000 variants preprocessed
+4300000 variants preprocessed
+4400000 variants preprocessed
+4500000 variants preprocessed
+4600000 variants preprocessed
+4700000 variants preprocessed
+4800000 variants preprocessed
+4900000 variants preprocessed
+5000000 variants preprocessed
+5100000 variants preprocessed
+5200000 variants preprocessed
+5300000 variants preprocessed
+5400000 variants preprocessed
+5500000 variants preprocessed
+5600000 variants preprocessed
+5700000 variants preprocessed
+5800000 variants preprocessed
+5900000 variants preprocessed
+6000000 variants preprocessed
+6100000 variants preprocessed
+6200000 variants preprocessed
+6300000 variants preprocessed
+6400000 variants preprocessed
+6500000 variants preprocessed
+6600000 variants preprocessed
+6700000 variants preprocessed
+6800000 variants preprocessed
+6900000 variants preprocessed
+7000000 variants preprocessed
+7100000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chr2/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chr2/output.bcf.csi) created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec:	14235594
+no_unique:	 5623095
+no_zero_vectors:	7067605
+no_copies:	 1544894
+no_zero_runs:	18361316
+no_ones_runs:	3323795
+no_matches:	4331678
+no_same_vec_match	1285866
+no_literals(all):	31241882
+no_lit_runs:	64579
+no_literals_in_runs:	2112946
+
+Archive file (gtc_v2/chr2/output.gtc) created.
+
+File with list of samples (gtc_v2/chrX/output.ind) created.
+0 variants preprocessed
+100000 variants preprocessed
+200000 variants preprocessed
+300000 variants preprocessed
+400000 variants preprocessed
+500000 variants preprocessed
+600000 variants preprocessed
+700000 variants preprocessed
+800000 variants preprocessed
+900000 variants preprocessed
+1000000 variants preprocessed
+1100000 variants preprocessed
+1200000 variants preprocessed
+1300000 variants preprocessed
+1400000 variants preprocessed
+1500000 variants preprocessed
+1600000 variants preprocessed
+1700000 variants preprocessed
+1800000 variants preprocessed
+1900000 variants preprocessed
+2000000 variants preprocessed
+2100000 variants preprocessed
+2200000 variants preprocessed
+2300000 variants preprocessed
+2400000 variants preprocessed
+2500000 variants preprocessed
+2600000 variants preprocessed
+2700000 variants preprocessed
+2800000 variants preprocessed
+2900000 variants preprocessed
+3000000 variants preprocessed
+3100000 variants preprocessed
+3200000 variants preprocessed
+3300000 variants preprocessed
+3400000 variants preprocessed
+3500000 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chrX/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chrX/output.bcf.csi)
+created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec: 7006316
+no_unique:       2696588
+no_zero_vectors:        120870
+no_copies:       4188858
+no_zero_runs:   9092254
+no_ones_runs:   1294486
+no_matches:     2180350
+no_same_vec_match       642806
+no_literals(all):       17449928
+no_lit_runs:    64211
+no_literals_in_runs:    2403227
+
+Archive file (gtc_v2/chrX/output.gtc) created.
+File with list of samples (gtc_v2/chrY/output.ind) created.
+0 variants preprocessed
+All variants preprocessed
+BCF file with list of variant sites (gtc_v2/chrY/output.bcf) created.
+Index for BCF file with list of variant sites (gtc_v2/chrY/output.bcf.csi)
+created.
+All blocks initially compressed.
+Final encoding.
+
+Stats:
+no_vec: 124204
+no_unique:       27837
+no_zero_vectors:        59874
+no_copies:       36493
+no_zero_runs:   73820
+no_ones_runs:   2041
+no_matches:     8246
+no_same_vec_match       378
+no_literals(all):       132347
+no_lit_runs:    781
+no_literals_in_runs:    29535
+
+Archive file (gtc_v2/chrY/output.gtc) created.

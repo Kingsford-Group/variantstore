@@ -1,0 +1,3 @@
+ppandey@savanna:/mnt/disk34/user/ppandey/variantstore$ /usr/bin/time ./scripts/run_query_mem.sh 10000
+219.98user 91.10system 5:11.04elapsed 100%CPU (0avgtext+0avgdata 2226436maxresident)k
+0inputs+512outputs (0major+53044356minor)pagefaults 0swaps
