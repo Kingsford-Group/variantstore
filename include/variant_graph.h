@@ -183,7 +183,10 @@ namespace variantstore {
 			};
 
 			uint32_t get_sample_id(uint32_t sampleclass_id, uint32_t index) const;
+			std::vector<uint32_t> get_sample_ids_read_mode(uint32_t sampleclass_id) const;
+			std::vector<uint32_t> get_sample_ids(uint32_t sampleclass_id) const;
 			bool is_chr_equal(const std::string var, const std::string chr) const;
+			bool is_bit_vector(const VariantGraphVertex& v) const;
 			const VariantGraphVertex& get_vertex(Graph::vertex id) const;
 			VariantGraphVertex* get_mutable_vertex(Graph::vertex id);
 			void serialize_vertex_list(uint64_t index) const;
@@ -303,6 +306,8 @@ namespace variantstore {
 			std::unordered_map<uint32_t, std::string> idsample_map;
 			std::unordered_map<uint64_t, uint32_t> sampleclass_map;
 			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE> rrr_sample_vector;
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type rank_rrr;
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::select_1_type select_rrr;
 			mutable std::map<uint32_t, VariantGraphVertexList*> in_memory_vertex_lists;
 
 			/* structures to persist when serializing variant graph. */
@@ -406,6 +411,10 @@ namespace variantstore {
 			console->error("Failed to load sample vector {}.", sample_vector_name);
 			abort();
 		}
+		sdsl::util::assign(rank_rrr,
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::rank_1_type(&rrr_sample_vector));
+		sdsl::util::assign(select_rrr,
+			sdsl::rrr_vector<SDSL_BITVECTOR_BLOCK_SIZE>::select_1_type(&rrr_sample_vector));
 
 		//load sampleid map
 		std::string sampleid_map_name = prefix + "/sampleid_map.lst";
@@ -896,7 +905,6 @@ namespace variantstore {
 			return 0;
 		} else {
 			uint64_t start_idx = (sampleclass_id - 1) * num_samples;
-			uint64_t vector_offset = start_idx;
 			uint32_t rank = index + 1;
 			for (uint32_t i = 0; i < num_samples/64*64; i+=64) {
 				uint64_t word;
@@ -906,7 +914,7 @@ namespace variantstore {
 					word = rrr_sample_vector.get_int(start_idx+i, 64);
 
 				if (word_rank(word) >= rank) {
-					return word_select(word, rank - 1) + start_idx + i - vector_offset;
+					return word_select(word, rank - 1) + i;
 				} else {
 					rank -= word_rank(word);
 				}
@@ -931,6 +939,70 @@ namespace variantstore {
 			}
 		}
 		return UINT32_MAX;
+	}
+
+	std::vector<uint32_t> VariantGraph::get_sample_ids_read_mode(uint32_t
+																															 sampleclass_id)
+		const {
+			std::vector<uint32_t> sample_ids;
+			if (sampleclass_id == 0) { // only ref sample
+				sample_ids.push_back(0);
+			} else {
+				uint64_t start_idx = (sampleclass_id - 1) * num_samples;
+				uint64_t rank_prev = rank_rrr(start_idx);
+				uint64_t rank_incl = rank_rrr(start_idx + num_samples);
+	
+				if (start_idx == 0 || select_rrr(rank_prev) < start_idx)
+					rank_prev++;
+				while (rank_prev <= rank_incl) {
+					sample_ids.push_back(select_rrr(rank_prev) - start_idx);
+					rank_prev++;
+				}
+			}	
+			return sample_ids;
+		}
+
+	std::vector<uint32_t> VariantGraph::get_sample_ids(uint32_t sampleclass_id)
+		const {
+			if (mode == READ_ONLY_MODE) {
+				return get_sample_ids_read_mode(sampleclass_id);
+			}
+			std::vector<uint32_t> sample_ids;
+			if (sampleclass_id == 0) { // only ref sample
+				sample_ids.push_back(0);
+			} else {
+				uint64_t start_idx = (sampleclass_id - 1) * num_samples;
+				for (uint32_t i = 0; i < num_samples/64*64; i+=64) {
+					uint64_t word;
+					if (mode == READ_WRITE_MODE)
+						word = sample_vector.get_int(start_idx+i, 64);
+					else
+						word = rrr_sample_vector.get_int(start_idx+i, 64);
+
+					uint32_t rank = 1;
+					uint32_t num_bit_set = word_rank(word);
+					while (rank <= num_bit_set) {
+						sample_ids.push_back(word_select(word, rank - 1) + i);
+						rank++;
+					}
+				}
+				if (num_samples%64) {
+					uint64_t word;
+					if (mode == READ_WRITE_MODE)
+						word = sample_vector.get_int(start_idx+num_samples/64*64,
+																				 num_samples%64);
+					else
+						word = rrr_sample_vector.get_int(start_idx+num_samples/64*64,
+																						 num_samples%64);
+					uint32_t rank = 1;
+					uint32_t num_bit_set = word_rank(word);
+					while (rank <= num_bit_set) {
+						sample_ids.push_back(word_select(word, rank - 1) + num_samples/64*64);
+						rank++;
+					}
+				}
+			}
+			return sample_ids;
 	}
 
 	sdsl::bit_vector VariantGraph::get_bit_vector(uint32_t sampleclass_id) const
@@ -1214,16 +1286,40 @@ namespace variantstore {
 		}
 	}
 
+	// returns true if a bit vector representation is used for storing sample
+	// ids.
+	bool VariantGraph::is_bit_vector(const VariantGraphVertex& v) const {
+		const VariantGraphVertex::sample_info& s = v.s_info(0);
+		return s.sample_id_size() > 0 ? false : true;
+	}
+
 	bool VariantGraph::get_sample_from_vertex_if_exists(Graph::vertex v,
 																											uint32_t sample_id,
 																											VariantGraphVertex::sample_info&
 																											sample) const {
 		const VariantGraphVertex cur_vertex = get_vertex(v);
-		for (int i = 0; i < cur_vertex.s_info_size(); i++) {
-			const VariantGraphVertex::sample_info& s = cur_vertex.s_info(i);
-			if (get_sample_id(cur_vertex, i) == sample_id) {
-				sample = s;
-				return true;
+		if (is_bit_vector(cur_vertex)) {
+			uint32_t idx = 0;
+			auto sample_ids = get_sample_ids(cur_vertex.sampleclass_id(0));
+			if ((unsigned int)cur_vertex.s_info_size() != sample_ids.size()) {
+				console->error("Returned number of sample ids is not equal to the number of sample info objects. vertex: {} sample_class_id: {} num_s_info: {} num_ids: {}",
+											 v, cur_vertex.sampleclass_id(0),
+											 cur_vertex.s_info_size(), sample_ids.size());
+			}
+			for (auto id : sample_ids) {
+				if (id == sample_id) {
+					sample = cur_vertex.s_info(idx);
+					return true;
+				}
+				idx++;
+			}
+		} else {
+			for (int i = 0; i < cur_vertex.s_info_size(); i++) {
+				const VariantGraphVertex::sample_info& s = cur_vertex.s_info(i);
+				if (get_sample_id(cur_vertex, i) == sample_id) {
+					sample = s;
+					return true;
+				}
 			}
 		}
 		return false;
@@ -1308,18 +1404,43 @@ namespace variantstore {
 		uint32_t min_idx = UINT32_MAX;
 		for (const auto v_id : topology.out_neighbors(id)) {
 			const VariantGraphVertex vertex = get_vertex(v_id);
-			for (int i = 0; i < vertex.s_info_size(); i++) {
-				const VariantGraphVertex::sample_info& s = vertex.s_info(i);
-				uint32_t s_id = get_sample_id(vertex, i);
-				if (s_id != 0 && s_id == sample_id) {
-					*v = v_id; 
-					return true;
-				} else if (s_id == 0) {	// if sample_id is not found follow "ref" path
-					// if there are multiple outgoing ref vertexes then we return the
-					// one with the smallest index.
-					if (min_idx > s.index()) {
-						*v = v_id;
-						min_idx = s.index();
+			if (is_bit_vector(vertex)) {
+				uint32_t idx = 0;
+				auto sample_ids = get_sample_ids(vertex.sampleclass_id(0));
+				if ((unsigned int)vertex.s_info_size() != sample_ids.size()) {
+				console->error("Returned number of sample ids is not equal to the number of sample info objects. vertex: {} sample_class_id: {} num_s_info: {} num_ids: {}",
+											 v_id, vertex.sampleclass_id(0),
+											 vertex.s_info_size(), sample_ids.size());
+				}
+				for (auto s_id : sample_ids) {
+					if (s_id != 0 && s_id == sample_id) {
+						*v = v_id; 
+						return true;
+					} else if (s_id == 0) {	// if sample_id is not found follow "ref" path
+						// if there are multiple outgoing ref vertexes then we return the
+						// one with the smallest index.
+						const VariantGraphVertex::sample_info& s = vertex.s_info(idx);
+						if (min_idx > s.index()) {
+							*v = v_id;
+							min_idx = s.index();
+						}
+					}
+					idx++;
+				}
+			} else {
+				for (int i = 0; i < vertex.s_info_size(); i++) {
+					const VariantGraphVertex::sample_info& s = vertex.s_info(i);
+					uint32_t s_id = get_sample_id(vertex, i);
+					if (s_id != 0 && s_id == sample_id) {
+						*v = v_id; 
+						return true;
+					} else if (s_id == 0) {	// if sample_id is not found follow "ref" path
+						// if there are multiple outgoing ref vertexes then we return the
+						// one with the smallest index.
+						if (min_idx > s.index()) {
+							*v = v_id;
+							min_idx = s.index();
+						}
 					}
 				}
 			}
@@ -1474,7 +1595,8 @@ namespace variantstore {
 				VariantGraphVertex next_ref_vertex;
 	
 				// Adding a dummy node by splitting the ref_vertex
-				split_vertex(ref_vertex_id, 1, &next_ref_vertex_id);
+				if (ref_vertex.length() > 1)
+					split_vertex(ref_vertex_id, 1, &next_ref_vertex_id);
 				prev_ref_vertex_id = ref_vertex_id;
 				ref_vertex_id = next_ref_vertex_id;
 
@@ -1486,10 +1608,13 @@ namespace variantstore {
 				if (temp_itr->first + next_ref_vertex.length() == pos +
 						ref.size()) {
 					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
-				} else {
+				} else if (temp_itr->first + next_ref_vertex.length() < pos +
+						ref.size()) {
 					// split the vertex
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
 											 &next_ref_vertex_id);
+				} else {
+					next_ref_vertex_id = next_ref_vertex.vertex_id();
 				}
 
 				// find the prev vertex.
@@ -1514,8 +1639,9 @@ namespace variantstore {
 				// split the current vertex to get prev_vertex. mutation spans one or
 				// more vertexes.
 				prev_ref_vertex_id = ref_vertex_id;
-				split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
-										 &ref_vertex_id);
+				if (ref_vertex.length() > 1)
+					split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
+											 &ref_vertex_id);
 
 				// find the next ref vertex
 				VariantGraphVertex next_ref_vertex;
@@ -1527,10 +1653,13 @@ namespace variantstore {
 				if (temp_itr->first + next_ref_vertex.length() == pos +
 						ref.size()) {
 					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
-				} else {
+				} else if (temp_itr->first + next_ref_vertex.length() < pos +
+						ref.size()) {
 					// split the vertex
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
 											 &next_ref_vertex_id);
+				} else {
+					next_ref_vertex_id = next_ref_vertex.vertex_id();
 				}
 			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
 								 == pos + ref.size()) { // split the current vertex to get prev_vertex
@@ -1550,7 +1679,6 @@ namespace variantstore {
 			VariantGraphVertex* sample_vertex = add_vertex(alt, 0,
 																										 sampleclass_id,
 																										 sample_list[0]);
-			std::cout << print_vertex_info(*sample_vertex) << std::endl;
 
 			// make connections for the new vertex in the graph
 			topology.add_edge(prev_ref_vertex_id, sample_vertex->vertex_id());
@@ -1693,8 +1821,10 @@ namespace variantstore {
 			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
 								 < pos + ref.size()) { // split the current vertex to get prev_vertex
 				prev_ref_vertex_id = ref_vertex_id;
-				split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
-										 &ref_vertex_id);	
+
+				if (ref_vertex.length() > 1)
+					split_vertex(prev_ref_vertex_id, pos - ref_vertex_idx + 1,
+											 &ref_vertex_id);	
 				// find the next ref vertex
 				VariantGraphVertex next_ref_vertex;
 				auto temp_itr = idx_vertex_id.lower_bound(ref_vertex_idx);
@@ -1704,10 +1834,13 @@ namespace variantstore {
 				} while (temp_itr->first + next_ref_vertex.length() < pos + ref.size());
 				if (temp_itr->first + next_ref_vertex.length() == pos + ref.size()) {
 					get_neighbor_vertex(temp_itr->second, 0, &next_ref_vertex_id);
-				} else {
+				} else if (temp_itr->first + next_ref_vertex.length() < pos +
+									 ref.size()) {
 					// split the vertex
 					split_vertex(temp_itr->second, pos + ref.size() - temp_itr->first + 1,
 											 &next_ref_vertex_id);
+				} else {
+					next_ref_vertex_id = next_ref_vertex.vertex_id();
 				}
 			} else if (ref_vertex_idx < pos && ref_vertex_idx + ref_vertex.length()
 								 == pos + ref.size()) { // split the current vertex to get prev_vertex

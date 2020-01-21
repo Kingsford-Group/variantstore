@@ -15,7 +15,7 @@ print(C)
 
 #df =(df["count"].map(str) + "_" + df["time"].map(str)).value_counts()
 # hist = df.plot.hist(by=df["count"])
-bins = np.arange(0, 3000, 300)
+bins = np.arange(0, 2800, 400)
 print(bins)
 # df = df.groupby(pd.cut(df["count"], bins, labels=labels), as_index=False)["time"].mean().plot(kind="bar", rot=0, legend=True)
 df = df.groupby(pd.cut(df["count"], bins, include_lowest=True), as_index=False)["Time"].mean()

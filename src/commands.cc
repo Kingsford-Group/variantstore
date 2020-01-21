@@ -148,37 +148,37 @@ query_main ( QueryOpts& opts )
 		std::vector<std::string> refs;
 		switch (opts.type) {
 			case 1:
-				console->info("1. Return closest mutation in ref coordinate. ...");
+				console->info("1. Return closest mutation in ref coordinate. {}", i);
 				console->debug("Query region {}", std::get<0>(regions[i]));
 				closest_var(&vg, &idx, std::get<0>(regions[i]), var, opts.verbose, opts.outfile);
 				break;
 			case 2:
-				console->info("2. Get sample's sequence in ref coordinate ...");
+				console->info("2. Get sample's sequence in ref coordinate. {}", i);
 				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
 				query_sample_from_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
 				break;
 			case 3:
-				console->info("3. Get sample's sequence in sample's coordinate ...");
+				console->info("3. Get sample's sequence in sample's coordinate. {}", i);
 				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
 				query_sample_from_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
 				break;
 			case 4:
-				console->info("4. Get sample's variants in ref coordinate ...");
+				console->info("4. Get sample's variants in ref coordinate. {}", i);
 				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
 				get_sample_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
 				break;
 			case 5:
-				console->info("5. Get sample's variants in sample coordinate ...");
+				console->info("5. Get sample's variants in sample coordinate. {}", i);
 				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
 				get_sample_var_in_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
 				break;
 			case 6:
-				console->info("6. Get variants in ref coordinate. ...");
+				console->info("6. Get variants in ref coordinate. {}", i);
 				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
 				get_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.verbose, opts.outfile);
 				break;
 			case 7:
-				console->info("7. Get samples have given variant. ...");
+				console->info("7. Get samples have given variant. {}", i);
 				alts = read_sequences(opts.alt);
 				refs = read_sequences(opts.ref);
 				// TODO: CHECK ALTS, REFS, REGIONS HAVE THE SAME LENGTH.

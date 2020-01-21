@@ -27,7 +27,8 @@ Graph indexing:
 (seq 1 22) | parallel -j 22 "/usr/bin/time vg index -x vgdata_v2/{}.xg -G vgdata_v2/{}.gbwt -v ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz vgdata_v2/{}.vg"
 
 
-variantstore commands:
+VariantStore commands:
+
 /usr/bin/time ./variantstore construct -r ../vcfdata/ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.X.fa -v ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrX.phase3_shapeit2_mvncall_integrated_v1b.20130502.genotypes.vcf.gz -p vs_v2/chrX/
 /usr/bin/time ./variantstore construct -r ../vcfdata/ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.Y.fa -v ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrY.phase3_integrated_v2a.20130502.genotypes.vcf.gz -p vs_v2/chrY/
 (seq 1 22;) | parallel -j 24 /usr/bin/time ./variantstore construct -r ../vcfdata/ftp.ensembl.org/pub/grch37/current/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.dna.chromosome.{}.fa -v ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz -p vs_v2/chr{}
@@ -37,4 +38,10 @@ Index only:
 for i in {1..6}; do for j in 10 100 1000; do ./scripts/bm_vs_query.sh vs_v4/chr22/ $j 10 855078 $i 0 HG01872 >> query.out; done; done;
 Complete graph:
 for i in {1..6}; do for j in 10 100 1000; do ./scripts/bm_vs_query.sh vs_v4/chr22/ $j 10 855078 $i 1 HG01872 >> query.out; done; done;
+
+
+GTC commands:
+/usr/bin/time ./gtc compress -o output/chrX/output -t 1 ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrX.phase3_shapeit2_mvncall_integrated_v1b.20130502.genotypes.vcf.gz >> output/compress.log
+/usr/bin/time ./gtc compress -o output/chrX/output -t 1 ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrY.phase3_integrated_v2a.20130502.genotypes.vcf.gz >> output/compress.log
+(seq 1 22;) | parallel -j 22 /usr/bin/time ./gtc compress -o output/chr{}/output ../vcfdata/ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr{}.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz >> output/compress.log
 
