@@ -37,6 +37,22 @@ Construct variation graph
 $ ./variantstore construct -r data/x.fa -v data/x.vcf.gz -p ser/
 ```
 
+Expected output
+```bash
+[2020-05-19 10:10:35.172] [info] Creating variant graph
+[2020-05-19 10:10:35.208] [info] Building sample vector based variant graph.
+[2020-05-19 10:10:35.208] [info] Adding mutations from: data/x.vcf.gz #Samples: 1
+[2020-05-19 10:10:35.211] [info] Num mutations: 75 num mutations-sample: 75
+[2020-05-19 10:10:35.211] [info] Num vars: 75
+[2020-05-19 10:10:35.212] [info] Fixing sample indexes in the graph
+[2020-05-19 10:10:35.212] [info] Graph stats:
+[2020-05-19 10:10:35.212] [info] Chromosome: x #Vertices: 212 #Edges: 287 Seq length: 1074
+[2020-05-19 10:10:35.212] [info] Serializing variant graph to disk
+[2020-05-19 10:10:35.245] [info] Number of sample vector classes: 2
+[2020-05-19 10:10:35.245] [info] Creating Index
+[2020-05-19 10:10:35.246] [info] Serializing index to disk
+```
+
 The usage for this command are as follows:
 
 ```bash
@@ -57,6 +73,18 @@ Variant queries
 
 ```bash
 $ ./variantstore query -p ser/ -t 6 -r 10:105 -m 0 -s 1 -o variant.txt -v
+```
+
+Expected output
+```bash
+[2020-05-19 10:19:08.284] [info] Loading Index ...
+[2020-05-19 10:19:08.284] [info] Loading variant graph ...
+[2020-05-19 10:19:08.284] [info] Read index only ..
+[2020-05-19 10:19:08.329] [info] Graph stats:
+[2020-05-19 10:19:08.329] [info] Chromosome: x #Vertices: 212 #Edges: 0 Seq length: 1074
+[2020-05-19 10:19:08.329] [info] 6. Get variants in ref coordinate. 0
+Number of variants get_var_in_ref: 8
+Query1: (query_var_in_ref) Total Time Elapsed: 0.000426seconds
 ```
 
 The usage for this command are as follows:
