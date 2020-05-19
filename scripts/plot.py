@@ -18,8 +18,18 @@ print(C)
 bins = np.arange(0, 2800, 400)
 print(bins)
 # df = df.groupby(pd.cut(df["count"], bins, labels=labels), as_index=False)["time"].mean().plot(kind="bar", rot=0, legend=True)
+grouped_df=df.groupby(pd.cut(df["count"], bins, include_lowest=True), as_index=False)["Time"].agg([np.mean,np.std])
+# grouped_df.columns = [col.strip() for col in v.columns.values]
+
 df = df.groupby(pd.cut(df["count"], bins, include_lowest=True), as_index=False)["Time"].mean()
-ax = df.plot.bar(rot=0)
+ax = df.plot(rot=0, kind='bar')
+
+
+for i,(index,row) in enumerate(grouped_df.iterrows()):
+    name = row.name
+    mean = row['mean']
+    stddev = row['std']
+    ax.vlines(x=i,ymin=mean-stddev,ymax=mean+stddev)
 
 labels=[[bins[i], bins[i+1]-1]
         for i in range(len(bins)-1)]
