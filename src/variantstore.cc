@@ -14,7 +14,7 @@
 #include <stdlib.h>
 
 #include "spdlog/spdlog.h"
-
+#include "variantstore_fs.h"
 #include "progopts.h"
 #include "clipp.h"
 
@@ -67,13 +67,22 @@ main ( int argc, char *argv[] ) {
 	console->set_level(spdlog::level::debug);
 #endif
 
+	auto ensure_dir_exists = [](const std::string& s) -> bool {
+    bool exists = variantstore::fs::DirExists(s.c_str());
+    if (!exists) {
+      std::string e = "The required input directory " + s + " does not seem to exist.";
+      throw std::runtime_error{e};
+    }
+    return true;
+  };
+
 	auto construct_mode = (
 									command("construct").set(selected, mode::construct),
 									required("-r","--reference") & value("reference-file", construct_opt.ref) %
 									"reference file",
 									required("-v","--vcf") & value("vcf-file", construct_opt.vcf) %
 									"variant call format file",
-									required("-p","--output-prefix") & value(
+									required("-p","--output-prefix") & value(ensure_dir_exists,
 																												 "output-prefix",
 												construct_opt.prefix) %
 									"output directory"
