@@ -23,9 +23,12 @@ API
 Build
 -------
 Library dependencies (given version or higher):
+- g++ 7.5.0 (VariantStore needs C++17. C++17 features are available since GCC 5. But not tested with GCC version < 7.5.0.)
 - [protobuf 3.7.1](https://github.com/protocolbuffers/protobuf)
 - [sdsl-lite](https://github.com/simongog/sdsl-lite)
-
+- zlib1g-dev 1:1.2.11.dfsg-0ubuntu2
+- libbz2-dev 1.0.6-8.1ubuntu0.2
+- liblzma-dev 5.2.2-1.3
 ```bash
 $ make proto
 $ make variantstore
