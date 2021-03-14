@@ -40,12 +40,12 @@ Construct variation graph
 $ ./variantstore construct -r data/x.fa -v data/x.vcf.gz -p ser/
 ```
 
-Expected output
+Expected outputv
 ```bash
 [2020-05-19 10:10:35.172] [info] Creating variant graph
 [2020-05-19 10:10:35.208] [info] Building sample vector based variant graph.
 [2020-05-19 10:10:35.208] [info] Adding mutations from: data/x.vcf.gz #Samples: 1
-[2020-05-19 10:10:35.211] [info] Num mutations: 75 num mutations-sample: 75
+[2020-05-19 10:1u0:35.211] [info] Num mutations: 75 num mutations-sample: 75
 [2020-05-19 10:10:35.211] [info] Num vars: 75
 [2020-05-19 10:10:35.212] [info] Fixing sample indexes in the graph
 [2020-05-19 10:10:35.212] [info] Graph stats:
@@ -123,6 +123,52 @@ OPTIONS
         -v, --verbose
                     print vcf
 ```
+
+Visualize variation graph
+
+Output variation graph in the dot format
+
+```bash
+$ ./variantstore draw -p ser/ -r 10 -h 3 
+```
+
+Visualize dot graph
+
+```bash
+$ make graph
+```
+
+Expected output
+```bash
+[2021-03-14 15:23:18.632] [info] Loading Index ...
+[2021-03-14 15:23:18.632] [info] Loading variant graph ...
+[2021-03-14 15:23:18.632] [info] Read complete graph ..
+[2021-03-14 15:23:18.682] [info] Graph stats:
+[2021-03-14 15:23:18.682] [info] Chromosome: x #Vertices: 212 #Edges: 0 Seq length: 1074
+[2021-03-14 15:23:18.682] [info] Looking up vertex corresponding to the queried region
+```
+
+The usage for this command are as follows:
+
+```bash
+SYNOPSIS
+        variantstore draw -p <output-prefix> -r <region> -h <hops> [-s <sample-name>] [-o <outfile>]
+
+OPTIONS
+        <output-prefix>
+                    output directory
+
+        <region>    region in format <start>:<end>, regions separated by ','
+        <hops>      radius of the subgraph
+
+        <sample-name>
+                    sample name (default: REF)
+
+        <outfile>   output_file
+
+```
+
+
 
 Contributing
 ------------

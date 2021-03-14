@@ -14,6 +14,7 @@
 #include <tuple>
 #include "spdlog/spdlog.h"
 
+#include "dot_graph.h"
 #include "query.h"
 #include "index.h"
 #include "variant_graph.h"
@@ -112,103 +113,130 @@ std::vector<std::string> read_sequences (std::string s)
 	int
 query_main ( QueryOpts& opts )
 {
-	console->info("Loading Index ...");
-	Index idx(opts.prefix);
-	console->info("Loading variant graph ...");
-	enum READ_TYPE mode;
-	if (opts.mode == 0)
-	{
-		mode = READ_INDEX_ONLY;
-		console->info("Read index only ..");
-	}
-	else
-	{
-		mode = READ_COMPLETE_GRAPH;
-		console->info("Read complete graph ..");
-	}
+  console->info("Loading Index ...");
+  Index idx(opts.prefix);
+  console->info("Loading variant graph ...");
+  enum READ_TYPE mode;
+  if (opts.mode == 0)
+  {
+    mode = READ_INDEX_ONLY;
+    console->info("Read index only ..");
+  }
+  else
+  {
+    mode = READ_COMPLETE_GRAPH;
+    console->info("Read complete graph ..");
+  }
 
 
-	VariantGraph vg(opts.prefix, mode);
-	console->info("Graph stats:");
-	console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
-								vg.get_chr(), vg.get_num_vertices() , vg.get_num_edges(),
-								vg.get_seq_length());
+  VariantGraph vg(opts.prefix, mode);
+  console->info("Graph stats:");
+  console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
+      vg.get_chr(), vg.get_num_vertices() , vg.get_num_edges(),
+      vg.get_seq_length());
 
-	std::vector<std::tuple<uint64_t, uint64_t>> regions = read_regions(opts.region);
+  std::vector<std::tuple<uint64_t, uint64_t>> regions = read_regions(opts.region);
 
-	uint32_t query_num=0;
-	struct timeval start, end;
-	struct timezone tzp;                                                    gettimeofday(&start, &tzp);
+  uint32_t query_num=0;
+  struct timeval start, end;
+  struct timezone tzp;                                                    
+  gettimeofday(&start, &tzp);
+
+  for (uint32_t i = 0; i != regions.size(); i++)
+  {
+    std::vector<Variant> var;
+    std::vector<std::string> alts;
+    std::vector<std::string> refs;
+    switch (opts.type) {
+      case 1:
+        console->info("1. return closest mutation in ref coordinate. {}", i);
+        console->debug("query region {}", std::get<0>(regions[i]));
+        closest_var(&vg, &idx, std::get<0>(regions[i]), var, opts.verbose, opts.outfile);
+        break;
+      case 2:
+        console->info("2. Get sample's sequence in ref coordinate. {}", i);
+        console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
+        query_sample_from_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+        break;
+      case 3:
+        console->info("3. Get sample's sequence in sample's coordinate. {}", i);
+        console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
+        query_sample_from_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+        break;
+      case 4:
+        console->info("4. Get sample's variants in ref coordinate. {}", i);
+        console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
+        get_sample_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+        break;
+      case 5:
+        console->info("5. Get sample's variants in sample coordinate. {}", i);
+        console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
+        get_sample_var_in_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
+        break;
+      case 6:
+        console->info("6. Get variants in ref coordinate. {}", i);
+        console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
+        get_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.verbose, opts.outfile);
+        break;
+      case 7:
+        console->info("7. Get samples have given variant. {}", i);
+        alts = read_sequences(opts.alt);
+        refs = read_sequences(opts.ref);
+        // TODO: CHECK ALTS, REFS, REGIONS HAVE THE SAME LENGTH.
+        console->info("Looking for variant POS: {}, REF: {}, ALT: {}",
+            std::get<0>(regions[i]), refs[i], alts[i]);
+        samples_has_var(&vg, &idx, std::get<0>(regions[i]), refs[i], alts[i], opts.verbose, opts.outfile);
+        break;
+      default:
+        console->error("Unsupported query type");
+        break;
+    }
+
+    query_num += 1;
+    if ((query_num == 10) || (query_num == 100) || (query_num == 1000))
+    {
+      gettimeofday(&end, &tzp);
+      std::string dsc = "Query" ;
+      dsc.append(std::to_string(query_num));
+      dsc.append(": ");
+      print_time_elapsed(dsc, &start, &end);
+    }
+  }
+  gettimeofday(&end, &tzp);
+  std::string dsc = "Query" ;
+  dsc.append(std::to_string(query_num));
+  dsc.append(": ");
+  if (opts.type == 6)
+    dsc.append("(query_var_in_ref) ");
+  print_time_elapsed(dsc, &start, &end);
 
 
-	for (uint32_t i = 0; i != regions.size(); i++)
-	{
-		std::vector<Variant> var;
-		std::vector<std::string> alts;
-		std::vector<std::string> refs;
-		switch (opts.type) {
-			case 1:
-				console->info("1. Return closest mutation in ref coordinate. {}", i);
-				console->debug("Query region {}", std::get<0>(regions[i]));
-				closest_var(&vg, &idx, std::get<0>(regions[i]), var, opts.verbose, opts.outfile);
-				break;
-			case 2:
-				console->info("2. Get sample's sequence in ref coordinate. {}", i);
-				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-				query_sample_from_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
-				break;
-			case 3:
-				console->info("3. Get sample's sequence in sample's coordinate. {}", i);
-				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-				query_sample_from_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
-				break;
-			case 4:
-				console->info("4. Get sample's variants in ref coordinate. {}", i);
-				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-				get_sample_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
-				break;
-			case 5:
-				console->info("5. Get sample's variants in sample coordinate. {}", i);
-				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-				get_sample_var_in_sample(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.sample_name, opts.verbose, opts.outfile);
-				break;
-			case 6:
-				console->info("6. Get variants in ref coordinate. {}", i);
-				console->debug("Query region {}:{}", std::get<0>(regions[i]), std::get<1>(regions[i]));
-				get_var_in_ref(&vg, &idx, std::get<0>(regions[i]), std::get<1>(regions[i]), opts.verbose, opts.outfile);
-				break;
-			case 7:
-				console->info("7. Get samples have given variant. {}", i);
-				alts = read_sequences(opts.alt);
-				refs = read_sequences(opts.ref);
-				// TODO: CHECK ALTS, REFS, REGIONS HAVE THE SAME LENGTH.
-				console->info("Looking for variant POS: {}, REF: {}, ALT: {}",
-											std::get<0>(regions[i]), refs[i], alts[i]);
-				samples_has_var(&vg, &idx, std::get<0>(regions[i]), refs[i], alts[i], opts.verbose, opts.outfile);
-				break;
-			default:
-				console->error("Unsupported query type");
-				break;
-		}
-
-		query_num += 1;
-		if ((query_num == 10) || (query_num == 100) || (query_num == 1000))
-		{
-			gettimeofday(&end, &tzp);
-			std::string dsc = "Query" ;
-			dsc.append(std::to_string(query_num));
-			dsc.append(": ");
-			print_time_elapsed(dsc, &start, &end);
-		}
-	}
-	gettimeofday(&end, &tzp);
-	std::string dsc = "Query" ;
-	dsc.append(std::to_string(query_num));
-	dsc.append(": ");
-	if (opts.type == 6)
-		dsc.append("(query_var_in_ref) ");
-	print_time_elapsed(dsc, &start, &end);
-
-
-	return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
+
+int draw_main( DrawOpts& opts) {
+
+  console->info("Loading Index ...");
+  Index idx(opts.prefix);
+  console->info("Loading variant graph ...");
+  enum READ_TYPE mode = READ_COMPLETE_GRAPH;
+  console->info("Read complete graph ..");
+
+  VariantGraph vg(opts.prefix, mode);
+  console->info("Graph stats:");
+  console->info("Chromosome: {} #Vertices: {} #Edges: {} Seq length: {}",
+      vg.get_chr(), vg.get_num_vertices() , vg.get_num_edges(),
+      vg.get_seq_length());
+
+  std::vector<std::tuple<uint64_t, uint64_t>> regions = read_regions(opts.region);
+
+  assert(regions.size() == 1);
+
+  console->info("Looking up vertex corresponding to the queried region");
+  console->debug("query region {}", std::get<0>(regions[0]));
+  std::string name = opts.sample_name == "" ? "ref" : opts.sample_name; 
+  std::string file = opts.outfile == "" ? "graph.dot" : opts.sample_name; 
+  draw_subgraph(&vg, &idx, std::get<0>(regions[0]), opts.radius, name, opts.prefix + "/" + file);
+
+  return EXIT_SUCCESS;
+}
