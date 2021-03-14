@@ -146,9 +146,7 @@ main ( int argc, char *argv[] ) {
 									option("-s","--sample-name") & value("sample-name", 
 																											 query_opt.sample_name)
 										%
-									"sample name (default: REF)",
-                  option("-o","--output_file") & value("outfile", draw_opt.outfile) %
-                  "output_file"
+									"sample name (default: REF)"
             );
 
 

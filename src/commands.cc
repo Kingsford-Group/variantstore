@@ -235,7 +235,7 @@ int draw_main( DrawOpts& opts) {
   console->info("Looking up vertex corresponding to the queried region");
   console->debug("query region {}", std::get<0>(regions[0]));
   std::string name = opts.sample_name == "" ? "ref" : opts.sample_name; 
-  std::string file = opts.outfile == "" ? "graph.dot" : opts.sample_name; 
+  std::string file = "graph.dot"; 
   draw_subgraph(&vg, &idx, std::get<0>(regions[0]), opts.radius, name, opts.prefix + "/" + file);
 
   return EXIT_SUCCESS;

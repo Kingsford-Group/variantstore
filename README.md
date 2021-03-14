@@ -164,8 +164,6 @@ OPTIONS
         <sample-name>
                     sample name (default: REF)
 
-        <outfile>   output_file
-
 ```
 
 
