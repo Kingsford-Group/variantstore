@@ -20,6 +20,7 @@
 #include <iostream>
 #include <fstream>
 #include "index.h"
+#include "dot_graph.h"
 #include "variant_graph.h"
 
 std::string REF = "ref";
@@ -820,6 +821,25 @@ namespace variantstore {
 
 			return samples;
 		} // samples_has_var()
+
+  bool draw_subgraph ( VariantGraph *vg, Index *idx, const uint64_t pos, const
+      uint64_t radius, const std::string sample_id, std::string outfile)
+	{
+
+		Graph::vertex v; 
+    if (sample_id == REF) {
+      v = idx->find(pos); // the node before pos
+    } else {
+      uint64_t ref_pos;
+      uint64_t sample_pos;
+      v = get_prev_vertex_with_sample(vg, idx, pos, sample_id, ref_pos,
+          sample_pos);
+    }
+
+    createDotGraph(vg, outfile, v, radius);
+		
+    return true;
+	}
 
 }
 

@@ -31,11 +31,11 @@ r2=${r2::-1}
 #set -x
 #echo "Benchmarking query type 1"
 #./variantstore query -t 1 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt
-echo "Benchmarking query type 2"
-./variantstore query -t 2 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt
+#echo "Benchmarking query type 2"
+#./variantstore query -t 2 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt
 #echo "Benchmarking query type 4"
 #./variantstore query -t 4 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt
 #echo "Benchmarking query type 5"
 #./variantstore query -t 5 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt
-#echo "Benchmarking query type 6"
-#./variantstore query -t 6 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt
+echo "Benchmarking query type 6"
+./variantstore query -t 6 -p $vs_file -r $r1 -m $mode -s $sample -o temp.txt

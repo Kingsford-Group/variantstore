@@ -68,10 +68,11 @@ namespace variantstore {
     return samples;
   }
 
-	bool createDotGraph(const VariantGraph *vg, const std::string prefix,
+	bool createDotGraph(const VariantGraph *vg, const std::string outfile,
 											Graph::vertex v = 0, uint64_t radius = UINT64_MAX) {
     std::ofstream dotfile;
-    dotfile.open (prefix + "/graph.dot");
+    //dotfile.open (prefix + "/graph.dot");
+    dotfile.open (outfile);
 		std::string labels = "";
     std::string ref = "";
     std::string sample = "";

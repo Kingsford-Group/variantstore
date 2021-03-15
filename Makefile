@@ -30,16 +30,12 @@ OBJDIR=obj
 SER=ser
 
 CXXFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -fopenmp -m64 -I. -I$(LOC_INCLUDE)
-#CXXFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -fopenmp -m64 -I. -I$(LOC_INCLUDE) -I/mnt/disk34/user/ppandey/sdsl-lite/include -I/opt/local/stow/protobuf-3.7.1/include
 
 CFLAGS += -Wall $(DEBUG) $(PROFILE) $(OPT) $(ARCH) -m64 -I. -I$(LOC_INCLUDE)
 
 LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -L$(LOC_LIB) -lm -lvcflib -lhts -lz \
-					 -lbz2 -llzma -lrt -lpthread -lssl -lcrypto -lboost_system -lsdsl \
+					 -lbz2 -llzma -lpthread -lsdsl \
 						`pkg-config --cflags --libs protobuf` -ltcmalloc
-
-#LDFLAGS += $(DEBUG) $(PROFILE) $(OPT) -L$(LOC_LIB) -L/mnt/disk34/user/ppandey/sdsl-lite/lib -L/opt/local/stow/protobuf-3.7.1/lib -lm -lvcflib -lhts -lz \
-					 -lbz2 -llzma -lrt -lpthread -lssl -lcrypto -lboost_system -lsdsl -lprotobuf
 
 #
 # declaration of dependencies

@@ -32,4 +32,14 @@ class QueryOpts {
 		std::string ref;
 };
 
+class DrawOpts {
+	public:
+		std::string prefix;
+		std::string region;
+    uint32_t radius{5};
+		std::string sample_name;
+		std::string outfile="";
+};
+
+
 #endif //__PROG_OPTS__
