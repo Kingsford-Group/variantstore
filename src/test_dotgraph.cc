@@ -109,6 +109,6 @@ main ( int argc, char *argv[] )
 	VariantGraph vg(ref_file, vcfs, READ_COMPLETE_GRAPH);
 
 	print_vg_info(vg, vcf_file);
-	createDotGraph(&vg, "graph");
+	createDotGraph(&vg, "graph.dot");
 	return 0;
 }

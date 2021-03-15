@@ -44,6 +44,7 @@ void explore_options_verbose(T& res) {
 
 int construct_main(ConstructOpts& construct_opt);
 int query_main(QueryOpts& query_opt);
+int draw_main(DrawOpts& draw_opt);
 
 std::shared_ptr<spdlog::logger> console;
 
@@ -56,11 +57,12 @@ std::shared_ptr<spdlog::logger> console;
 	int
 main ( int argc, char *argv[] ) {
   using namespace clipp;
-	enum class mode {construct, query, help};
+	enum class mode {construct, query, draw, help};
   mode selected = mode::help;
 
 	ConstructOpts construct_opt;
 	QueryOpts query_opt;
+  DrawOpts draw_opt;
 
 	console = spdlog::default_logger();
 #ifdef DEBUG_MODE
@@ -131,7 +133,24 @@ main ( int argc, char *argv[] ) {
 									"print vcf"
 						 );
 
-	auto cli = ((construct_mode | query_mode |
+  	auto draw_mode = (
+									command("draw").set(selected, mode::draw),
+									required("-p","--output-prefix") & value(
+																												 "output-prefix",
+												draw_opt.prefix) %
+									"output directory",
+									required("-r","--region") & value("region", draw_opt.region) %
+                  "region in format <start>:<end>, regions separated by ','",
+                  required("-h","--hops") & value("hops", draw_opt.radius) %
+                  "radius of the subgraph",
+									option("-s","--sample-name") & value("sample-name", 
+																											 query_opt.sample_name)
+										%
+									"sample name (default: REF)"
+            );
+
+
+	auto cli = ((construct_mode | query_mode | draw_mode |
 							 command("help").set(selected, mode::help)),
 							option("-v", "--version").call([]{std::cout <<
 																						 "version 0.1\n\n";}).doc("show version"));
@@ -166,6 +185,7 @@ main ( int argc, char *argv[] ) {
 									// required("-e","--end") & value("end", query_opt.end) %
 									// "ending position",
 				query_main(query_opt); break;
+      case mode::draw: draw_main(draw_opt); break;
 			case mode::help:  break;
 		}
   } else {
@@ -176,7 +196,9 @@ main ( int argc, char *argv[] ) {
         std::cout << make_man_page(construct_mode, "variantstore");
       } else if (b->arg() == "query") {
         std::cout << make_man_page(query_mode, "variantstore");
-      }else {
+      } else if (b->arg() == "draw") {
+        std::cout << make_man_page(draw_mode, "variantstore");
+      } else {
         std::cout << "There is no command \"" << b->arg() << "\"\n";
         std::cout << usage_lines(cli, "variantstore") << '\n';
       }
