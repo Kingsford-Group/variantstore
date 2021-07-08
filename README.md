@@ -19,17 +19,22 @@ API
 --------
 * `variantstore construct`: construct a variation graph and position index.
 * `variantstore query`: query variation graph for variants using the position index.
+* `variantstore draw`:  output a subgraph of the variation graph in the dot format.
 
 Build
 -------
 Library dependencies (given version or higher):
-- g++ 7.5.0 (VariantStore needs C++17. C++17 features are available since GCC 5. But not tested with GCC version < 7.5.0.)
-- [protobuf 3.7.1](https://github.com/protocolbuffers/protobuf)
+- g++ 7.5.0 (VariantStore needs C++17. C++17 features are available since GCC 5. Also tested on 7.3.0 but not other versions.)
+- [protobuf 3.7.1](https://github.com/protocolbuffers/protobuf), C++ installation and trouble shooting, see [here](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md)
 - [sdsl-lite](https://github.com/simongog/sdsl-lite)
-- zlib1g-dev 1:1.2.11.dfsg-0ubuntu2
-- libbz2-dev 1.0.6-8.1ubuntu0.2
-- liblzma-dev 5.2.2-1.3
+- zlib1g-dev 1:1.2.11.dfsg-0ubuntu2, or zlib-devel on CentOS
+- libbz2-dev 1.0.6-8.1ubuntu0.2, or bzip2-devel on CentOS
+- liblzma-dev 5.2.2-1.3, or xz-devel on CentOS
+- gperftools-devel on CentO
+S
 ```bash
+$ git clone https://github.com/Kingsford-Group/variantstore
+$ cd variantstore
 $ make proto
 $ make variantstore
 ```
@@ -37,10 +42,11 @@ $ make variantstore
 Construct variation graph
 
 ```bash
+$ mkdir ser/ # make output folder
 $ ./variantstore construct -r data/x.fa -v data/x.vcf.gz -p ser/
 ```
 
-Expected outputv
+Expcted output
 ```bash
 [2020-05-19 10:10:35.172] [info] Creating variant graph
 [2020-05-19 10:10:35.208] [info] Building sample vector based variant graph.
@@ -129,7 +135,7 @@ Visualize variation graph
 Output variation graph in the dot format
 
 ```bash
-$ ./variantstore draw -p ser/ -r 10 -h 3 
+$ ./variantstore draw -p ser/ -r 10 -h 3
 ```
 
 Visualize dot graph
@@ -176,7 +182,5 @@ Contributions via GitHub pull requests are welcome.
 Authors
 -------
 - Prashant Pandey <ppandey2@cs.cmu.edu>
-- Yinjie Gao <yinjieg@andrew.cmu.edu>
+- Yinjie Gao <yinjieg@alumni.cmu.edu>
 - Carl Kingsford <carlk@cs.cmu.edu>
-
-
